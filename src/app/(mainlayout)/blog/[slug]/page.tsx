@@ -5,14 +5,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { RichTextRenderer } from '@/components/blog/RichTextRenderer'
+import { Card, CardContent } from '@/components/ui/card'
 import { TableOfContents } from '@/components/blog/TableOfContents'
 import { ShareButtons } from '@/components/blog/ShareButtons'
 import { BlogCard } from '@/components/blog/BlogCard'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
-import User from '@/models/User'
 import { formatDate } from '@/lib/utils'
 import { 
   ArrowLeft, 
@@ -23,14 +21,17 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
+import ReadOnlyEditor from '@/components/tiptap-templates/simple/read-only-editor'
 
+// Correct type for Next.js 15+ dynamic params
 interface BlogDetailPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export async function generateMetadata({ params }: BlogDetailPageProps): Promise<Metadata> {
+export async function generateMetadata(props: BlogDetailPageProps): Promise<Metadata> {
+  const params = await props.params;
   await dbConnect()
   const blog = await Blog.findOne({ slug: params.slug })
     .populate('author', 'name')
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
       title: blog.seoTitle || blog.title,
       description: blog.seoDescription || blog.excerpt,
       type: 'article',
-      publishedTime: blog.publishedAt.toISOString(),
+      publishedTime: blog.publishedAt ? new Date(blog.publishedAt).toISOString() : undefined,
       authors: [blog.author.name],
       tags: blog.tags,
     },
@@ -65,7 +66,6 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
 async function getBlogPostAndRelated(slug: string) {
   await dbConnect()
   
-  // Get the blog post with author info
   const blog = await Blog.findOne({ slug })
     .populate('author', 'name image bio')
     .lean()
@@ -74,10 +74,8 @@ async function getBlogPostAndRelated(slug: string) {
     return null
   }
   
-  // Increment view count
   await Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } })
   
-  // Get previous and next posts
   const [prevPost, nextPost] = await Promise.all([
     Blog.findOne({
       published: true,
@@ -96,7 +94,6 @@ async function getBlogPostAndRelated(slug: string) {
     .lean(),
   ])
   
-  // Get related posts (same category or tags)
   const relatedPosts = await Blog.find({
     _id: { $ne: blog._id },
     published: true,
@@ -119,7 +116,8 @@ async function getBlogPostAndRelated(slug: string) {
   }
 }
 
-export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+export default async function BlogDetailPage(props: BlogDetailPageProps) {
+  const params = await props.params;
   const data = await getBlogPostAndRelated(params.slug)
   
   if (!data) {
@@ -128,7 +126,6 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   
   const { blog, prevPost, nextPost, relatedPosts } = data
 
-  // Prepare structured data for SEO
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -159,276 +156,314 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   return (
     <>
-      {/* Structured Data for SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
-      <div className="min-h-screen">
-        {/* Breadcrumb */}
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Link href="/blog" className="hover:text-primary transition-colors">
-              Blog
-            </Link>
-            <span className="mx-2">/</span>
-            {blog.category && (
-              <>
-                <Link 
-                  href={`/blog?category=${encodeURIComponent(blog.category)}`}
-                  className="hover:text-primary transition-colors"
-                >
-                  {blog.category}
-                </Link>
-                <span className="mx-2">/</span>
-              </>
-            )}
-            <span className="text-foreground line-clamp-1">{blog.title}</span>
+      <div className="min-h-screen bg-background">
+        {/* Breadcrumb Area */}
+        <div className="border-b bg-secondary/10">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Link href="/blog" className="hover:text-primary transition-colors">
+                Blog
+              </Link>
+              <span className="mx-2">/</span>
+              {blog.category && (
+                <>
+                  <Link 
+                    href={`/blog?category=${encodeURIComponent(blog.category)}`}
+                    className="hover:text-primary transition-colors"
+                  >
+                    {blog.category}
+                  </Link>
+                  <span className="mx-2">/</span>
+                </>
+              )}
+              <span className="text-foreground line-clamp-1 max-w-[200px] sm:max-w-md">
+                {blog.title}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Hero Section */}
-        <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto">
-              <Button variant="ghost" size="sm" asChild className="mb-6">
-                <Link href="/blog">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Blog
-                </Link>
-              </Button>
+        <section className="pt-8 pb-8 md:pt-12 md:pb-12">
+          <div className="container mx-auto px-4 max-w-5xl">
+            <Button variant="ghost" size="sm" asChild className="mb-8 pl-0 hover:pl-2 transition-all">
+              <Link href="/blog">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Articles
+              </Link>
+            </Button>
+            
+            <div className="space-y-6">
+              {/* Category and Tags */}
+              <div className="flex flex-wrap items-center gap-2">
+                {blog.category && (
+                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0">
+                    {blog.category}
+                  </Badge>
+                )}
+                {blog.tags.slice(0, 3).map((tag: string) => (
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
               
-              <div className="space-y-6">
-                {/* Category and Tags */}
-                <div className="flex flex-wrap items-center gap-2">
-                  {blog.category && (
-                    <Badge className="bg-primary">
-                      {blog.category}
-                    </Badge>
+              {/* Title */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-tight">
+                {blog.title}
+              </h1>
+              
+              {/* Meta Info Grid */}
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground border-y py-4">
+                <div className="flex items-center gap-2 min-w-fit">
+                  {blog.author.image ? (
+                    <Image
+                      src={blog.author.image}
+                      alt={blog.author.name}
+                      width={40}
+                      height={40}
+                      className="rounded-full border"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <UserIcon className="h-5 w-5 text-primary" />
+                    </div>
                   )}
-                  {blog.tags.slice(0, 3).map((tag: string) => (
-                    <Badge key={tag} variant="secondary">
-                      {tag}
-                    </Badge>
-                  ))}
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-foreground">Written by</span>
+                    <span className="font-medium">{blog.author.name}</span>
+                  </div>
                 </div>
                 
-                {/* Title */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-                  {blog.title}
-                </h1>
+                <div className="w-px h-8 bg-border hidden sm:block" />
+
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  <span>{formatDate(blog.publishedAt)}</span>
+                </div>
                 
-                {/* Meta Info */}
-                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    {blog.author.image && (
-                      <Image
-                        src={blog.author.image}
-                        alt={blog.author.name}
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
-                    )}
-                    <div className="flex items-center gap-1">
-                      <UserIcon className="h-4 w-4" />
-                      <span className="font-medium">{blog.author.name}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <CalendarDays className="h-4 w-4" />
-                    <time dateTime={blog.publishedAt}>
-                      {formatDate(blog.publishedAt)}
-                    </time>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    <span>{blog.readTime} min read</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    <span>{(blog.views + 1).toLocaleString()} views</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>{blog.readTime} min read</span>
+                </div>
+                
+                <div className="flex items-center gap-2 ml-auto">
+                  <Eye className="h-4 w-4" />
+                  <span>{(blog.views + 1).toLocaleString()} views</span>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Featured Image */}
+        {/* Featured Image - Wide but not full width */}
         {blog.featuredImage && (
-          <section className="py-8">
-            <div className="container mx-auto px-4">
-              <div className="max-w-4xl mx-auto">
-                <div className="relative aspect-video rounded-xl overflow-hidden">
-                  <Image
-                    src={blog.featuredImage}
-                    alt={blog.title}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
+          <section className="mb-12">
+            <div className="container mx-auto px-4 max-w-6xl">
+              <div className="relative aspect-[21/9] md:aspect-[2/1] rounded-2xl overflow-hidden shadow-lg border">
+                <Image
+                  src={blog.featuredImage}
+                  alt={blog.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
             </div>
           </section>
         )}
 
-        {/* Main Content */}
-        <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Article Content */}
-              <div className="lg:w-2/3">
-                <article className="prose prose-lg max-w-none">
-                  <RichTextRenderer content={blog.content} />
+        {/* Main Content Layout */}
+        <section className="pb-20">
+          {/* FIX: Increased max-w to 7xl to allow sidebar room */}
+          <div className="container mx-auto px-4 max-w-7xl">
+            <div className="flex flex-col lg:flex-row gap-12">
+              
+              {/* Article Content Column (2/3 width) */}
+              <div className="lg:w-3/4">
+                <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
+                  <ReadOnlyEditor content={blog.content} />
                 </article>
                 
-                {/* Tags */}
+                {/* Bottom Tags */}
                 {blog.tags.length > 0 && (
                   <div className="mt-12 pt-8 border-t">
-                    <h3 className="text-lg font-semibold mb-4">Tags</h3>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                      Related Tags
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {blog.tags.map((tag: string) => (
-                        <Badge key={tag} variant="outline" className="text-sm">
-                          {tag}
+                        <Badge key={tag} variant="secondary" className="px-3 py-1">
+                          #{tag}
                         </Badge>
                       ))}
                     </div>
                   </div>
                 )}
                 
-                {/* Share Buttons */}
-                <div className="mt-12 pt-8 border-t">
-                  <ShareButtons
+                {/* Mobile Share Buttons (Visible only on small screens) */}
+                <div className="lg:hidden mt-8">
+                   <ShareButtons
                     url={shareUrl}
                     title={blog.title}
                     description={blog.excerpt}
                   />
                 </div>
                 
-                {/* Author Bio */}
-                <div className="mt-12 p-6 bg-secondary/30 rounded-xl">
-                  <div className="flex items-start gap-4">
+                {/* Author Bio Box */}
+                <div className="mt-12 p-8 bg-card border rounded-2xl">
+                  <div className="flex flex-col sm:flex-row items-start gap-6">
                     {blog.author.image && (
                       <Image
                         src={blog.author.image}
                         alt={blog.author.name}
                         width={80}
                         height={80}
-                        className="rounded-full"
+                        className="rounded-full border-2 border-background shadow-sm"
                       />
                     )}
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2">
-                        About {blog.author.name}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {blog.author.bio || 'M&A professional with extensive experience in financial modeling and deal analysis.'}
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold">
+                          About {blog.author.name}
+                        </h3>
+                        <Button variant="outline" size="sm">Follow</Button>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">
+                        {blog.author.bio || `M&A professional and contributor at LiveLearnLeverage. Analyzing market trends and financial strategies.`}
                       </p>
                     </div>
                   </div>
                 </div>
                 
-                {/* Navigation between posts */}
+                {/* Post Navigation */}
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {prevPost && (
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                          <ChevronLeft className="h-4 w-4" />
-                          Previous Article
-                        </div>
-                        <Link 
-                          href={`/blog/${prevPost.slug}`}
-                          className="font-medium hover:text-primary transition-colors"
-                        >
-                          {prevPost.title}
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  )}
+                  {prevPost ? (
+                    <Link href={`/blog/${prevPost.slug}`} className="group block">
+                      <Card className="h-full hover:border-primary/50 transition-colors">
+                        <CardContent className="p-6">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3 group-hover:text-primary">
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous Article
+                          </div>
+                          <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                            {prevPost.title}
+                          </h4>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ) : <div />}
                   
                   {nextPost && (
-                    <Card className={!prevPost ? 'md:col-span-2' : ''}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground mb-2">
-                          Next Article
-                          <ChevronRight className="h-4 w-4" />
-                        </div>
-                        <Link 
-                          href={`/blog/${nextPost.slug}`}
-                          className="font-medium hover:text-primary transition-colors block text-right"
-                        >
-                          {nextPost.title}
-                        </Link>
-                      </CardContent>
-                    </Card>
+                    <Link href={`/blog/${nextPost.slug}`} className="group block">
+                      <Card className="h-full hover:border-primary/50 transition-colors">
+                        <CardContent className="p-6 text-right">
+                          <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground mb-3 group-hover:text-primary">
+                            Next Article
+                            <ChevronRight className="h-4 w-4" />
+                          </div>
+                          <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
+                            {nextPost.title}
+                          </h4>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   )}
                 </div>
               </div>
               
-              {/* Sidebar with Table of Contents */}
-              <div className="lg:w-1/3">
-                <TableOfContents content={blog.content} />
-              </div>
+              {/* Sidebar Column (1/3 width) - Sticky */}
+              <aside className="lg:w-1/4 space-y-8">
+                {/* Sticky Wrapper */}
+                <div className="sticky top-24 space-y-8">
+                    {/* Table of Contents */}
+                    <div className="hidden lg:block">
+                        <TableOfContents content={blog.content} />
+                    </div>
+
+                    {/* Desktop Share Buttons */}
+                    <div className="hidden lg:block">
+                        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+                            Share this article
+                        </h3>
+                        <ShareButtons
+                            url={shareUrl}
+                            title={blog.title}
+                            description={blog.excerpt}
+                        />
+                    </div>
+
+                    {/* Simple CTA/Ad placeholder */}
+                    <Card className="bg-primary/5 border-primary/20">
+                        <CardContent className="p-6">
+                            <h4 className="font-bold mb-2">Need Financial Models?</h4>
+                            <p className="text-sm text-muted-foreground mb-4">
+                                Download professional M&A and valuation templates.
+                            </p>
+                            <Button className="w-full" size="sm" asChild>
+                                <Link href="/models">Browse Models</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+              </aside>
+
             </div>
           </div>
         </section>
 
-        {/* Related Posts */}
+        {/* Related Posts Section */}
         {relatedPosts.length > 0 && (
-          <section className="py-12 bg-secondary/30">
-            <div className="container mx-auto px-4">
-              <div className="space-y-8">
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold">Related Articles</h2>
-                  <p className="text-muted-foreground">
-                    You might also be interested in
-                  </p>
+          <section className="py-16 bg-secondary/20 border-t">
+            <div className="container mx-auto px-4 max-w-7xl">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h2 className="text-2xl font-bold">Related Articles</h2>
+                    <p className="text-muted-foreground">More insights from {blog.category}</p>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {relatedPosts.map((post: any) => (
-                    <BlogCard key={post._id} blog={post} />
-                  ))}
-                </div>
+                <Button variant="outline" asChild>
+                    <Link href="/blog">View All</Link>
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {relatedPosts.map((post: any) => (
+                  <BlogCard key={post._id} blog={post} />
+                ))}
               </div>
             </div>
           </section>
         )}
 
-        {/* Newsletter CTA */}
-        <section className="py-12">
+        {/* Newsletter Section */}
+        <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Enjoyed this article?</h2>
-                <p className="text-muted-foreground">
-                  Subscribe to get notified about new posts and exclusive content.
-                </p>
+              <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 text-primary mb-2">
+                <CalendarDays className="h-6 w-6" />
               </div>
+              <h2 className="text-3xl font-bold">Subscribe to our newsletter</h2>
+              <p className="text-muted-foreground text-lg">
+                Get the latest financial insights, M&A trends, and modeling tips delivered directly to your inbox.
+              </p>
               
-              <form className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    required
-                  />
-                  <Button type="submit" className="whitespace-nowrap">
-                    Subscribe
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  No spam, unsubscribe at any time.
-                </p>
+              <form className="max-w-md mx-auto flex gap-2 pt-4">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+                  required
+                />
+                <Button type="submit">Subscribe</Button>
               </form>
+              <p className="text-xs text-muted-foreground pt-2">
+                We respect your privacy. Unsubscribe at any time.
+              </p>
             </div>
           </div>
         </section>

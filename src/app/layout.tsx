@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('http://localhost:3000'),
   title: {
     default: "LiveLearnLeverage - M&A Insights & Financial Models",
     template: "%s | LiveLearnLeverage",

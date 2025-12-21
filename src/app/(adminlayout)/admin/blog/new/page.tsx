@@ -2,8 +2,6 @@
 
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-// dynamic import is unused in your code, but keeping it if you plan to use it later
-// import dynamic from 'next/dynamic' 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -24,7 +22,8 @@ import {
   Upload,
   X,
   Plus,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { SimpleEditor, SimpleEditorRef } from '@/components/tiptap-templates/simple/simple-editor'
@@ -53,12 +52,13 @@ const tags = [
 
 export default function NewBlogPostPage() {
   const router = useRouter()
-  
-  // --- FIX START: useRef moved to the top level ---
   const editorRef = useRef<SimpleEditorRef>(null)
-  // --- FIX END ---
+  
+  // Ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false) // New state for image upload
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
   const [formData, setFormData] = useState({
@@ -74,22 +74,55 @@ export default function NewBlogPostPage() {
     publishDate: new Date().toISOString().split('T')[0],
   })
 
+  // --- NEW: Handle Featured Image Upload ---
+ // src/app/(adminlayout)/admin/blog/new/page.tsx
+
+const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  try {
+    setIsUploading(true)
+    const uploadData = new FormData()
+    
+    // FIXED: Append as 'image' to match your API route
+    uploadData.append('image', file) 
+
+    // FIXED: Use your EXISTING admin route
+    const response = await fetch('/api/admin/upload', {
+      method: 'POST',
+      body: uploadData,
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Upload failed')
+    }
+
+    setFormData(prev => ({ ...prev, featuredImage: data.url }))
+    toast.success('Image uploaded successfully')
+  } catch (error) {
+    console.error('Upload error:', error)
+    toast.error('Failed to upload image')
+  } finally {
+    setIsUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+}
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Note: editorRef is now accessible here because it is in the parent scope
-
     try {
-      // Get content from editor
       let editorContent = '';
       if (editorRef.current) {
         editorContent = editorRef.current.getContent();
       }
 
-      // Validate required fields
       if (!formData.title.trim() || !editorContent.trim() || !formData.category.trim()) {
-        toast.error('Title, content, and category are required'); // Changed alert to toast for consistency
+        toast.error('Title, content, and category are required');
         setIsSubmitting(false);
         return;
       }
@@ -101,7 +134,7 @@ export default function NewBlogPostPage() {
         },
         body: JSON.stringify({
           ...formData,
-          content: editorContent, // Make sure to include the content from the editor
+          content: editorContent,
           tags: selectedTags,
         }),
       })
@@ -142,7 +175,6 @@ export default function NewBlogPostPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">New Blog Post</h1>
@@ -163,15 +195,11 @@ export default function NewBlogPostPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6">
-        {/* Main Content */}
         <div className="space-y-6">
-          {/* Title */}
           <Card>
             <CardHeader>
               <CardTitle>Title</CardTitle>
-              <CardDescription>
-                Enter a descriptive title for your blog post
-              </CardDescription>
+              <CardDescription>Enter a descriptive title for your blog post</CardDescription>
             </CardHeader>
             <CardContent>
               <Input
@@ -183,27 +211,21 @@ export default function NewBlogPostPage() {
             </CardContent>
           </Card>
 
-          {/* Content */}
           <Card>
             <CardHeader>
               <CardTitle>Content</CardTitle>
-              <CardDescription>
-                Write your blog post content here
-              </CardDescription>
+              <CardDescription>Write your blog post content here</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* editorRef is now defined and works here */}
               <SimpleEditor ref={editorRef} />
               <div className="text-sm text-muted-foreground mt-2">
-                Write your blog content above. Images will be automatically uploaded.
+                Write your blog content above.
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Publish Settings */}
           <Card>
             <CardHeader>
               <CardTitle>Publish</CardTitle>
@@ -238,7 +260,6 @@ export default function NewBlogPostPage() {
             </CardContent>
           </Card>
 
-          {/* Category */}
           <Card>
             <CardHeader>
               <CardTitle>Category</CardTitle>
@@ -262,7 +283,6 @@ export default function NewBlogPostPage() {
             </CardContent>
           </Card>
 
-          {/* Tags */}
           <Card>
             <CardHeader>
               <CardTitle>Tags</CardTitle>
@@ -279,7 +299,6 @@ export default function NewBlogPostPage() {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              
               <div className="flex flex-wrap gap-2">
                 {selectedTags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="flex items-center gap-1">
@@ -294,35 +313,13 @@ export default function NewBlogPostPage() {
                   </Badge>
                 ))}
               </div>
-
-              <div className="pt-4 border-t">
-                <p className="text-sm font-medium mb-2">Suggested Tags</p>
-                <div className="flex flex-wrap gap-2">
-                  {tags
-                    .filter(tag => !selectedTags.includes(tag))
-                    .slice(0, 8)
-                    .map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="outline"
-                        className="cursor-pointer hover:bg-secondary"
-                        onClick={() => setSelectedTags([...selectedTags, tag])}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                </div>
-              </div>
             </CardContent>
           </Card>
 
-          {/* Excerpt */}
           <Card>
             <CardHeader>
               <CardTitle>Excerpt</CardTitle>
-              <CardDescription>
-                A short summary of your blog post
-              </CardDescription>
+              <CardDescription>A short summary of your blog post</CardDescription>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -334,15 +331,24 @@ export default function NewBlogPostPage() {
             </CardContent>
           </Card>
 
-          {/* Featured Image */}
+          {/* Featured Image Section Updated */}
           <Card>
             <CardHeader>
               <CardTitle>Featured Image</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Hidden Input */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleFeaturedImageUpload}
+              />
+
               {formData.featuredImage ? (
                 <div className="space-y-2">
-                  <div className="relative aspect-video rounded-lg overflow-hidden">
+                  <div className="relative aspect-video rounded-lg overflow-hidden border">
                     <img
                       src={formData.featuredImage}
                       alt="Featured"
@@ -351,7 +357,7 @@ export default function NewBlogPostPage() {
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full text-red-500 hover:text-red-600"
                     onClick={() => setFormData({ ...formData, featuredImage: '' })}
                   >
                     Remove Image
@@ -363,15 +369,26 @@ export default function NewBlogPostPage() {
                   <p className="text-sm text-muted-foreground mb-4">
                     Upload a featured image
                   </p>
-                  <Button variant="outline" type="button">
-                    Choose Image
+                  <Button 
+                    variant="outline" 
+                    type="button"
+                    disabled={isUploading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      'Choose Image'
+                    )}
                   </Button>
                 </div>
               )}
             </CardContent>
           </Card>
 
-          {/* SEO */}
           <Card>
             <CardHeader>
               <CardTitle>SEO Settings</CardTitle>

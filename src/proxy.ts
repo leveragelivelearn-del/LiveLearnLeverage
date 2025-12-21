@@ -8,7 +8,7 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. FIX: Check if we are already on the login page (prevents loop)
-  if (pathname.startsWith('/admin/login')) {
+  if (pathname.startsWith('/login')) {
     return NextResponse.next();
   }
 
@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
   if (pathname.startsWith('/admin')) {
     // If no token, redirect to login
     if (!token) {
-      const url = new URL('/admin/login', request.url);
+      const url = new URL('/login', request.url);
       url.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(url);
     }

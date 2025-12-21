@@ -18,14 +18,11 @@ const BlogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-
-  
   status: {
     type: String,
     enum: ['draft', 'published', 'scheduled', 'archived'],
     default: 'draft',
   },
- 
   featuredImage: {
     type: String,
   },
@@ -70,7 +67,8 @@ const BlogSchema = new mongoose.Schema({
   },
 })
 
-BlogSchema.pre('save', function (next) {
+// FIXED: Async function, NO parameters, NO next() call
+BlogSchema.pre('save', async function () {
   this.updatedAt = new Date()
   
   // Calculate read time (approx 200 words per minute)
@@ -83,8 +81,11 @@ BlogSchema.pre('save', function (next) {
   if (this.published && !this.publishedAt) {
     this.publishedAt = new Date()
   }
-  
-  next()
 })
 
-export default mongoose.models.Blog || mongoose.model('Blog', BlogSchema)
+// Delete existing model from cache if it exists to prevent Hot Reload errors
+if (mongoose.models.Blog) {
+  delete mongoose.models.Blog
+}
+
+export default mongoose.model('Blog', BlogSchema)

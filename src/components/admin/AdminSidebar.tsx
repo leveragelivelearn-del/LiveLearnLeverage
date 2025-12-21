@@ -76,7 +76,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/admin/login' })
+    await signOut({ callbackUrl: '/login' })
   }
 
   return (

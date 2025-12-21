@@ -38,12 +38,17 @@ export async function GET(request: NextRequest) {
     }
     
     if (year && month) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1)
-      const endDate = new Date(parseInt(year), parseInt(month), 1)
+      const yearNum = parseInt(year)
+      const monthNum = parseInt(month)
       
-      query.publishedAt = {
-        $gte: startDate,
-        $lt: endDate,
+      if (!isNaN(yearNum) && !isNaN(monthNum)) {
+        const startDate = new Date(yearNum, monthNum - 1, 1)
+        const endDate = new Date(yearNum, monthNum, 1)
+        
+        query.publishedAt = {
+          $gte: startDate,
+          $lt: endDate,
+        }
       }
     }
     
@@ -74,7 +79,7 @@ export async function GET(request: NextRequest) {
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('-content') // Exclude heavy content field
+      // REMOVED: .select('-content') so content is now visible
       .populate('author', 'name image')
       .lean()
     
