@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('-rationale -keyMetrics -slides') // Exclude heavy fields
+      // FIXED: Removed .select() so all fields (rationale, keyMetrics, etc.) are returned
       .lean()
     
     return NextResponse.json({

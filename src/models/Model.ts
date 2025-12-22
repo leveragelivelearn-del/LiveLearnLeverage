@@ -83,9 +83,14 @@ const ModelSchema = new mongoose.Schema({
   },
 })
 
-ModelSchema.pre('save', function (next) {
+// FIXED: Use async function and remove 'next' parameter
+ModelSchema.pre('save', async function () {
   this.updatedAt = new Date()
-  next()
 })
 
-export default mongoose.models.Model || mongoose.model('Model', ModelSchema)
+// Delete from cache if exists to prevent Hot Reload errors in Next.js
+if (mongoose.models.Model) {
+  delete mongoose.models.Model
+}
+
+export default mongoose.model('Model', ModelSchema)

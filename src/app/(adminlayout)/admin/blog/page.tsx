@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useEffect } from 'react' // Import useEffect instead
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { AdminSearch } from '@/components/admin/AdminSearch'
 import { BulkActions } from '@/components/admin/BulkActions'
+import { Checkbox } from '@/components/ui/checkbox'
 import { 
   Table,
   TableBody,
@@ -27,21 +26,20 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { 
-  Search, 
   MoreHorizontal, 
   Eye, 
   Edit, 
   Trash2,
   Plus,
   Calendar,
-  Clock,
+  Clock, 
   Filter,
   Loader2
 } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { toast } from 'sonner'
+import Swal from 'sweetalert2'
 
-// Mock data function - replace with your actual API call
 async function getBlogPosts() {
   try {
     const response = await fetch('/api/admin/blog', {
@@ -67,7 +65,12 @@ export default function BlogManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Replace useState(() => {}) with useEffect
+  // Filter State
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [dateFilter, setDateFilter] = useState('all')
+
   useEffect(() => {
     fetchPosts()
   }, [])
@@ -85,11 +88,59 @@ export default function BlogManagementPage() {
     }
   }
 
-  // Rest of your component remains the same...
+  // Client-Side Filtering Logic
+  const filteredPosts = posts.filter(post => {
+    // Search Filter
+    const matchesSearch = 
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.author?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+
+    // Status Filter
+    const matchesStatus = statusFilter === 'all' 
+      ? true 
+      : statusFilter === 'published' 
+        ? post.published === true 
+        : statusFilter === 'draft' 
+          ? post.published === false 
+          : post.status === statusFilter 
+
+    // Category Filter
+    const matchesCategory = categoryFilter === 'all' 
+      ? true 
+      : post.category === categoryFilter
+
+    // Date Filter
+    let matchesDate = true
+    if (dateFilter !== 'all') {
+      const postDate = new Date(post.publishedAt || post.createdAt)
+      const now = new Date()
+      const diffTime = Math.abs(now.getTime() - postDate.getTime())
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+      if (dateFilter === 'week') matchesDate = diffDays <= 7
+      if (dateFilter === 'month') matchesDate = diffDays <= 30
+      if (dateFilter === 'year') matchesDate = diffDays <= 365
+    }
+
+    return matchesSearch && matchesStatus && matchesCategory && matchesDate
+  })
+
   // Bulk delete function
   const handleBulkDelete = async () => {
     if (selectedPosts.length === 0) return
     
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to delete ${selectedPosts.length} posts. This cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete them!'
+    })
+
+    if (!result.isConfirmed) return
+
     setIsProcessing(true)
     try {
       const response = await fetch('/api/admin/bulk', {
@@ -105,9 +156,9 @@ export default function BlogManagementPage() {
       })
 
       if (response.ok) {
-        toast.success(`Deleted ${selectedPosts.length} post(s)`)
+        Swal.fire('Deleted!', 'Your posts have been deleted.', 'success')
         setSelectedPosts([])
-        fetchPosts() // Refresh the list
+        fetchPosts() 
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to delete posts')
@@ -140,7 +191,7 @@ export default function BlogManagementPage() {
       if (response.ok) {
         toast.success(`Published ${selectedPosts.length} post(s)`)
         setSelectedPosts([])
-        fetchPosts() // Refresh the list
+        fetchPosts() 
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to publish posts')
@@ -173,7 +224,7 @@ export default function BlogManagementPage() {
       if (response.ok) {
         toast.success(`Archived ${selectedPosts.length} post(s)`)
         setSelectedPosts([])
-        fetchPosts() // Refresh the list
+        fetchPosts() 
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to archive posts')
@@ -185,23 +236,37 @@ export default function BlogManagementPage() {
     }
   }
 
-  // Handle individual delete
+  // Handle individual delete with SweetAlert
   const handleDelete = async (postId: string) => {
-    if (!confirm('Are you sure you want to delete this post?')) return
-    
-    try {
-      const response = await fetch(`/api/admin/blog/${postId}`, {
-        method: 'DELETE',
-      })
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!"
+    });
 
-      if (response.ok) {
-        toast.success('Post deleted successfully')
-        fetchPosts() // Refresh the list
-      } else {
-        throw new Error('Failed to delete post')
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/admin/blog/${postId}`, {
+          method: 'DELETE',
+        })
+
+        if (response.ok) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your post has been deleted.",
+            icon: "success"
+          });
+          fetchPosts() // Refresh the list
+        } else {
+          throw new Error('Failed to delete post')
+        }
+      } catch (error) {
+        toast.error('Failed to delete post')
       }
-    } catch (error) {
-      toast.error('Failed to delete post')
     }
   }
 
@@ -213,7 +278,6 @@ export default function BlogManagementPage() {
     )
   }
 
-  // ... rest of your component JSX remains the same
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -227,10 +291,11 @@ export default function BlogManagementPage() {
         <div className="flex items-center gap-3">
           <BulkActions
             selectedItems={selectedPosts}
-            totalItems={posts.length}
-            onSelectAll={() => setSelectedPosts(posts.map(p => p._id))}
+            totalItems={filteredPosts.length}
+            onSelectAll={() => setSelectedPosts(filteredPosts.map(p => p._id))}
             onClearSelection={() => setSelectedPosts([])}
             onBulkDelete={handleBulkDelete}
+            // FIXED: Pass function references directly to solve type errors
             onBulkPublish={handleBulkPublish}
             onBulkArchive={handleBulkArchive}
           />
@@ -247,12 +312,16 @@ export default function BlogManagementPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <AdminSearch 
-            placeholder="Search posts by title, author, or content..."
+            placeholder="Search posts..."
+            onSearch={(query) => setSearchQuery(query)}
             onFilterClick={() => setShowFilters(!showFilters)}
+            // FIXED: Hide the internal filter button to avoid duplicates
+            showFilters={false} 
           />
           <Button 
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
+            className={showFilters ? "bg-accent" : ""}
           >
             <Filter className="mr-2 h-4 w-4" />
             Filters
@@ -265,7 +334,11 @@ export default function BlogManagementPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
                     <option value="all">All Status</option>
                     <option value="published">Published</option>
                     <option value="draft">Draft</option>
@@ -274,16 +347,28 @@ export default function BlogManagementPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Category</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                  >
                     <option value="all">All Categories</option>
                     <option value="M&A">M&A</option>
                     <option value="Financial Modeling">Financial Modeling</option>
                     <option value="Valuation">Valuation</option>
+                    <option value="Investment Banking">Investment Banking</option>
+                    <option value="Private Equity">Private Equity</option>
+                    <option value="Corporate Finance">Corporate Finance</option>
+                    <option value="Market Trends">Market Trends</option>
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Date Range</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                  >
                     <option value="all">All Time</option>
                     <option value="week">Last 7 days</option>
                     <option value="month">Last 30 days</option>
@@ -303,10 +388,10 @@ export default function BlogManagementPage() {
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedPosts.length === posts.length && posts.length > 0}
+                  checked={selectedPosts.length === filteredPosts.length && filteredPosts.length > 0}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedPosts(posts.map(p => p._id))
+                      setSelectedPosts(filteredPosts.map(p => p._id))
                     } else {
                       setSelectedPosts([])
                     }
@@ -323,14 +408,14 @@ export default function BlogManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {posts.length === 0 ? (
+            {filteredPosts.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                  No blog posts found
+                  No blog posts found matching your filters
                 </TableCell>
               </TableRow>
             ) : (
-              posts.map((post: any) => (
+              filteredPosts.map((post: any) => (
                 <TableRow key={post._id}>
                   <TableCell>
                     <Checkbox
@@ -434,10 +519,9 @@ export default function BlogManagementPage() {
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Showing {posts.length} of {posts.length} posts
+          Showing {filteredPosts.length} of {posts.length} posts
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" disabled>

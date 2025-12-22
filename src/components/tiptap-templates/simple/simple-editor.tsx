@@ -72,6 +72,7 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 
 // --- Components ---
+// import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
@@ -91,70 +92,73 @@ const MainToolbarContent = ({
   isMobile: boolean;
 }) => {
   return (
-    <>
-      <Spacer />
+    <div className="flex flex-col w-full gap-2 py-1">
+      {/* --- ROW 1: Structure & Major Actions --- */}
+      <div className="flex flex-wrap items-center gap-1">
+        <ToolbarGroup>
+          <UndoRedoButton action="undo" />
+          <UndoRedoButton action="redo" />
+        </ToolbarGroup>
 
-      <ToolbarGroup>
-        <UndoRedoButton action="undo" />
-        <UndoRedoButton action="redo" />
-      </ToolbarGroup>
+        <ToolbarSeparator />
 
-      <ToolbarSeparator />
+        <ToolbarGroup>
+          <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
+          <ListDropdownMenu
+            types={["bulletList", "orderedList", "taskList"]}
+            portal={isMobile}
+          />
+          <BlockquoteButton />
+          <CodeBlockButton />
+        </ToolbarGroup>
 
-      <ToolbarGroup>
-        <HeadingDropdownMenu levels={[1, 2, 3, 4]} portal={isMobile} />
-        <ListDropdownMenu
-          types={["bulletList", "orderedList", "taskList"]}
-          portal={isMobile}
-        />
-        <BlockquoteButton />
-        <CodeBlockButton />
-      </ToolbarGroup>
+        <ToolbarSeparator />
 
-      <ToolbarSeparator />
+        <ToolbarGroup>
+          <TextAlignButton align="left" />
+          <TextAlignButton align="center" />
+          <TextAlignButton align="right" />
+          <TextAlignButton align="justify" />
+        </ToolbarGroup>
+      </div>
 
-      <ToolbarGroup>
-        <MarkButton type="bold" />
-        <MarkButton type="italic" />
-        <MarkButton type="strike" />
-        <MarkButton type="code" />
-        <MarkButton type="underline" />
-        {!isMobile ? (
-          <ColorHighlightPopover />
-        ) : (
-          <ColorHighlightPopoverButton onClick={onHighlighterClick} />
-        )}
-        {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
-      </ToolbarGroup>
+      {/* --- ROW 2: Formatting, Inserts & Theme --- */}
+      <div className="flex flex-wrap items-center gap-1">
+        <ToolbarGroup>
+          <MarkButton type="bold" />
+          <MarkButton type="italic" />
+          <MarkButton type="strike" />
+          <MarkButton type="code" />
+          <MarkButton type="underline" />
+          {!isMobile ? (
+            <ColorHighlightPopover />
+          ) : (
+            <ColorHighlightPopoverButton onClick={onHighlighterClick} />
+          )}
+          {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
+        </ToolbarGroup>
 
-      <ToolbarSeparator />
+        <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <MarkButton type="superscript" />
-        <MarkButton type="subscript" />
-      </ToolbarGroup>
+        <ToolbarGroup>
+          <MarkButton type="superscript" />
+          <MarkButton type="subscript" />
+        </ToolbarGroup>
 
-      <ToolbarSeparator />
+        <ToolbarSeparator />
 
-      <ToolbarGroup>
-        <TextAlignButton align="left" />
-        <TextAlignButton align="center" />
-        <TextAlignButton align="right" />
-        <TextAlignButton align="justify" />
-      </ToolbarGroup>
+        <ToolbarGroup>
+          <ImageUploadButton text="Image" />
+        </ToolbarGroup>
 
-      <ToolbarSeparator />
-
-      <ToolbarGroup>
-        <ImageUploadButton text="Add Image" />
-      </ToolbarGroup>
-
-      <Spacer />
-
-      {isMobile && <ToolbarSeparator />}
-
-      
-    </>
+        {/* Pushes Theme Toggle to the far right
+        <div className="ml-auto">
+          <ToolbarGroup>
+            <ThemeToggle />
+          </ToolbarGroup>
+        </div> */}
+      </div>
+    </div>
   );
 };
 
@@ -331,7 +335,9 @@ export const SimpleEditor = forwardRef<SimpleEditorRef>((props, ref) => {
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
           ref={toolbarRef}
+          className="sticky top-0 z-20 bg-background border-b"
           style={{
+            backgroundColor: "var(--background)",
             ...(isMobile
               ? {
                   bottom: `calc(100% - ${height - rect.y}px)`,

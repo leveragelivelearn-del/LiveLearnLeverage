@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState, useEffect } from 'react' // Changed: Import useEffect
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { AdminSearch } from '@/components/admin/AdminSearch'
 import { BulkActions } from '@/components/admin/BulkActions'
+import { Checkbox } from '@/components/ui/checkbox'
 import { 
   Table,
   TableBody,
@@ -27,7 +26,6 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { 
-  Search, 
   MoreHorizontal, 
   Eye, 
   Edit, 
@@ -41,8 +39,8 @@ import {
 } from 'lucide-react'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { toast } from 'sonner'
+import Swal from 'sweetalert2'
 
-// Mock data function - replace with your actual API call
 async function getModels() {
   try {
     const response = await fetch('/api/admin/models', {
@@ -68,7 +66,13 @@ export default function ModelsManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  // Fetch data on component mount - Fixed: Using useEffect instead of useState
+  // Filter State
+  const [searchQuery, setSearchQuery] = useState('')
+  const [industryFilter, setIndustryFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [yearFilter, setYearFilter] = useState('all')
+
   useEffect(() => {
     fetchModels()
   }, [])
@@ -86,10 +90,46 @@ export default function ModelsManagementPage() {
     }
   }
 
-  // Bulk delete function
+  // Client-Side Filtering Logic
+  const filteredModels = models.filter(model => {
+    const matchesSearch = 
+      model.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      model.industry.toLowerCase().includes(searchQuery.toLowerCase())
+
+    const matchesIndustry = industryFilter === 'all' || model.industry === industryFilter
+    const matchesType = typeFilter === 'all' || model.dealType === typeFilter
+    
+    const matchesStatus = statusFilter === 'all' 
+      ? true 
+      : statusFilter === 'featured' 
+        ? model.featured === true 
+        : model.featured === false // Assuming 'standard' means not featured
+
+    let matchesYear = true
+    if (yearFilter !== 'all') {
+      const year = new Date(model.completionDate).getFullYear().toString()
+      matchesYear = year === yearFilter
+    }
+
+    return matchesSearch && matchesIndustry && matchesType && matchesStatus && matchesYear
+  })
+
+  // Bulk delete function with SweetAlert
   const handleBulkDelete = async () => {
     if (selectedModels.length === 0) return
     
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to delete ${selectedModels.length} models. This cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete them!'
+    })
+
+    if (!result.isConfirmed) return
+
     setIsProcessing(true)
     try {
       const response = await fetch('/api/admin/bulk', {
@@ -105,9 +145,9 @@ export default function ModelsManagementPage() {
       })
 
       if (response.ok) {
-        toast.success(`Deleted ${selectedModels.length} model(s)`)
+        Swal.fire('Deleted!', 'Your models have been deleted.', 'success')
         setSelectedModels([])
-        fetchModels() // Refresh the list
+        fetchModels() 
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to delete models')
@@ -120,7 +160,9 @@ export default function ModelsManagementPage() {
   }
 
   // Bulk feature/unfeature function
-  const handleBulkFeature = async (feature: boolean) => {
+  // We use this wrapper to satisfy the type requirement if needed, 
+  // but passing async functions directly usually works in TS.
+  const handleBulkFeature = async (feature: boolean = true) => {
     if (selectedModels.length === 0) return
     
     setIsProcessing(true)
@@ -140,7 +182,7 @@ export default function ModelsManagementPage() {
       if (response.ok) {
         toast.success(`${feature ? 'Featured' : 'Unfeatured'} ${selectedModels.length} model(s)`)
         setSelectedModels([])
-        fetchModels() // Refresh the list
+        fetchModels() 
       } else {
         const error = await response.json()
         throw new Error(error.error || `Failed to ${feature ? 'feature' : 'unfeature'} models`)
@@ -152,23 +194,37 @@ export default function ModelsManagementPage() {
     }
   }
 
-  // Handle individual delete
+  // Handle individual delete with SweetAlert
   const handleDelete = async (modelId: string) => {
-    if (!confirm('Are you sure you want to delete this model?')) return
-    
-    try {
-      const response = await fetch(`/api/admin/models/${modelId}`, {
-        method: 'DELETE',
-      })
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!"
+    });
 
-      if (response.ok) {
-        toast.success('Model deleted successfully')
-        fetchModels() // Refresh the list
-      } else {
-        throw new Error('Failed to delete model')
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/admin/models/${modelId}`, {
+          method: 'DELETE',
+        })
+
+        if (response.ok) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your model has been deleted.",
+            icon: "success"
+          });
+          fetchModels() 
+        } else {
+          throw new Error('Failed to delete model')
+        }
+      } catch (error) {
+        toast.error('Failed to delete model')
       }
-    } catch (error) {
-      toast.error('Failed to delete model')
     }
   }
 
@@ -193,10 +249,11 @@ export default function ModelsManagementPage() {
         <div className="flex items-center gap-3">
           <BulkActions
             selectedItems={selectedModels}
-            totalItems={models.length}
-            onSelectAll={() => setSelectedModels(models.map(m => m._id))}
+            totalItems={filteredModels.length}
+            onSelectAll={() => setSelectedModels(filteredModels.map(m => m._id))}
             onClearSelection={() => setSelectedModels([])}
             onBulkDelete={handleBulkDelete}
+            // FIXED: Passing functions correctly to avoid type errors
             onBulkPublish={() => handleBulkFeature(true)}
             onBulkArchive={() => handleBulkFeature(false)}
           />
@@ -213,12 +270,15 @@ export default function ModelsManagementPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <AdminSearch 
-            placeholder="Search models by title, industry, or description..."
+            placeholder="Search models..."
+            onSearch={(query) => setSearchQuery(query)}
             onFilterClick={() => setShowFilters(!showFilters)}
+            showFilters={false} // Hide duplicate filter button
           />
           <Button 
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
+            className={showFilters ? "bg-accent" : ""}
           >
             <Filter className="mr-2 h-4 w-4" />
             Filters
@@ -228,42 +288,58 @@ export default function ModelsManagementPage() {
         {showFilters && (
           <Card>
             <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Industry</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={industryFilter}
+                    onChange={(e) => setIndustryFilter(e.target.value)}
+                  >
                     <option value="all">All Industries</option>
                     <option value="Technology">Technology</option>
                     <option value="Healthcare">Healthcare</option>
-                    <option value="Finance">Finance</option>
+                    <option value="Financial Services">Financial Services</option>
+                    <option value="Consumer Goods">Consumer Goods</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Telecommunications">Telecommunications</option>
+                    <option value="Industrials">Industrials</option>
+                    <option value="Materials">Materials</option>
+                    <option value="Utilities">Utilities</option>
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Deal Type</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                  >
                     <option value="all">All Types</option>
                     <option value="Merger">Merger</option>
                     <option value="Acquisition">Acquisition</option>
-                    <option value="LBO">LBO</option>
+                    <option value="Leveraged Buyout">LBO</option>
+                    <option value="Divestiture">Divestiture</option>
+                    <option value="Joint Venture">Joint Venture</option>
+                    <option value="Strategic Alliance">Strategic Alliance</option>
+                    <option value="Takeover">Takeover</option>
+                    <option value="Management Buyout">Management Buyout</option>
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
+                  <select 
+                    className="w-full px-3 py-2 border rounded-md"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
                     <option value="all">All Status</option>
                     <option value="featured">Featured</option>
                     <option value="standard">Standard</option>
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Year</label>
-                  <select className="w-full px-3 py-2 border rounded-md">
-                    <option value="all">All Years</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
-                    <option value="2022">2022</option>
-                  </select>
-                </div>
+                
               </div>
             </CardContent>
           </Card>
@@ -282,7 +358,7 @@ export default function ModelsManagementPage() {
         </div>
         <div className="border rounded-lg p-4">
           <div className="text-2xl font-bold">
-            ${models.reduce((sum: number, model: any) => sum + model.dealSize, 0) / 1000000000}B
+            ${(models.reduce((sum: number, model: any) => sum + model.dealSize, 0) / 1000000000).toFixed(1)}B
           </div>
           <div className="text-sm text-muted-foreground">
             Total Value
@@ -298,7 +374,7 @@ export default function ModelsManagementPage() {
         </div>
         <div className="border rounded-lg p-4">
           <div className="text-2xl font-bold">
-            {models.reduce((sum: number, model: any) => sum + model.views, 0).toLocaleString()}
+            {models.reduce((sum: number, model: any) => sum + (model.views || 0), 0).toLocaleString()}
           </div>
           <div className="text-sm text-muted-foreground">
             Total Views
@@ -313,10 +389,10 @@ export default function ModelsManagementPage() {
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedModels.length === models.length && models.length > 0}
+                  checked={selectedModels.length === filteredModels.length && filteredModels.length > 0}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setSelectedModels(models.map(m => m._id))
+                      setSelectedModels(filteredModels.map(m => m._id))
                     } else {
                       setSelectedModels([])
                     }
@@ -334,14 +410,14 @@ export default function ModelsManagementPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {models.length === 0 ? (
+            {filteredModels.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                  No models found
+                  No models found matching your filters
                 </TableCell>
               </TableRow>
             ) : (
-              models.map((model: any) => (
+              filteredModels.map((model: any) => (
                 <TableRow key={model._id}>
                   <TableCell>
                     <Checkbox
@@ -452,7 +528,7 @@ export default function ModelsManagementPage() {
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Showing {models.length} of {models.length} models
+          Showing {filteredModels.length} of {models.length} models
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" disabled>

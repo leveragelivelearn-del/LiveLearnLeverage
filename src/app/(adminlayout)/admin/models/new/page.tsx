@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
@@ -23,20 +23,13 @@ import { SlidesUpload } from '@/components/admin/SlidesUpload'
 import { 
   Save,
   Eye,
-  Upload,
   X,
   Plus,
   Calendar,
   DollarSign,
-  Building2,
-  TrendingUp
 } from 'lucide-react'
 import { toast } from 'sonner'
-
-const Editor = dynamic(() => import('@/components/admin/Editor'), {
-  ssr: false,
-  loading: () => <div className="h-[400px] bg-secondary/30 rounded-lg animate-pulse" />
-})
+import { SimpleEditor, SimpleEditorRef } from '@/components/tiptap-templates/simple/simple-editor'
 
 const industries = [
   'Technology',
@@ -73,8 +66,26 @@ const currencies = [
   'CNY',
 ]
 
+// --- FIXED: Robust Slugify Function ---
+const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')               // Separate accents from letters
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .trim()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start
+    .replace(/-+$/, '')             // Trim - from end
+}
+
 export default function NewModelPage() {
   const router = useRouter()
+  
+  const editorRef = useRef<SimpleEditorRef>(null)
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [excelFile, setExcelFile] = useState<any>(null)
   const [slides, setSlides] = useState<any[]>([])
@@ -92,7 +103,6 @@ export default function NewModelPage() {
     industry: '',
     dealType: '',
     completionDate: new Date().toISOString().split('T')[0],
-    rationale: '',
     featured: false,
   })
 
@@ -101,7 +111,15 @@ export default function NewModelPage() {
     setIsSubmitting(true)
 
     try {
-      // Process key metrics
+      let rationaleContent = '';
+      if (editorRef.current) {
+        rationaleContent = editorRef.current.getContent();
+      }
+
+      if (!rationaleContent || rationaleContent.trim() === '<p></p>') {
+        throw new Error('Deal Rationale is required');
+      }
+
       const metricsMap: Record<string, string> = {}
       keyMetrics.forEach(metric => {
         if (metric.key.trim() && metric.value.trim()) {
@@ -111,6 +129,9 @@ export default function NewModelPage() {
 
       const modelData = {
         ...formData,
+        // Ensure slug is clean on submit just in case user edited it manually
+        slug: slugify(formData.slug), 
+        rationale: rationaleContent,
         dealSize: parseFloat(formData.dealSize.replace(/,/g, '')),
         slides: slides.map((slide, index) => ({
           imageUrl: slide.url,
@@ -158,13 +179,12 @@ export default function NewModelPage() {
     setKeyMetrics(updatedMetrics)
   }
 
+  // --- FIXED: Updated Title Change Handler ---
   const handleTitleChange = (title: string) => {
     setFormData({
       ...formData,
       title,
-      slug: title.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, ''),
+      slug: slugify(title), // Uses the new robust function
     })
   }
 
@@ -335,11 +355,7 @@ export default function NewModelPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Editor
-                value={formData.rationale}
-                onChange={(rationale) => setFormData({ ...formData, rationale })}
-                placeholder="Explain the strategic rationale, synergies, and key drivers..."
-              />
+              <SimpleEditor ref={editorRef} />
             </CardContent>
           </Card>
 
