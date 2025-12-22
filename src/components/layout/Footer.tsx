@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Facebook, Linkedin, Twitter, Mail, Instagram, MapPin, Phone } from 'lucide-react'
 import dbConnect from '@/lib/db'
 import Settings from '@/models/settings'
+import Logo from '../logo'
 
 async function getSettings() {
   try {
@@ -45,14 +46,12 @@ export async function Footer() {
   ]
 
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold">{settings?.siteName || 'LiveLearnLeverage'}</span>
-            </Link>
+            <Logo/>
             <p className="text-sm text-muted-foreground">
               {settings?.siteDescription || 'Showcasing M&A expertise, financial models, and investment insights.'}
             </p>
@@ -74,7 +73,7 @@ export async function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.href}>
@@ -91,7 +90,7 @@ export async function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact</h3>
+            <h3 className="text-lg text-white font-semibold mb-4">Contact</h3>
             <address className="not-italic space-y-3 text-sm text-muted-foreground">
               {/* Address Section */}
               <div className="flex items-start gap-3">

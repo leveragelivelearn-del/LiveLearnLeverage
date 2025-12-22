@@ -1,0 +1,21 @@
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { TextLoop } from "../../components/motion-primitives/text-loop";
+
+const Logo = () => {
+  return (
+    <Link href="/" className="flex items-center gap-2 group">
+      <Image src="/assets/3.png" alt="Logo" width={40} height={40} />
+ <TextLoop className='text-3xl font-extrabold text-primary'>
+      
+      <span>Live</span>
+      <span>Learn</span>
+      <span>Leverage</span>
+    </TextLoop>
+      
+    </Link>
+  );
+};
+
+export default Logo;

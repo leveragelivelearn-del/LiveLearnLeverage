@@ -28,6 +28,7 @@ import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "next-themes"; // Import useTheme hook
 import { ThemeToggle } from "../theme-toggle";
+import Logo from "../logo";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -81,19 +82,7 @@ export function NavigationBar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         {/* Logo */}
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity" />
-              <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-lg font-bold text-lg">
-                L³
-              </div>
-            </div>
-            <span className="text-xl font-bold hidden md:inline-block">
-              Live<span className="text-blue-500">.</span>Learn
-              <span className="text-purple-500">.</span>Leverage
-            </span>
-            <span className="text-xl font-bold md:hidden">L³</span>
-          </Link>
+          <Logo/>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 ml-6">

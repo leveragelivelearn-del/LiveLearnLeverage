@@ -1,27 +1,83 @@
 'use client';
 
 import { Cpu, ShieldCheck, TrendingUp, Rocket, Target, Zap, ChevronRight, BarChart3, Users, Award, CheckCircle, Sparkles } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
-import { useRef } from 'react';
+
+// --- ADDED: Animated Counter Helper Component ---
+const AnimatedCounter = ({ end, duration = 2000, suffix = "", decimals = 0 }: { end: number, duration?: number, suffix?: string, decimals?: number }) => {
+  const [count, setCount] = useState(0);
+  const countRef = useRef<HTMLSpanElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          setIsVisible(false);
+          setCount(0); // Reset to 0 when scrolling away
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (countRef.current) {
+      observer.observe(countRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let startTime: number | null = null;
+    let animationFrame: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const percentage = Math.min(progress / duration, 1);
+      
+      const easeOut = 1 - Math.pow(2, -10 * percentage);
+      
+      setCount(end * easeOut);
+
+      if (percentage < 1) {
+        animationFrame = requestAnimationFrame(animate);
+      } else {
+        setCount(end);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration, isVisible]);
+
+  return (
+    <span ref={countRef}>
+      {count.toFixed(decimals)}{suffix}
+    </span>
+  );
+};
+// ------------------------------------------------
 
 const ValueProposition = () => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.3 });
-  const [animatedCounts, setAnimatedCounts] = useState({
-    deals: 0,
-    compliance: 0,
-    cells: 0,
-    clients: 0
-  });
 
+  // UPDATED: Data structure to support numeric counting
   const values = [
     {
       icon: <TrendingUp className="w-8 h-8" />,
       title: "Real-World Deal Proven",
       description: "Models derived from actual M&A transactions with audited financials",
-      stats: "50+",
+      statValue: 50, // Changed from string "50+" to number
+      statSuffix: "+",
       statLabel: "closed deals",
       color: "from-blue-500 to-cyan-500",
       gradient: "from-blue-500/20 to-cyan-500/20 dark:from-blue-500/10 dark:to-cyan-500/10",
@@ -32,7 +88,8 @@ const ValueProposition = () => {
       icon: <ShieldCheck className="w-8 h-8" />,
       title: "Regulatory Compliant",
       description: "Built to SEC/FASB standards with full audit trails and version control",
-      stats: "100%",
+      statValue: 100,
+      statSuffix: "%",
       statLabel: "compliance rate",
       color: "from-emerald-500 to-teal-500",
       gradient: "from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/10 dark:to-teal-500/10",
@@ -43,7 +100,8 @@ const ValueProposition = () => {
       icon: <Cpu className="w-8 h-8" />,
       title: "Scalable Architecture",
       description: "Modular design that scales from early-stage startups to Fortune 500",
-      stats: "10M+",
+      statValue: 10,
+      statSuffix: "M+",
       statLabel: "cells modeled",
       color: "from-purple-500 to-pink-500",
       gradient: "from-purple-500/20 to-pink-500/20 dark:from-purple-500/10 dark:to-pink-500/10",
@@ -52,27 +110,13 @@ const ValueProposition = () => {
     }
   ];
 
+  // UPDATED: Data structure to support numeric counting
   const stats = [
-    { icon: <Users />, value: "200+", label: "Enterprise Clients", suffix: "", duration: 2 },
-    { icon: <Award />, value: "99", label: "Satisfaction Rate", suffix: "%", duration: 2 },
-    { icon: <BarChart3 />, value: "1.2K", label: "Deals Analyzed", suffix: "+", duration: 2 },
-    { icon: <Zap />, value: "24", label: "Hour Support", suffix: "/7", duration: 2 }
+    { icon: <Users />, value: 200, suffix: "+", label: "Enterprise Clients", decimals: 0 },
+    { icon: <Award />, value: 99, suffix: "%", label: "Satisfaction Rate", decimals: 0 },
+    { icon: <BarChart3 />, value: 1.2, suffix: "K+", label: "Deals Analyzed", decimals: 1 },
+    { icon: <Zap />, value: 24, suffix: "/7", label: "Hour Support", decimals: 0 }
   ];
-
-  useEffect(() => {
-    if (isInView) {
-      const timer = setTimeout(() => {
-        setAnimatedCounts({
-          deals: 50,
-          compliance: 100,
-          cells: 10,
-          clients: 200
-        });
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isInView]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -276,7 +320,7 @@ const ValueProposition = () => {
                   ))}
                 </div>
 
-                {/* Stats Counter */}
+                {/* Stats Counter (Inside Cards) */}
                 <div className="pt-6 border-t border-border">
                   <div className="flex items-end justify-between">
                     <div>
@@ -290,7 +334,7 @@ const ValueProposition = () => {
                           delay: value.delay 
                         }}
                       >
-                        {value.stats}
+                        <AnimatedCounter end={value.statValue} suffix={value.statSuffix} />
                       </motion.div>
                       <div className="text-sm text-muted-foreground mt-2">{value.statLabel}</div>
                     </div>
@@ -322,7 +366,7 @@ const ValueProposition = () => {
           ))}
         </motion.div>
 
-        {/* Stats Section */}
+        {/* Stats Section (Bottom Bar) */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
@@ -351,8 +395,11 @@ const ValueProposition = () => {
                   <div className="text-primary">{stat.icon}</div>
                 </motion.div>
                 <div className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent mb-2">
-                  {stat.value}
-                  <span className="text-2xl">{stat.suffix}</span>
+                  <AnimatedCounter 
+                    end={stat.value} 
+                    suffix={stat.suffix} 
+                    decimals={stat.decimals}
+                  />
                 </div>
                 <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
               </motion.div>

@@ -9,6 +9,17 @@ export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  // --- Configuration ---
+  const size = 44; // Button width/height
+  const strokeWidth = 3; // Thickness of the ring
+  const center = size / 2; // Center point (22)
+  const radius = (size / 2) - strokeWidth - 2; // Radius adjusted for stroke & padding
+  const circumference = 2 * Math.PI * radius;
+  
+  // Calculate offset based on scroll progress
+  const offset = circumference - (scrollProgress / 100) * circumference;
+  // ---------------------
+
   useEffect(() => {
     const handleScroll = () => {
       // Calculate scroll progress
@@ -27,11 +38,9 @@ export default function ScrollToTop() {
   }, []);
 
   const scrollToTop = () => {
-    // Use Lenis if available
     if (typeof window !== 'undefined' && (window as any).lenis) {
       (window as any).lenis.scrollTo(0, { duration: 1.5 });
     } else {
-      // Fallback to native smooth scroll
       window.scrollTo({
         top: 0,
         behavior: 'smooth',
@@ -39,61 +48,64 @@ export default function ScrollToTop() {
     }
   };
 
-  const radius = 20;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (scrollProgress / 100) * circumference;
-
   return (
     <button
       onClick={scrollToTop}
       className={cn(
-        'fixed bottom-8 right-8 z-50',
+        'fixed bottom-6 right-6 z-50',
         'flex items-center justify-center',
-        'rounded-full bg-gradient-to-br from-primary to-primary/90',
+        'rounded-full bg-primary text-primary-foreground', // Solid background
         'shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30',
         'transition-all duration-300 ease-out',
         'hover:scale-110 active:scale-95',
-        'focus:outline-none focus:ring-3 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background',
-        'backdrop-blur-sm border border-primary/20',
         'group',
         isVisible
           ? 'opacity-100 translate-y-0'
           : 'opacity-0 translate-y-10 pointer-events-none'
       )}
       aria-label="Scroll to top"
-      style={{ width: '56px', height: '56px' }}
+      // Apply the dynamic size here
+      style={{ width: size, height: size }}
     >
-      {/* Progress ring */}
-      <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+      {/* Progress ring SVG */}
+      <svg 
+        className="absolute inset-0 transform -rotate-90 pointer-events-none"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+      >
+        {/* Background Circle (Track) */}
         <circle
-          cx="28"
-          cy="28"
+          cx={center}
+          cy={center}
           r={radius}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth={strokeWidth}
           fill="none"
-          className="text-primary/30"
+          className="opacity-20" // Subtle track
         />
+        
+        {/* Progress Circle (Indicator) */}
         <circle
-          cx="28"
-          cy="28"
+          cx={center}
+          cy={center}
           r={radius}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className="text-primary-foreground transition-all duration-300"
           strokeLinecap="round"
+          className="transition-all duration-200 ease-linear"
         />
       </svg>
       
       {/* Arrow icon */}
-      <ArrowUp className="h-6 w-6 text-primary-foreground relative z-10 group-hover:translate-y-[-2px] transition-transform" />
+      <ArrowUp className="h-5 w-5 relative z-10" />
       
       {/* Tooltip */}
-      <div className="absolute bottom-full mb-2 right-0 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-        Scroll to top ({Math.round(scrollProgress)}%)
+      <div className="absolute bottom-full mb-3 right-0 bg-popover text-popover-foreground text-xs py-1.5 px-3 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-border">
+        {Math.round(scrollProgress)}%
       </div>
     </button>
   );

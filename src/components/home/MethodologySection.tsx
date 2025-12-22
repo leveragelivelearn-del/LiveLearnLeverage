@@ -4,6 +4,7 @@ import { AlertTriangle, Calculator, FileCheck, Puzzle, Search, ArrowRight, Spark
 import React, { useEffect } from 'react';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import ElectricBorder from '../ElectricBorder';
 
 const MethodologySection = () => {
   useEffect(() => {
@@ -121,44 +122,53 @@ const MethodologySection = () => {
                   data-aos-delay={delay}
                 >
                   {/* Step Card */}
+                  {/* Corrected: The structural div comes FIRST, ElectricBorder wraps the inner card */}
                   <div className={`lg:w-5/12 ${isEven ? 'lg:pr-12' : 'lg:pl-12'}`}>
-                    <div 
-                      className={`group relative overflow-hidden rounded-2xl border border-border bg-card p-8 shadow-lg shadow-black/5 dark:shadow-white/5 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 dark:hover:shadow-primary/20 hover:-translate-y-1 hover:border-primary/30 ${step.gradient}`}
+                    <ElectricBorder
+                      color="#7df9ff"
+                      speed={1}
+                      chaos={0.5}
+                      thickness={2}
+                      style={{ borderRadius: 16 }}
                     >
-                      {/* Animated Background Gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 dark:via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                      
-                      {/* Step Number Badge */}
-                      <div className="absolute -top-3 -left-3">
-                        <div className="relative">
-                          <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${step.gradient} border border-border backdrop-blur-sm flex items-center justify-center shadow-lg`}>
-                            <span className={`text-lg font-bold ${step.color}`}>{step.number}</span>
+                      <div 
+                        className={`group relative overflow-hidden rounded-2xl  p-8 shadow-lg shadow-black/5 dark:shadow-white/5 transition-all duration-500 hover:shadow-xl hover:shadow-primary/10 dark:hover:shadow-primary/20 hover:-translate-y-1 hover:border-primary/30 ${step.gradient}`}
+                      >
+                        {/* Animated Background Gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 dark:via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                        
+                        {/* Step Number Badge */}
+                        <div className="absolute -top-3 -left-3">
+                          <div className="relative">
+                            <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${step.gradient} border border-border backdrop-blur-sm flex items-center justify-center shadow-lg`}>
+                              <span className={`text-lg font-bold ${step.color}`}>{step.number}</span>
+                            </div>
+                            <div className="absolute inset-0 rounded-xl border-2 border-primary/20 animate-pulse" />
                           </div>
-                          <div className="absolute inset-0 rounded-xl border-2 border-primary/20 animate-pulse" />
                         </div>
-                      </div>
-                      
-                      {/* Icon */}
-                      <div className="mb-6 flex justify-end">
-                        <div className={`p-4 rounded-xl bg-gradient-to-br ${step.gradient} border border-border shadow-inner ${step.color}`}>
-                          {step.icon}
+                        
+                        {/* Icon */}
+                        <div className="mb-6 flex justify-end">
+                          <div className={`p-4 rounded-xl bg-gradient-to-br ${step.gradient} border border-border shadow-inner ${step.color}`}>
+                            {step.icon}
+                          </div>
                         </div>
+                        
+                        {/* Content */}
+                        <div className="relative space-y-4">
+                          <h3 className="text-2xl font-bold tracking-tight group-hover:text-primary transition-colors duration-300">
+                            {step.title}
+                            <ArrowRight className="w-5 h-5 ml-2 inline opacity-0 group-hover:opacity-100 translate-x-0 group-hover:translate-x-2 transition-all duration-300" />
+                          </h3>
+                          <p className="text-muted-foreground leading-relaxed text-lg">
+                            {step.description}
+                          </p>
+                        </div>
+                        
+                        {/* Bottom Border Animation */}
+                        <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary via-primary/50 to-transparent group-hover:w-full transition-all duration-500" />
                       </div>
-                      
-                      {/* Content */}
-                      <div className="relative space-y-4">
-                        <h3 className="text-2xl font-bold tracking-tight group-hover:text-primary transition-colors duration-300">
-                          {step.title}
-                          <ArrowRight className="w-5 h-5 ml-2 inline opacity-0 group-hover:opacity-100 translate-x-0 group-hover:translate-x-2 transition-all duration-300" />
-                        </h3>
-                        <p className="text-muted-foreground leading-relaxed text-lg">
-                          {step.description}
-                        </p>
-                      </div>
-                      
-                      {/* Bottom Border Animation */}
-                      <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary via-primary/50 to-transparent group-hover:w-full transition-all duration-500" />
-                    </div>
+                    </ElectricBorder>
                   </div>
                   
                   {/* Center Connector (Desktop) */}
@@ -218,27 +228,7 @@ const MethodologySection = () => {
             </button>
           </div>
           
-          {/* Stats */}
-          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
-            {[
-              { label: "Models Built", value: "200+" },
-              { label: "Accuracy Rate", value: "98.5%" },
-              { label: "Deals Analyzed", value: "1.2K+" },
-              { label: "Client Satisfaction", value: "99%" }
-            ].map((stat, i) => (
-              <div 
-                key={i} 
-                className="text-center p-4 rounded-xl bg-card/50 border border-border backdrop-blur-sm"
-                data-aos="fade-up"
-                data-aos-delay={700 + i * 100}
-              >
-                <div className="text-3xl font-bold bg-gradient-to-r from-primary to-chart-3 bg-clip-text text-transparent">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-muted-foreground mt-2">{stat.label}</div>
-              </div>
-            ))}
-          </div>
+      
         </div>
       </div>
 
