@@ -5,11 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetTrigger 
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,10 +21,13 @@ import {
   LayoutDashboard,
   LogOut,
   Settings,
-  ChevronDown
+  Sun, // Added Sun Icon
+  Moon, // Added Moon Icon
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTheme } from "next-themes"; // Import useTheme hook
+import { ThemeToggle } from "../theme-toggle";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -43,6 +42,7 @@ export function NavigationBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { theme, setTheme } = useTheme(); // Theme Hook
 
   // Handle scroll effect for navbar background
   useEffect(() => {
@@ -70,11 +70,11 @@ export function NavigationBar() {
   };
 
   return (
-    <header 
+    <header
       className={cn(
         "sticky top-0 z-50 w-full transition-all duration-300",
-        isScrolled 
-          ? "bg-background/95 backdrop-blur-md border-b shadow-sm" 
+        isScrolled
+          ? "bg-background/95 backdrop-blur-md border-b shadow-sm"
           : "bg-background/80 backdrop-blur-sm border-b"
       )}
     >
@@ -89,11 +89,10 @@ export function NavigationBar() {
               </div>
             </div>
             <span className="text-xl font-bold hidden md:inline-block">
-              Live<span className="text-blue-500">.</span>Learn<span className="text-purple-500">.</span>Leverage
+              Live<span className="text-blue-500">.</span>Learn
+              <span className="text-purple-500">.</span>Leverage
             </span>
-            <span className="text-xl font-bold md:hidden">
-              L³
-            </span>
+            <span className="text-xl font-bold md:hidden">L³</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -103,7 +102,7 @@ export function NavigationBar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-sm font-medium relative px-3 py-2 rounded-lg transition-all duration-200 hover:bg-accent/50",
+                  "text-sm font-medium relative px-3 py-2 rounded-lg transition-all duration-200 ",
                   pathname === item.href
                     ? "text-primary font-semibold after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-primary after:rounded-full"
                     : "text-muted-foreground hover:text-primary"
@@ -115,8 +114,13 @@ export function NavigationBar() {
           </nav>
         </div>
 
-        {/* Right side - Auth & User Menu */}
+        {/* Right side - Auth, Theme & User Menu */}
         <div className="flex items-center gap-3">
+          {/* THEME TOGGLE (Desktop) */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
+
           {status === "loading" ? (
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
@@ -130,15 +134,14 @@ export function NavigationBar() {
               {/* Desktop User Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {/* FIXED: Added focus-visible:ring-0 focus-visible:ring-offset-0 */}
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     className="hidden md:flex items-center rounded-full hover:bg-accent/50 transition-all focus-visible:ring-0 focus-visible:ring-offset-0"
                   >
                     <div className="relative">
                       <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
-                        <AvatarImage 
-                          src={session.user?.image || ""} 
+                        <AvatarImage
+                          src={session.user?.image || ""}
                           alt={session.user?.name || "User"}
                         />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
@@ -153,8 +156,8 @@ export function NavigationBar() {
                   <DropdownMenuLabel className="flex flex-col">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage 
-                          src={session.user?.image || ""} 
+                        <AvatarImage
+                          src={session.user?.image || ""}
                           alt={session.user?.name || "User"}
                         />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
@@ -172,7 +175,8 @@ export function NavigationBar() {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {(session.user?.role === "admin" || session.user?.role === "editor") && (
+                  {(session.user?.role === "admin" ||
+                    session.user?.role === "editor") && (
                     <>
                       <DropdownMenuItem asChild>
                         <Link href="/admin" className="cursor-pointer">
@@ -189,9 +193,9 @@ export function NavigationBar() {
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  
+
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleSignOut}
                     className="cursor-pointer text-red-600 focus:text-red-600"
                   >
@@ -205,15 +209,14 @@ export function NavigationBar() {
               <div className="md:hidden">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    {/* FIXED: Added focus-visible:ring-0 focus-visible:ring-offset-0 */}
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
                     >
                       <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src={session.user?.image || ""} 
+                        <AvatarImage
+                          src={session.user?.image || ""}
                           alt={session.user?.name || "User"}
                         />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
@@ -225,8 +228,12 @@ export function NavigationBar() {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>
                       <div className="flex flex-col">
-                        <span className="font-semibold">{session.user?.name}</span>
-                        <span className="text-xs text-muted-foreground">{session.user?.email}</span>
+                        <span className="font-semibold">
+                          {session.user?.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {session.user?.email}
+                        </span>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -237,7 +244,7 @@ export function NavigationBar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={handleSignOut}
                       className="cursor-pointer text-red-600"
                     >
@@ -277,7 +284,11 @@ export function NavigationBar() {
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
-                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {isOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
@@ -287,8 +298,8 @@ export function NavigationBar() {
                   <div className="flex items-center gap-3">
                     {session ? (
                       <Avatar className="h-10 w-10">
-                        <AvatarImage 
-                          src={session.user?.image || ""} 
+                        <AvatarImage
+                          src={session.user?.image || ""}
                           alt={session.user?.name || "User"}
                         />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
@@ -335,7 +346,12 @@ export function NavigationBar() {
                       {item.name}
                     </Link>
                   ))}
-                  
+
+                  {/* THEME TOGGLE (Mobile) */}
+                  <div className="border-t my-3 pt-3">
+                    <ThemeToggle />
+                  </div>
+
                   {session && (
                     <>
                       <div className="border-t my-3" />
@@ -347,7 +363,7 @@ export function NavigationBar() {
                         <LayoutDashboard className="mr-3 h-4 w-4" />
                         Dashboard
                       </Link>
-                     
+
                       <button
                         onClick={() => {
                           handleSignOut();

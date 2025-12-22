@@ -5,6 +5,9 @@ import "./globals.css"; // Ensure you have your global css imported here
 // Your Custom Components
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import LenisProvider from "@/components/providers/LenisProvider";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 
 // Initialize the font (This defines 'inter' which you were missing)
 const inter = Inter({ subsets: ["latin"] });
@@ -86,14 +89,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <SessionProvider>
-          <div>
-            {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SessionProvider>
+            <LenisProvider>
+              {children}
+              <ScrollToTop />
+            </LenisProvider>
             <Toaster />
-          </div>
-        </SessionProvider>
+          </SessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

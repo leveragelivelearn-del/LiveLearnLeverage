@@ -1,15 +1,41 @@
 import Link from 'next/link'
-import { Facebook, Linkedin, Twitter, Mail } from 'lucide-react'
+import { Facebook, Linkedin, Twitter, Mail, Instagram, MapPin, Phone } from 'lucide-react'
+import dbConnect from '@/lib/db'
+import Settings from '@/models/settings'
 
-export function Footer() {
+async function getSettings() {
+  try {
+    await dbConnect()
+    const settings = await Settings.findOne().lean()
+    return settings || {}
+  } catch (error) {
+    console.error('Failed to load footer settings', error)
+    return {}
+  }
+}
+
+export async function Footer() {
+  const settings = await getSettings()
   const currentYear = new Date().getFullYear()
   
-  const socialLinks = [
-    { icon: Linkedin, href: 'https://www.linkedin.com/in/gamaelle-charles-liv3theg00dlif3/', label: 'LinkedIn' },
-    { icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-    { icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-    { icon: Mail, href: 'mailto:gamaellechar123@gmail.com', label: 'Email' },
-  ]
+  const socialLinks = []
+  
+  if (settings?.socialLinks?.linkedin) {
+    socialLinks.push({ icon: Linkedin, href: settings.socialLinks.linkedin, label: 'LinkedIn' })
+  }
+  if (settings?.socialLinks?.twitter) {
+    socialLinks.push({ icon: Twitter, href: settings.socialLinks.twitter, label: 'Twitter' })
+  }
+  if (settings?.socialLinks?.facebook) {
+    socialLinks.push({ icon: Facebook, href: settings.socialLinks.facebook, label: 'Facebook' })
+  }
+  if (settings?.socialLinks?.instagram) {
+    socialLinks.push({ icon: Instagram, href: settings.socialLinks.instagram, label: 'Instagram' })
+  }
+  // Optional: Add email to social row if desired, or keep just in contact section below
+  if (settings?.contactEmail) {
+    socialLinks.push({ icon: Mail, href: `mailto:${settings.contactEmail}`, label: 'Email' })
+  }
 
   const quickLinks = [
     { name: 'About', href: '/about' },
@@ -25,10 +51,10 @@ export function Footer() {
           {/* Brand Section */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <span className="text-xl font-bold">LiveLearnLeverage</span>
+              <span className="text-xl font-bold">{settings?.siteName || 'LiveLearnLeverage'}</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Showcasing M&A expertise, financial models, and investment insights.
+              {settings?.siteDescription || 'Showcasing M&A expertise, financial models, and investment insights.'}
             </p>
             <div className="flex items-center gap-4">
               {socialLinks.map((link) => (
@@ -66,23 +92,47 @@ export function Footer() {
           {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
-            <address className="not-italic text-sm text-muted-foreground space-y-2">
-              <p>123 Financial District</p>
-              <p>New York, NY 10005</p>
-              <p>United States</p>
-              <a
-                href="mailto:contact@livelearnleverage.com"
-                className="block hover:text-primary transition-colors"
-              >
-                  
-              </a>
+            <address className="not-italic space-y-3 text-sm text-muted-foreground">
+              {/* Address Section */}
+              <div className="flex items-start gap-3">
+                <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                {settings?.contactAddress ? (
+                  <span className="whitespace-pre-line">{settings.contactAddress}</span>
+                ) : (
+                  <div>
+                    <p>123 Financial District</p>
+                    <p>New York, NY 10005</p>
+                    <p>United States</p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Phone Section */}
+              {settings?.contactPhone && (
+                 <div className="flex items-center gap-3">
+                   <Phone className="h-4 w-4 shrink-0" />
+                   <a href={`tel:${settings.contactPhone}`} className="hover:text-primary transition-colors">
+                     {settings.contactPhone}
+                   </a>
+                 </div>
+              )}
+
+              {/* Email Section */}
+              {settings?.contactEmail && (
+                <div className="flex items-center gap-3">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <a href={`mailto:${settings.contactEmail}`} className="hover:text-primary transition-colors">
+                    {settings.contactEmail}
+                  </a>
+                </div>
+              )}
             </address>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© {currentYear} LiveLearnLeverage. All rights reserved.</p>
-                  </div>
+          <p>© {currentYear} {settings?.siteName || 'LiveLearnLeverage'}. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   )
