@@ -1,6 +1,5 @@
-
 import React from 'react';
-
+import Image from 'next/image';
 
 const WhoWeAre: React.FC = () => {
   return (
@@ -63,7 +62,7 @@ const WhoWeAre: React.FC = () => {
                   </div>
                   
                   {/* Vertical Divider */}
-                  <div className="hidden sm:block h-12 w-[1px] bg-muted-foreground"></div>
+                  <div className="hidden sm:block h-12 w-px bg-muted-foreground"></div>
                   
                   <div className="flex flex-col">
                     <span className="text-4xl md:text-5xl font-bold text-primary mb-1">
@@ -80,14 +79,16 @@ const WhoWeAre: React.FC = () => {
 
           {/* Right: Featured Image */}
           <div className="w-full lg:w-2/3 mt-12 lg:mt-0">
-            <div className="relative aspect-[4/3] lg:aspect-square overflow-hidden rounded-sm shadow-2xl">
-              <img 
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=1200" 
+            <div className="relative aspect-4/3 lg:aspect-square overflow-hidden rounded-sm shadow-2xl">
+              <Image 
+                src="/assets/whowerree.png" 
                 alt="Business Consultant Professional" 
-                className="w-full h-full object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
+                fill
+                className="object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
+                sizes="(max-width: 1024px) 100vw, 66vw"
               />
               {/* Decorative background element for mobile/tablet */}
-              <div className="absolute inset-0 bg-blue-900/5 lg:hidden"></div>
+              <div className="absolute inset-0 bg-blue-900/5 lg:hidden pointer-events-none"></div>
             </div>
           </div>
 
