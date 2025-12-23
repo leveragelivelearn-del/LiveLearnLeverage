@@ -64,8 +64,8 @@ const itemVariants = {
 
 const IndustryExpertise = () => {
   return (
-    <section className="py-24 bg-background overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="bg-background overflow-hidden">
+      <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           {/* Left Content */}
           <div className="lg:w-2/5 space-y-8">

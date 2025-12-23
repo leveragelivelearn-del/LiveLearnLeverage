@@ -10,7 +10,7 @@ const Logo = () => {
  <TextLoop className='text-3xl font-extrabold text-primary'>
       
       <span>Live</span>
-      <span>Learn</span>
+      <span className="text-[#e23645]">Learn</span>
       <span>Leverage</span>
     </TextLoop>
       

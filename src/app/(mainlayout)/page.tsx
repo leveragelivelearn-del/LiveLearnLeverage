@@ -1,15 +1,17 @@
-import HomeHeroSection from "@/components/home/hero";
+import HomeHeroSection from "@/components/home/hero/hero";
 import FeaturedModelSection from "@/components/home/FeaturedModelSection";
 import FeaturedBlogSection from "@/components/home/FeaturedBlogSection";
-import ValueProposition from "@/components/home/ValueProposition";
 import IndustryExpertise from "@/components/home/IndustryExpertise";
-import MethodologySection from "@/components/home/MethodologySection";
-import TestimonialsSection from "@/components/home/TestimonialsSection";
+import TestimonialsSection from "@/components/home/testimonials/TestimonialsSection";
 import FAQSection from "@/components/home/FAQSection";
+import WhoWeAare from "@/components/home/whoweare";
+import OurServices from "@/components/home/OurServices/OurServices";
+import InvestOurCompany from "@/components/home/InvestOurCompany/InvestOurCompany";
+import CaseStudies from "@/components/home/CaseStudies/CaseStudies";
 
 export default async function HomePage() {
   return (
-    <>
+    <div className="space-y-16 lg:space-y-24">
       {/* Hero Section */}
 
       <HomeHeroSection />
@@ -19,12 +21,14 @@ export default async function HomePage() {
       {/* Featured Blog Posts */}
 
       <FeaturedBlogSection />
-      <MethodologySection/>
-      <ValueProposition/>
+      <WhoWeAare/>
+      <OurServices/>
+      <CaseStudies/>
+      <InvestOurCompany/>
       <IndustryExpertise/>
       <TestimonialsSection/>
       <FAQSection/>
       {/* CTA Section */}
-    </>
+    </div>
   );
 }

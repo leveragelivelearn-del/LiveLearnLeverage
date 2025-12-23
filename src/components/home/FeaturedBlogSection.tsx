@@ -27,7 +27,7 @@ async function getFeaturedContent() {
 const FeaturedBlogSection = async() => {
     const { blogs } = await getFeaturedContent();
     return (
-       <section className="py-16 bg-secondary/30">
+       <section className="bg-background overflow-hidden">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
             <div>
