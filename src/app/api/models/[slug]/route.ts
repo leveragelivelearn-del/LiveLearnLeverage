@@ -2,17 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Model from '@/models/Model'
 
-interface Params {
-  params: {
-    id: string
-  }
-}
-
-export async function GET(request: NextRequest, { params }: Params) {
+export async function GET(
+  request: NextRequest,
+  // The second argument is the context, where params is a Promise
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
     await dbConnect()
     
-    const model = await Model.findOne({ slug: params.id }).lean()
+    // 1. Await the params Promise to extract the slug
+    const { slug } = await params;
+    
+    // 2. Use the unwrapped 'slug' variable
+    const model = await Model.findOne({ 
+      slug: { $regex: new RegExp(`^${slug}$`, "i") } 
+    }).lean()
     
     if (!model) {
       return NextResponse.json(

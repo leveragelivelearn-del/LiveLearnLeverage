@@ -1,35 +1,45 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Metadata } from 'next'
-import { ModelGrid } from '@/components/models/ModelGrid'
-import { FilterBar } from '@/components/models/FilterBar'
-import dbConnect from '@/lib/db'
-import Model from '@/models/Model'
+import { Metadata } from 'next';
+import ModelsContent from './ModelsContent';
+import dbConnect from '@/lib/db';
+import Model from '@/models/Model';
+
+// --- ISR CONFIGURATION ---
+// Revalidate this page every 5 minutes (300 seconds)
+export const revalidate = 300; 
 
 export const metadata: Metadata = {
   title: 'M&A Models & Deal Analysis | LiveLearnLeverage',
   description: 'Explore detailed M&A financial models, deal analyses, and transaction insights across various industries.',
-}
+};
 
-async function getModelsAndFilters() {
-  await dbConnect()
-  
-  // Get all models for initial display
+// DIRECT DATABASE FETCH (Prevents "Fetch Loop" Deadlock)
+async function getModelsAndIndustries() {
+  await dbConnect();
+
+  // 1. Fetch Models (Directly from DB, no API call)
   const models = await Model.find({})
     .sort({ completionDate: -1 })
-    .select('title slug description dealSize currency industry dealType completionDate views featured')
-    .lean()
-  
-  // Get unique industries for filter dropdown
-  const industries = await Model.distinct('industry')
-  
+    .limit(12) // Initial limit
+    .select('title slug description dealSize currency industry dealType completionDate views featured slides keyMetrics')
+    .lean();
+
+  // 2. Fetch Industries
+  const industries = await Model.distinct('industry');
+
+  // 3. Serialize data (Crucial: Convert ObjectIds and Dates to strings)
   return {
     models: JSON.parse(JSON.stringify(models)),
     industries: JSON.parse(JSON.stringify(industries)),
-  }
+  };
 }
 
 export default async function ModelsPage() {
-  const { models, industries } = await getModelsAndFilters()
+  const { models, industries } = await getModelsAndIndustries();
+
+  // Calculate stats
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const totalValue = models.reduce((sum: number, model: any) => sum + (Number(model.dealSize) || 0), 0);
+  const formattedValue = Math.round(totalValue / 1000000000);
 
   return (
     <div className="min-h-screen">
@@ -42,13 +52,12 @@ export default async function ModelsPage() {
             </h1>
             <p className="text-xl text-muted-foreground">
               Explore detailed financial models and comprehensive analysis of M&A transactions across various industries.
-              Each model includes deal rationale, key metrics, and downloadable resources.
             </p>
             <div className="pt-4">
               <p className="text-sm text-muted-foreground">
                 <span className="font-semibold">{models.length}</span> deals analyzed
                 <span className="mx-2">•</span>
-                <span className="font-semibold">${models.reduce((sum: number, model: any) => sum + model.dealSize, 0) / 1000000000}B+</span> total transaction value
+                <span className="font-semibold">${formattedValue}B+</span> total transaction value
               </p>
             </div>
           </div>
@@ -58,18 +67,8 @@ export default async function ModelsPage() {
       {/* Main Content */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="space-y-8">
-            {/* Filter Bar */}
-            <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4">
-              <FilterBar 
-                onFilterChange={() => {}} // This will be handled client-side
-                industries={industries}
-              />
-            </div>
-
-            {/* Models Grid */}
-            <ModelGrid initialModels={models} />
-          </div>
+          {/* Pass the server-fetched data to the client component */}
+          <ModelsContent initialModels={models} industries={industries} />
         </div>
       </section>
 
@@ -81,33 +80,25 @@ export default async function ModelsPage() {
               <div className="text-3xl font-bold text-primary mb-2">
                 {models.length}
               </div>
-              <div className="text-sm text-muted-foreground">
-                Deals Analyzed
-              </div>
+              <div className="text-sm text-muted-foreground">Deals Analyzed</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary mb-2">
                 {industries.length}
               </div>
-              <div className="text-sm text-muted-foreground">
-                Industries Covered
-              </div>
+              <div className="text-sm text-muted-foreground">Industries Covered</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary mb-2">
-                ${Math.round(models.reduce((sum: number, model: any) => sum + model.dealSize, 0) / 1000000000)}B+
+                ${formattedValue}B+
               </div>
-              <div className="text-sm text-muted-foreground">
-                Total Transaction Value
-              </div>
+              <div className="text-sm text-muted-foreground">Total Value</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-primary mb-2">
                 2014-{new Date().getFullYear()}
               </div>
-              <div className="text-sm text-muted-foreground">
-                Years of Coverage
-              </div>
+              <div className="text-sm text-muted-foreground">Years of Coverage</div>
             </div>
           </div>
         </div>
@@ -117,16 +108,14 @@ export default async function ModelsPage() {
       <section className="py-12">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold">
-              Looking for Custom M&A Analysis?
-            </h2>
+            <h2 className="text-3xl font-bold">Looking for Custom M&A Analysis?</h2>
             <p className="text-muted-foreground">
               Need help with financial modeling, due diligence, or deal structuring for your specific transaction?
             </p>
             <div className="pt-4">
               <a
                 href="mailto:contact@livelearnleverage.com"
-                className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
               >
                 Contact for Custom Analysis
               </a>
@@ -135,5 +124,5 @@ export default async function ModelsPage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

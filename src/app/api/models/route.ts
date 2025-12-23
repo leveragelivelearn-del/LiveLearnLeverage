@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Model from '@/models/Model'
 
+// 1. Force Dynamic to prevent caching "All" results
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect()
@@ -10,6 +13,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
+    
+    // Get raw params
     const industry = searchParams.get('industry')
     const dealType = searchParams.get('dealType')
     const search = searchParams.get('search')
@@ -17,61 +22,75 @@ export async function GET(request: NextRequest) {
     const maxSize = parseFloat(searchParams.get('maxSize') || '1000000000')
     const sortBy = searchParams.get('sortBy') || 'newest'
     
-    // Build query
+    console.log("API Filter Params Received:", { industry, dealType, search });
+
+    // 2. Build Query - Logic matching Admin Page
     const query: any = {}
     
-    if (industry && industry !== 'all') {
-      query.industry = industry
+    // REMOVED: query.status = 'published' - Now showing all models
+    
+    // Industry Filter: Ignore 'all', 'All', 'All Industries', etc.
+    if (industry && industry.trim() !== '' && 
+        !['all', 'all industries', 'any'].includes(industry.toLowerCase())) {
+      query.industry = industry;
     }
     
-    if (dealType && dealType !== 'all') {
-      query.dealType = dealType
+    // Deal Type Filter
+    if (dealType && dealType.trim() !== '' &&
+        !['all', 'all types', 'any'].includes(dealType.toLowerCase())) {
+      query.dealType = dealType;
     }
     
-    if (search) {
+    // Search Filter (Title OR Description OR Industry)
+    if (search && search.trim() !== '') {
+      const searchRegex = { $regex: search.trim(), $options: 'i' };
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { industry: { $regex: search, $options: 'i' } },
+        { title: searchRegex },
+        { description: searchRegex },
+        { industry: searchRegex },
+        { dealType: searchRegex }
       ]
     }
     
+    // Size Filter
     if (minSize > 0 || maxSize < 1000000000) {
       query.dealSize = { $gte: minSize, $lte: maxSize }
     }
     
-    // Build sort
+    console.log("Mongo Query Object:", JSON.stringify(query, null, 2));
+
+    // 3. Sorting
     let sort: any = {}
     switch (sortBy) {
-      case 'newest':
-        sort = { completionDate: -1 }
-        break
-      case 'oldest':
-        sort = { completionDate: 1 }
-        break
-      case 'size-high':
-        sort = { dealSize: -1 }
-        break
-      case 'size-low':
-        sort = { dealSize: 1 }
-        break
-      default:
-        sort = { completionDate: -1 }
+      case 'newest': sort = { completionDate: -1 }; break
+      case 'oldest': sort = { completionDate: 1 }; break
+      case 'size-high': sort = { dealSize: -1 }; break
+      case 'size-low': sort = { dealSize: 1 }; break
+      default: sort = { completionDate: -1 }
     }
     
-    // Get total count for pagination
+    // 4. Get all unique industries from ALL models (not just published)
+    const industries = await Model.distinct('industry')
+    
+    // 5. Get total count and models
     const total = await Model.countDocuments(query)
     
-    // Get paginated results
+    // Get ALL fields for all models (including draft)
     const models = await Model.find(query)
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit)
-      // FIXED: Removed .select() so all fields (rationale, keyMetrics, etc.) are returned
-      .lean()
+    
+    console.log("Models found:", models.length)
+    console.log("Industries found:", industries.length)
+    // Log model statuses for debugging
+    if (models.length > 0) {
+      console.log("Model statuses:", models.map(m => ({ title: m.title, status: m.status })))
+    }
     
     return NextResponse.json({
       models,
+      industries,
       pagination: {
         page,
         limit,
@@ -80,7 +99,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error fetching models:', error)
+    console.error('Error fetching models API:', error)
     return NextResponse.json(
       { error: 'Failed to fetch models' },
       { status: 500 }
