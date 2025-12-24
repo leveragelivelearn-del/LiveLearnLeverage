@@ -2,7 +2,7 @@
 import React from "react";
 import { Button } from "../ui/button";
 import { ArrowRight, TrendingUp, Activity } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 const industries = [
   {
@@ -43,7 +43,8 @@ const industries = [
   },
 ];
 
-const containerVariants = {
+// FIX: Explicitly type the variants
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -53,7 +54,8 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+// FIX: Explicitly type the variants
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
