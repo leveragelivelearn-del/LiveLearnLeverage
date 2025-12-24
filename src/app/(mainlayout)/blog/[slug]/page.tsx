@@ -33,9 +33,11 @@ interface BlogDetailPageProps {
 export async function generateMetadata(props: BlogDetailPageProps): Promise<Metadata> {
   const params = await props.params;
   await dbConnect()
+  
+  // FIX: Added <any> to lean() to tell TypeScript the author field is populated
   const blog = await Blog.findOne({ slug: params.slug })
     .populate('author', 'name')
-    .lean()
+    .lean<any>()
 
   if (!blog) {
     return {
@@ -51,7 +53,7 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
       description: blog.seoDescription || blog.excerpt,
       type: 'article',
       publishedTime: blog.publishedAt ? new Date(blog.publishedAt).toISOString() : undefined,
-      authors: [blog.author.name],
+      authors: [blog.author.name], // This line caused the error, now fixed by <any>
       tags: blog.tags,
     },
     twitter: {
@@ -66,9 +68,10 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
 async function getBlogPostAndRelated(slug: string) {
   await dbConnect()
   
+  // FIX: Added <any> to lean() here as well for consistency
   const blog = await Blog.findOne({ slug })
     .populate('author', 'name image bio')
-    .lean()
+    .lean<any>()
   
   if (!blog || !blog.published) {
     return null
@@ -106,7 +109,7 @@ async function getBlogPostAndRelated(slug: string) {
   .limit(3)
   .populate('author', 'name image')
   .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
-  .lean()
+  .lean<any>() // Also treating related posts as any to handle populated author safely
   
   return {
     blog: JSON.parse(JSON.stringify(blog)),
