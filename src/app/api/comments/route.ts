@@ -44,7 +44,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const identifier = request.ip ?? '127.0.0.1'
+    // FIXED: Use headers to get IP address to avoid TypeScript error
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    // Extract the first IP if there are multiple (x-forwarded-for can be a comma-separated list)
+    const identifier = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+    
     const isRateLimited = await limiter.check(identifier, 3) // 3 comments per minute
     
     if (isRateLimited) {

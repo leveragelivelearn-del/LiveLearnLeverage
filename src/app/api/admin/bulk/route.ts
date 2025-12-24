@@ -28,7 +28,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let ModelClass
+    // FIX: Explicitly type as 'any' to avoid TypeScript union errors with Mongoose Query filters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let ModelClass: any
     switch (modelType) {
       case 'blog':
         ModelClass = Blog
