@@ -81,7 +81,11 @@ export default function ModelsManagementPage() {
     setIsLoading(true);
     try {
       const data = await getModels();
-      setModels(data);
+      // Sort models by createdAt in descending order (latest first)
+      const sortedData = data.sort((a: any, b: any) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+      setModels(sortedData);
     } catch (error) {
       console.error("Failed to fetch models:", error);
       toast.error("Failed to load models");
