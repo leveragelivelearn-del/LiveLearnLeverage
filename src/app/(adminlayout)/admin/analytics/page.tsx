@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -7,9 +8,7 @@ import {
   Eye, 
   TrendingUp, 
   TrendingDown,
-  Calendar,
   Download,
-  Filter
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,8 +22,6 @@ import {
 import { 
   LineChart, 
   Line, 
-  BarChart, 
-  Bar, 
   PieChart, 
   Pie, 
   Cell,
@@ -292,7 +289,10 @@ export default function AnalyticsPage() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    // FIXED: Use 'any' type to bypass strict Recharts typing issues
+                    label={(props: any) => 
+                      `${props.name}: ${((props.percent || 0) * 100).toFixed(0)}%`
+                    }
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -301,7 +301,8 @@ export default function AnalyticsPage() {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => [`${value}%`, 'Traffic']} />
+                  {/* FIXED: Use 'any' type for value to handle number | string | undefined */}
+                  <Tooltip formatter={(value: any) => [`${value}%`, 'Traffic']} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
