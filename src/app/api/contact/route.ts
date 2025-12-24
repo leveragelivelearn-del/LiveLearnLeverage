@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { rateLimit } from '@/lib/rate-limit'
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // Rate limiting configuration
 const limiter = rateLimit({
   interval: 60 * 1000, // 1 minute
@@ -13,8 +10,20 @@ const limiter = rateLimit({
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Check for API Key first
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      console.error('RESEND_API_KEY is missing in environment variables')
+      return NextResponse.json(
+        { error: 'Server configuration error: Email service not enabled' },
+        { status: 500 }
+      )
+    }
+
+    // 2. Initialize Resend INSIDE the handler
+    const resend = new Resend(apiKey)
+
     // Rate limiting check
-    // FIX: Get IP from headers instead of request.ip
     const forwardedFor = request.headers.get('x-forwarded-for')
     const identifier = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
     
@@ -44,7 +53,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check for spam keywords (basic protection)
+    // Check for spam keywords
     const spamKeywords = [
       'viagra', 'cialis', 'casino', 'loan', 'debt', 'investment', 'opportunity',
       'make money', 'work from home', 'buy now', 'click here', 'discount',
@@ -53,7 +62,6 @@ export async function POST(request: NextRequest) {
     
     const messageLower = message.toLowerCase()
     if (spamKeywords.some(keyword => messageLower.includes(keyword))) {
-      // Log but still send (for review)
       console.log('Potential spam detected:', { email, subject })
     }
 
@@ -61,7 +69,6 @@ export async function POST(request: NextRequest) {
     const { error } = await resend.emails.send({
       from: 'LiveLearnLeverage <contact@livelearnleverage.com>',
       to: [process.env.ADMIN_EMAIL || 'admin@livelearnleverage.com'],
-      // FIX: Changed 'reply_to' to 'replyTo' to match TypeScript definition
       replyTo: email,
       subject: `Contact Form: ${subject || 'New Message'}`,
       text: `
