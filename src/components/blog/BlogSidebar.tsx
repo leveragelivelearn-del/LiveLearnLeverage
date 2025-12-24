@@ -140,16 +140,18 @@ export function BlogSidebar({
           <CardContent>
             <div className="flex flex-wrap gap-2">
               {tags.slice(0, 15).map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                  asChild
+                /* FIX: Wrapped Badge with Link instead of using asChild */
+                <Link 
+                  key={tag} 
+                  href={`/blog?tag=${encodeURIComponent(tag)}`}
                 >
-                  <Link href={`/blog?tag=${encodeURIComponent(tag)}`}>
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
                     {tag}
-                  </Link>
-                </Badge>
+                  </Badge>
+                </Link>
               ))}
             </div>
           </CardContent>
