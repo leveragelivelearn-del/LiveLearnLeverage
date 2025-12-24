@@ -210,7 +210,7 @@ const FAQSection = () => {
 
       {/* Mobile-Friendly Image Section (Visible on md and below) */}
       <div className="lg:hidden w-full px-6 pb-16">
-        <div className="relative max-w-2xl mx-auto h-[400px]">
+        <div className="relative max-w-2xl mx-auto h-100">
            <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
              <Image 
                src="https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1000&auto=format&fit=crop" 

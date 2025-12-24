@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
   LayoutDashboard,
   FileText,
   BarChart3,
@@ -20,64 +20,61 @@ import {
   FileSpreadsheet,
   BookOpen,
   Upload,
-  Database
-} from 'lucide-react'
-import { cn } from '@/lib/utils'
+  Database,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import Logo from "../logo";
 
 interface AdminSidebarProps {
   user: {
-    name?: string | null
-    email?: string | null
-    image?: string | null
-    role?: string
-  }
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    role?: string;
+  };
 }
 
 const navigation = [
   {
-    title: 'Dashboard',
-    href: '/admin',
+    title: "Dashboard",
+    href: "/admin",
     icon: LayoutDashboard,
   },
   {
-    title: 'Models',
-    href: '/admin/models',
+    title: "Models",
+    href: "/admin/models",
     icon: FileSpreadsheet,
   },
   {
-    title: 'Blog Posts',
-    href: '/admin/blog',
+    title: "Blog Posts",
+    href: "/admin/blog",
     icon: BookOpen,
   },
+
   {
-    title: 'Media Library',
-    href: '/admin/media',
-    icon: Image,
-  },
-  {
-    title: 'Analytics',
-    href: '/admin/analytics',
+    title: "Analytics",
+    href: "/admin/analytics",
     icon: BarChart3,
   },
   {
-    title: 'Users',
-    href: '/admin/users',
+    title: "Users",
+    href: "/admin/users",
     icon: Users,
   },
   {
-    title: 'Settings',
-    href: '/admin/settings',
+    title: "Settings",
+    href: "/admin/settings",
     icon: Settings,
   },
-]
+];
 
 export function AdminSidebar({ user }: AdminSidebarProps) {
-  const pathname = usePathname()
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const pathname = usePathname();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/login' })
-  }
+    await signOut({ callbackUrl: "/login" });
+  };
 
   return (
     <>
@@ -98,43 +95,28 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed lg:sticky top-0 left-0 z-40 h-screen w-64 border-r bg-background transition-transform lg:translate-x-0',
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          "fixed lg:sticky top-0 left-0 z-40 h-screen w-64 border-r bg-background transition-transform lg:translate-x-0",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b">
-            <Link href="/admin" className="flex items-center gap-2">
-              <div className="bg-primary/10 p-2 rounded-lg">
-                <LayoutDashboard className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-bold text-lg">Admin Dashboard</h1>
-                <p className="text-xs text-muted-foreground">LiveLearnLeverage</p>
-              </div>
-            </Link>
+          <div className="p-4 border-b">
+            <Logo />
           </div>
 
           {/* User Profile */}
           <div className="p-4 border-b">
             <div className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src={user?.image || ''} />
-                <AvatarFallback>
-                  {user?.name?.charAt(0) || 'A'}
-                </AvatarFallback>
+                <AvatarImage src={user?.image || ""} />
+                <AvatarFallback>{user?.name?.charAt(0) || "A"}</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">{user?.name || 'Admin'}</p>
+                <p className="font-medium truncate">{user?.name || "Admin"}</p>
                 <p className="text-sm text-muted-foreground truncate">
-                  {user?.email || 'admin@example.com'}
+                  {user?.email || "admin@example.com"}
                 </p>
-                <div className="flex items-center gap-1 mt-1">
-                  <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                    {user?.role || 'admin'}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -144,44 +126,34 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
             <nav className="p-4">
               <ul className="space-y-1">
                 {navigation.map((item) => {
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  // FIX: Specific check for Dashboard to prevent it from matching sub-routes
+                  const isActive =
+                    item.href === "/admin"
+                      ? pathname === "/admin"
+                      : pathname === item.href ||
+                        pathname.startsWith(item.href + "/");
+
                   return (
                     <li key={item.href}>
                       <Link
                         href={item.href}
                         onClick={() => setIsMobileOpen(false)}
                         className={cn(
-                          'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
                           isActive
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-accent hover:text-accent-foreground'
+                            ? "bg-primary text-primary-foreground"
+                            : "hover:bg-accent hover:text-accent-foreground"
                         )}
                       >
                         <item.icon className="h-4 w-4" />
                         {item.title}
                       </Link>
                     </li>
-                  )
+                  );
                 })}
               </ul>
             </nav>
           </ScrollArea>
-
-          {/* Quick Actions */}
-          <div className="p-4 border-t space-y-2">
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/">
-                <Upload className="mr-2 h-4 w-4" />
-                Upload New
-              </Link>
-            </Button>
-            <Button variant="outline" className="w-full justify-start" asChild>
-              <Link href="/">
-                <Database className="mr-2 h-4 w-4" />
-                Database
-              </Link>
-            </Button>
-          </div>
 
           {/* Sign Out Button */}
           <div className="p-4 border-t">
@@ -205,5 +177,5 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
         />
       )}
     </>
-  )
+  );
 }
