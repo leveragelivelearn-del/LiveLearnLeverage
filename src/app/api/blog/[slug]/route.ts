@@ -2,17 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 
-interface Params {
-  params: {
-    slug: string
-  }
-}
-
-export async function GET(request: NextRequest, { params }: Params) {
+// FIXED: Define the type correctly for Next.js 15 (params is a Promise)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
   try {
     await dbConnect()
     
-    const blog = await Blog.findOne({ slug: params.slug })
+    // FIXED: Await the params Promise to extract the slug
+    const { slug } = await params
+    
+    // Use the unwrapped 'slug' variable
+    const blog = await Blog.findOne({ slug })
       .populate('author', 'name image bio')
       .lean()
     
