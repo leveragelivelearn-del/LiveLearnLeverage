@@ -14,7 +14,10 @@ const limiter = rateLimit({
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting check
-    const identifier = request.ip ?? '127.0.0.1'
+    // FIX: Get IP from headers instead of request.ip
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    const identifier = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
+    
     const isRateLimited = await limiter.check(identifier, 5) // 5 requests per minute
     
     if (isRateLimited) {
@@ -55,10 +58,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Send email using Resend
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: 'LiveLearnLeverage <contact@livelearnleverage.com>',
       to: [process.env.ADMIN_EMAIL || 'admin@livelearnleverage.com'],
-      reply_to: email,
+      // FIX: Changed 'reply_to' to 'replyTo' to match TypeScript definition
+      replyTo: email,
       subject: `Contact Form: ${subject || 'New Message'}`,
       text: `
 Name: ${name}
