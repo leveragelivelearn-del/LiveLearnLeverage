@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ArrowRightCircle, Plus, Minus } from 'lucide-react';
+import Image from 'next/image';
+import { ChevronRight, Plus, Minus } from 'lucide-react';
 
 interface FAQ {
   question: string;
@@ -169,16 +170,20 @@ const FAQSection = () => {
           <div className="hidden lg:block absolute left-[-160px] top-1/2 -translate-y-1/2 z-30 group">
             <div className="relative w-[320px] h-[480px]">
               {/* Image Frame with Shadow & Border */}
-              <div className="absolute inset-0 bg-white p-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:-translate-y-2 group-hover:rotate-1">
-                <img 
-                  src="https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1000&auto=format&fit=crop" 
-                  alt="Professional Environment"
-                  className="w-full h-full object-cover rounded-xl"
-                />
+              <div className="absolute inset-0 bg-white p-3 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-transform duration-500 group-hover:-translate-y-2 group-hover:rotate-1 overflow-hidden">
+                <div className="relative w-full h-full rounded-xl overflow-hidden">
+                  <Image 
+                    src="/assets/whowerree.png" 
+                    alt="Professional Environment"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 320px"
+                  />
+                </div>
                 
                 {/* Floating Experience Badge */}
-                <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-xl flex flex-col items-center justify-center w-28 h-28 border-4 border-blue-600 animate-bounce-slow">
-                  <span className="text-3xl font-black text-blue-600">15+</span>
+                <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-xl flex flex-col items-center justify-center w-28 h-28 border-4 border-blue-600 animate-bounce-slow z-10">
+                  <span className="text-3xl font-black text-blue-600">5+</span>
                   <span className="text-[10px] font-bold text-slate-400 uppercase text-center leading-none">Years of Excellence</span>
                 </div>
               </div>
@@ -190,11 +195,15 @@ const FAQSection = () => {
 
           {/* Secondary Overlapping Image (Interacts with Stats) */}
           <div className="hidden xl:block absolute -right-20 top-20 z-20 w-40 h-40 rounded-3xl border-8 border-white shadow-2xl overflow-hidden rotate-12 transition-all hover:rotate-0 hover:scale-110 duration-500">
-             <img 
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=400&auto=format&fit=crop" 
-                className="w-full h-full object-cover"
-                alt="Team working"
-             />
+             <div className="relative w-full h-full">
+               <Image 
+                 src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=400&auto=format&fit=crop" 
+                 alt="Team working"
+                 fill
+                 className="object-cover"
+                 sizes="160px"
+               />
+             </div>
           </div>
         </div>
       </div>
@@ -202,21 +211,25 @@ const FAQSection = () => {
       {/* Mobile-Friendly Image Section (Visible on md and below) */}
       <div className="lg:hidden w-full px-6 pb-16">
         <div className="relative max-w-2xl mx-auto h-[400px]">
-           <img 
-              src="https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1000&auto=format&fit=crop" 
-              alt="Professional Business"
-              className="w-full h-full object-cover rounded-3xl shadow-2xl"
-           />
-           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-10 py-6 rounded-2xl shadow-xl border border-slate-100 flex gap-12 text-center whitespace-nowrap">
-              <div>
-                <div className="text-2xl font-black text-blue-600">24/7</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Support</div>
-              </div>
-              <div className="w-px h-full bg-slate-100"></div>
-              <div>
-                <div className="text-2xl font-black text-blue-600">100%</div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Secure</div>
-              </div>
+           <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl">
+             <Image 
+               src="https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1000&auto=format&fit=crop" 
+               alt="Professional Business"
+               fill
+               className="object-cover"
+               sizes="(max-width: 768px) 100vw, 700px"
+             />
+           </div>
+           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-10 py-6 rounded-2xl shadow-xl border border-slate-100 flex gap-12 text-center whitespace-nowrap z-10">
+             <div>
+               <div className="text-2xl font-black text-blue-600">24/7</div>
+               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Support</div>
+             </div>
+             <div className="w-px h-full bg-slate-100"></div>
+             <div>
+               <div className="text-2xl font-black text-blue-600">100%</div>
+               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Secure</div>
+             </div>
            </div>
         </div>
       </div>

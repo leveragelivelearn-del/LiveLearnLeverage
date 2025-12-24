@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
@@ -69,11 +70,12 @@ export function useElementRect({
       return document.querySelector(element)
     }
 
-    if ("current" in element) {
-      return element.current
+    // Check for React Ref Object
+    if ("current" in (element as any)) {
+      return (element as React.RefObject<Element>).current
     }
 
-    return element
+    return element as Element
   }, [element, enabled])
 
   const updateRect = useThrottledCallback(
@@ -104,8 +106,8 @@ export function useElementRect({
   )
 
   useEffect(() => {
+    // FIX: Removed synchronous setRect call here to prevent cascading renders error.
     if (!enabled || !isClientSide()) {
-      setRect(initialRect)
       return
     }
 
@@ -139,6 +141,11 @@ export function useElementRect({
       setRect(initialRect)
     }
   }, [enabled, getTargetElement, updateRect, useResizeObserver])
+
+  // FIX: Return initialRect directly if disabled, preventing the need to sync state in effect
+  if (!enabled || !isClientSide()) {
+    return initialRect
+  }
 
   return rect
 }
