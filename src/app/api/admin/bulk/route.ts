@@ -43,13 +43,16 @@ export async function POST(request: NextRequest) {
         )
     }
 
-    let result
+    // Initialize count to 0
+    let count = 0
+
     switch (action) {
       case 'delete':
-        result = await ModelClass.deleteMany({ _id: { $in: ids } })
+        const deleteResult = await ModelClass.deleteMany({ _id: { $in: ids } })
+        count = deleteResult.deletedCount || 0
         break
       case 'publish':
-        result = await ModelClass.updateMany(
+        const publishResult = await ModelClass.updateMany(
           { _id: { $in: ids } },
           { 
             status: 'published',
@@ -57,18 +60,21 @@ export async function POST(request: NextRequest) {
             published: true
           }
         )
+        count = publishResult.modifiedCount
         break
       case 'archive':
-        result = await ModelClass.updateMany(
+        const archiveResult = await ModelClass.updateMany(
           { _id: { $in: ids } },
           { status: 'archived' }
         )
+        count = archiveResult.modifiedCount
         break
       case 'draft':
-        result = await ModelClass.updateMany(
+        const draftResult = await ModelClass.updateMany(
           { _id: { $in: ids } },
           { status: 'draft' }
         )
+        count = draftResult.modifiedCount
         break
       default:
         return NextResponse.json(
@@ -79,8 +85,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Successfully ${action}ed ${result.modifiedCount || result.deletedCount} items`,
-      count: result.modifiedCount || result.deletedCount,
+      message: `Successfully ${action}ed ${count} items`,
+      count: count,
     })
   } catch (error) {
     console.error('Bulk operation error:', error)
