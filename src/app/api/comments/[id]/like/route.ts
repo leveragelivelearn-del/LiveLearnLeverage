@@ -2,18 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Comment from '@/models/Comment'
 
-interface Params {
-  params: {
-    id: string
-  }
-}
-
-export async function POST(request: NextRequest, { params }: Params) {
+// FIXED: Update function signature to handle params as a Promise
+export async function POST(
+  request: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await dbConnect()
     
+    // FIXED: Await the params Promise to get the ID
+    const { id } = await params
+    
     const comment = await Comment.findByIdAndUpdate(
-      params.id,
+      id,
       { $inc: { likes: 1 } },
       { new: true }
     ).lean()
