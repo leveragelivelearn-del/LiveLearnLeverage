@@ -9,7 +9,7 @@ type UserRef<T> =
   | null
   | undefined
 
-const updateRef = <T>(ref: UserRef<T>, value: T | null) => {
+const updateRef = <T>(ref: NonNullable<UserRef<T>>, value: T | null) => {
   if (typeof ref === "function") {
     ref(value)
   } else if (ref && typeof ref === "object" && "current" in ref) {
@@ -26,9 +26,9 @@ export const useComposedRef = <T extends HTMLElement>(
 
   return useCallback(
     (instance: T | null) => {
-      // FIX: Use updateRef helper instead of direct assignment
-      // to avoid "Modifying component props or hook arguments" error
-      updateRef(libRef, instance)
+      if (libRef && "current" in libRef) {
+        ;(libRef as { current: T | null }).current = instance
+      }
 
       if (prevUserRef.current) {
         updateRef(prevUserRef.current, null)

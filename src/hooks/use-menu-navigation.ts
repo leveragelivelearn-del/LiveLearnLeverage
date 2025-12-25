@@ -65,18 +65,6 @@ export function useMenuNavigation<T>({
     autoSelectFirstItem ? 0 : -1
   )
 
-  // Track the previous query to detect changes during render
-  const [prevQuery, setPrevQuery] = useState(query)
-
-  // FIX: Adjust state during render instead of in useEffect to avoid cascading renders
-  // This pattern allows React to update state immediately and re-render before painting
-  if (query !== prevQuery) {
-    setPrevQuery(query)
-    if (query) {
-      setSelectedIndex(autoSelectFirstItem ? 0 : -1)
-    }
-  }
-
   useEffect(() => {
     const handleKeyboardNavigation = (event: KeyboardEvent) => {
       if (!items.length) return false
@@ -194,6 +182,12 @@ export function useMenuNavigation<T>({
     onClose,
     orientation,
   ])
+
+  useEffect(() => {
+    if (query) {
+      setSelectedIndex(autoSelectFirstItem ? 0 : -1)
+    }
+  }, [query, autoSelectFirstItem])
 
   return {
     selectedIndex: items.length ? selectedIndex : undefined,

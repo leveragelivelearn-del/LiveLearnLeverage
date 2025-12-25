@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Node as PMNode } from "@tiptap/pm/model"
 import type { Transaction } from "@tiptap/pm/state"
 import {
@@ -359,8 +358,6 @@ export function selectionWithinConvertibleTypes(
  * @param abortSignal Optional AbortSignal for cancelling the upload
  * @returns Promise resolving to the URL of the uploaded image
  */
-// src/lib/tiptap-utils.ts
-
 export const handleImageUpload = async (
   file: File,
   onProgress?: (event: { progress: number }) => void,
@@ -368,48 +365,27 @@ export const handleImageUpload = async (
 ): Promise<string> => {
   // Validate file
   if (!file) {
-    throw new Error("No file provided");
+    throw new Error("No file provided")
   }
 
   if (file.size > MAX_FILE_SIZE) {
     throw new Error(
       `File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`
-    );
+    )
   }
 
-  // Simulate progress start
-  onProgress?.({ progress: 10 });
-
-  try {
-    const formData = new FormData();
-    // IMPORTANT: The key must be 'image' because your /api/admin/upload route expects 'image'
-    formData.append("image", file);
-
-    const response = await fetch("/api/admin/upload", {
-      method: "POST",
-      body: formData,
-      signal: abortSignal,
-    });
-
-    // Simulate progress complete
-    onProgress?.({ progress: 100 });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Upload failed");
+  // For demo/testing: Simulate upload progress. In production, replace the following code
+  // with your own upload implementation.
+  for (let progress = 0; progress <= 100; progress += 10) {
+    if (abortSignal?.aborted) {
+      throw new Error("Upload cancelled")
     }
-
-    const data = await response.json();
-    
-    // Return the URL from the response
-    return data.url;
-  } catch (error: any) {
-    console.error("Image upload failed:", error);
-    throw new Error(error.message || "Failed to upload image");
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    onProgress?.({ progress })
   }
-};
 
-
+  return "/images/tiptap-ui-placeholder-image.jpg"
+}
 
 type ProtocolOptions = {
   /**
