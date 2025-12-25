@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { 
   Save,
@@ -22,7 +21,6 @@ import {
   Upload,
   X,
   Plus,
-  Calendar,
   Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -58,9 +56,11 @@ export default function NewBlogPostPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isUploading, setIsUploading] = useState(false) // New state for image upload
+  const [isUploading, setIsUploading] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
+  
+  // FIXED: Default published to true
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -70,46 +70,40 @@ export default function NewBlogPostPage() {
     seoTitle: '',
     seoDescription: '',
     featuredImage: '',
-    published: false,
+    published: true, // Always true by default
     publishDate: new Date().toISOString().split('T')[0],
   })
 
-  // --- NEW: Handle Featured Image Upload ---
- // src/app/(adminlayout)/admin/blog/new/page.tsx
+  const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+    try {
+      setIsUploading(true)
+      const uploadData = new FormData()
+      uploadData.append('image', file) 
 
-  try {
-    setIsUploading(true)
-    const uploadData = new FormData()
-    
-    // FIXED: Append as 'image' to match your API route
-    uploadData.append('image', file) 
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadData,
+      })
 
-    // FIXED: Use your EXISTING admin route
-    const response = await fetch('/api/admin/upload', {
-      method: 'POST',
-      body: uploadData,
-    })
+      const data = await response.json()
 
-    const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed')
+      }
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Upload failed')
+      setFormData(prev => ({ ...prev, featuredImage: data.url }))
+      toast.success('Image uploaded successfully')
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Failed to upload image')
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
-
-    setFormData(prev => ({ ...prev, featuredImage: data.url }))
-    toast.success('Image uploaded successfully')
-  } catch (error) {
-    console.error('Upload error:', error)
-    toast.error('Failed to upload image')
-  } finally {
-    setIsUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ''
   }
-}
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -136,11 +130,14 @@ const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>)
           ...formData,
           content: editorContent,
           tags: selectedTags,
+          // FIXED: Explicitly set status to published
+          status: 'published',
+          published: true 
         }),
       })
 
       if (response.ok) {
-        toast.success('Blog post created successfully!')
+        toast.success('Blog post published successfully!')
         router.push('/admin/blog')
       } else {
         throw new Error('Failed to create blog post')
@@ -174,7 +171,7 @@ const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">New Blog Post</h1>
@@ -187,157 +184,119 @@ const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>)
             <Eye className="mr-2 h-4 w-4" />
             Preview
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            <Save className="mr-2 h-4 w-4" />
-            {isSubmitting ? 'Publishing...' : 'Publish'}
-          </Button>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Title</CardTitle>
-              <CardDescription>Enter a descriptive title for your blog post</CardDescription>
-            </CardHeader>
-            <CardContent>
+        
+        {/* Main Content Area */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Title & Content</CardTitle>
+            <CardDescription>Enter the core details of your article</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="title">Post Title</Label>
               <Input
+                id="title"
                 placeholder="Enter blog post title"
                 value={formData.title}
                 onChange={(e) => handleTitleChange(e.target.value)}
                 required
+                className="text-lg font-medium"
               />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Content</Label>
+              <SimpleEditor ref={editorRef} />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Metadata Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Category & Tags</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add a tag"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                  />
+                  <Button type="button" onClick={handleAddTag} variant="secondary">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTag(tag)}
+                        className="ml-1 hover:text-destructive"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Content</CardTitle>
-              <CardDescription>Write your blog post content here</CardDescription>
+              <CardTitle>Short Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <SimpleEditor ref={editorRef} />
-              <div className="text-sm text-muted-foreground mt-2">
-                Write your blog content above.
+              <div className="space-y-2">
+                <Label>Excerpt</Label>
+                <Textarea
+                  placeholder="Enter a brief excerpt for the card preview"
+                  value={formData.excerpt}
+                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                  rows={6}
+                />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Publish</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="published">Status</Label>
-                <Switch
-                  id="published"
-                  checked={formData.published}
-                  onCheckedChange={(checked) => 
-                    setFormData({ ...formData, published: checked })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="publishDate">Publish Date</Label>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="publishDate"
-                    type="date"
-                    value={formData.publishDate}
-                    onChange={(e) => setFormData({ ...formData, publishDate: e.target.value })}
-                  />
-                </div>
-              </div>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                <Save className="mr-2 h-4 w-4" />
-                {formData.published ? 'Publish Now' : 'Save as Draft'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Category</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Tags</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Add a tag"
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                />
-                <Button type="button" onClick={handleAddTag}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Excerpt</CardTitle>
-              <CardDescription>A short summary of your blog post</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                placeholder="Enter a brief excerpt"
-                value={formData.excerpt}
-                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                rows={4}
-              />
-            </CardContent>
-          </Card>
-
-          {/* Featured Image Section Updated */}
+        {/* Images & SEO */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Featured Image</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Hidden Input */}
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -359,21 +318,24 @@ const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>)
                     variant="outline"
                     className="w-full text-red-500 hover:text-red-600"
                     onClick={() => setFormData({ ...formData, featuredImage: '' })}
+                    type="button"
                   >
                     Remove Image
                   </Button>
                 </div>
               ) : (
-                <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                <div 
+                  className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                   <p className="text-sm text-muted-foreground mb-4">
-                    Upload a featured image
+                    Click to upload a featured image
                   </p>
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     type="button"
                     disabled={isUploading}
-                    onClick={() => fileInputRef.current?.click()}
                   >
                     {isUploading ? (
                       <>
@@ -400,7 +362,7 @@ const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>)
                   id="seoTitle"
                   value={formData.seoTitle}
                   onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
-                  placeholder="SEO-friendly title"
+                  placeholder="Title for search engines"
                 />
               </div>
               <div className="space-y-2">
@@ -409,16 +371,39 @@ const handleFeaturedImageUpload = async (e: React.ChangeEvent<HTMLInputElement>)
                   id="seoDescription"
                   value={formData.seoDescription}
                   onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
-                  placeholder="SEO-friendly description"
-                  rows={3}
+                  placeholder="Description for search results"
+                  rows={4}
                 />
               </div>
               <div className="text-xs text-muted-foreground">
-                <p>Slug: {formData.slug || 'auto-generated-from-title'}</p>
+                <p>URL Slug: /blog/{formData.slug || '...'}</p>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* FIXED: Action Button at the very end */}
+        <div className="flex justify-end pt-4 border-t mt-4">
+          <Button 
+            type="submit" 
+            size="lg" 
+            disabled={isSubmitting}
+            className="w-full md:w-auto px-8"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Publishing...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Publish Now
+              </>
+            )}
+          </Button>
+        </div>
+
       </form>
     </div>
   )
