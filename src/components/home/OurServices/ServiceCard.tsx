@@ -8,7 +8,7 @@ interface ServiceCardProps {
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
   return (
-    <div className="flex flex-col items-center text-center group transition-all duration-300 transform hover:-translate-y-2">
+    <div className="service-card-item flex flex-col items-center text-center group transition-all duration-300 transform hover:-translate-y-2">
       <div className="mb-6 flex items-center justify-center h-24 w-24">
         {service.icon}
       </div>

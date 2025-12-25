@@ -1,12 +1,28 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect } from 'react';
 import Image from 'next/image';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const WhoWeAre: React.FC = () => {
+  useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: false,
+      mirror: true,
+      easing: 'ease-out-cubic',
+    });
+  }, []);
+
   return (
     <section className="bg-background overflow-hidden">
       <div className="px-4 container mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16 md:mb-20">
+        <div 
+          className="text-center mb-16 md:mb-20"
+          data-aos="fade-up"
+        >
           <h2 className="text-3xl md:text-4xl font-extrabold text-primary tracking-wider uppercase mb-4">
             Who We Are
           </h2>
@@ -22,7 +38,11 @@ const WhoWeAre: React.FC = () => {
         <div className="relative flex flex-col lg:flex-row items-center justify-center">
           
           {/* Left: Info Card (Overlaps image slightly on desktop) */}
-          <div className="w-full lg:w-3/5 z-10 lg:-mr-32">
+          <div 
+            className="w-full lg:w-3/5 z-10 lg:-mr-32"
+            data-aos="fade-right"
+            data-aos-delay="200"
+          >
             <div className="bg-white p-8 md:p-12 lg:p-16 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-50 rounded-sm">
               <h3 className="text-xl md:text-2xl font-bold text-foreground leading-tight mb-6 uppercase">
                 Looking for a premier partner for <br className="hidden md:block" />
@@ -78,7 +98,11 @@ const WhoWeAre: React.FC = () => {
           </div>
 
           {/* Right: Featured Image */}
-          <div className="w-full lg:w-2/3 mt-12 lg:mt-0">
+          <div 
+            className="w-full lg:w-2/3 mt-12 lg:mt-0"
+            data-aos="fade-left"
+            data-aos-delay="400"
+          >
             <div className="relative aspect-4/3 lg:aspect-square overflow-hidden rounded-sm shadow-2xl">
               <Image 
                 src="/assets/whowerree.png" 

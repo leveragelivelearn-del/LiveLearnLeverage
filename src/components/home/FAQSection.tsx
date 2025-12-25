@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ChevronRight, Plus, Minus } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface FAQ {
   question: string;
@@ -13,6 +18,7 @@ const FAQSection = () => {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [openIndex, setOpenIndex] = useState<number | null>(0); // Open first by default
+  const containerRef = useRef<HTMLElement>(null);
 
   const defaultFaqs: FAQ[] = [
     { 
@@ -49,27 +55,55 @@ const FAQSection = () => {
     fetchFaqs();
   }, []);
 
+  useGSAP(() => {
+    const statsItems = gsap.utils.toArray<HTMLElement>('.stat-number');
+    
+    statsItems.forEach((stat) => {
+      const targetValue = parseInt(stat.getAttribute('data-value') || '0', 10);
+      const suffix = stat.getAttribute('data-suffix') || '';
+      
+      gsap.fromTo(stat, 
+        { innerText: 0 },
+        {
+          innerText: targetValue,
+          duration: 2,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: stat,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
+          },
+          snap: { innerText: 1 },
+          onUpdate: function() {
+            stat.innerText = Math.ceil(this.targets()[0].innerText).toLocaleString() + suffix;
+          }
+        }
+      );
+    });
+  }, { scope: containerRef });
+
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
   const stats = [
-    { number: "1,200+", label: "Projects Completed" },
-    { number: "50+", label: "Industry Awards" },
-    { number: "800+", label: "Global Clients" },
+    { number: 1200, suffix: "+", label: "Projects Completed" },
+    { number: 50, suffix: "+", label: "Industry Awards" },
+    { number: 800, suffix: "+", label: "Global Clients" },
   ];
 
   if (!loading && faqs.length === 0) return null;
 
   return (
-    <section className="relative w-full bg-background overflow-hidden">
+    <section ref={containerRef} className="relative w-full bg-background overflow-hidden">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
       
       <div className="flex flex-col lg:flex-row min-h-[700px] relative">
         
         {/* Left Content Area: FAQs */}
-        <div className="w-full lg:w-[65%] px-6 py-16 md:py-24 lg:pl-20 xl:pl-32 lg:pr-24 z-10">
+        {/* INCREASED PADDING RIGHT to lg:pr-48 to stop text from going under image */}
+        <div className="w-full lg:w-[65%] px-6 py-16 md:py-24 lg:pl-20 xl:pl-32 lg:pr-48 z-10">
           <div className="max-w-3xl">
             <header className="mb-12">
               <span className="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-blue-600 uppercase bg-blue-50 rounded-full">
@@ -154,8 +188,12 @@ const FAQSection = () => {
             <div className="relative z-10 space-y-12 lg:ml-12 xl:ml-20">
               {stats.map((stat, idx) => (
                 <div key={idx} className="group cursor-default">
-                  <div className="text-5xl md:text-6xl font-black tracking-tighter transition-transform group-hover:scale-105 origin-left duration-300">
-                    {stat.number}
+                  <div 
+                    className="stat-number text-5xl md:text-6xl font-black tracking-tighter transition-transform group-hover:scale-105 origin-left duration-300"
+                    data-value={stat.number}
+                    data-suffix={stat.suffix}
+                  >
+                    0{stat.suffix}
                   </div>
                   <div className="text-blue-100 font-medium text-lg opacity-80 mt-1 uppercase tracking-widest text-xs">
                     {stat.label}
