@@ -162,32 +162,34 @@ export function ExcelUpload({ onUploadComplete, existingFile }: ExcelUploadProps
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="bg-green-100 p-3 rounded-lg">
-                  <FileSpreadsheet className="h-6 w-6 text-green-600" />
+            <div className="flex flex-col gap-3 p-3 border rounded-lg">
+              <div className="flex items-start gap-3 w-full">
+                <div className="bg-green-100 p-2 rounded-lg shrink-0">
+                  <FileSpreadsheet className="h-5 w-5 text-green-600" />
                 </div>
-                <div>
-                  <p className="font-medium">{existingFile.fileName}</p>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-sm truncate" title={existingFile.fileName}>
+                    {existingFile.fileName}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                     <span>{formatFileSize(existingFile.fileSize)}</span>
                     <span>•</span>
                     <span>
-                      Uploaded {new Date(existingFile.uploadedAt).toLocaleDateString()}
+                      {new Date(existingFile.uploadedAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" asChild>
+              <div className="flex items-center gap-2 w-full">
+                <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
                   <a href={existingFile.url} download>
-                    <Download className="mr-2 h-4 w-4" />
+                    <Download className="mr-2 h-3 w-3" />
                     Download
                   </a>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
                   <a href={existingFile.url} target="_blank" rel="noopener noreferrer">
-                    <Eye className="mr-2 h-4 w-4" />
+                    <Eye className="mr-2 h-3 w-3" />
                     Preview
                   </a>
                 </Button>

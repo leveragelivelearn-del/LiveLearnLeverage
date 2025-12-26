@@ -197,8 +197,14 @@ export interface SimpleEditorRef {
   getTextContent: () => string;
 }
 
+// Define props interface
+interface SimpleEditorProps {
+  initialContent?: string;
+}
+
 // Use forwardRef to expose methods
-export const SimpleEditor = forwardRef<SimpleEditorRef>((props, ref) => {
+export const SimpleEditor = forwardRef<SimpleEditorRef, SimpleEditorProps>((props, ref) => {
+  const { initialContent } = props;
   const isMobile = useIsBreakpoint();
   const { height } = useWindowSize();
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -261,7 +267,7 @@ export const SimpleEditor = forwardRef<SimpleEditorRef>((props, ref) => {
         },
       }),
     ],
-    content,
+    content: initialContent || content,
   });
 
   // Expose editor methods via ref

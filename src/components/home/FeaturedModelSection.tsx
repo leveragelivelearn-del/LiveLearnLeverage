@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import Model from '@/models/Model';
@@ -10,7 +11,7 @@ async function getFeaturedContent() {
   const featuredModels = await Model.find({ featured: true })
     .sort({ createdAt: -1 })
     .limit(3)
-    .select("title description slug industry dealSize dealType completionDate")
+    .select("title description slug industry dealSize dealType completionDate currency views slides featured")
     .lean();
 
   return {

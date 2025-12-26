@@ -85,7 +85,7 @@ async function getModelAndRelated(slug: string) {
     .sort({ completionDate: -1 })
     .limit(3)
     .select(
-      "title slug description dealSize currency industry dealType completionDate views featured"
+      "title slug description dealSize currency industry dealType completionDate views featured slides"
     )
     .lean();
 
