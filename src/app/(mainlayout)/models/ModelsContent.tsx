@@ -74,20 +74,19 @@ export default function ModelsContent({ initialModels, industries }: ModelsConte
   };
 
   return (
-    <div className="space-y-8">
-      {/* Filter Bar */}
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4">
+    <div className="flex flex-col lg:flex-row gap-8 items-start">
+      {/* Sidebar (Desktop) / Top Bar (Mobile) */}
+      <aside className="w-full lg:w-[280px] shrink-0 sticky top-24 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto no-scrollbar">
         <FilterBar
           onFilterChange={handleFilterChange}
           industries={industries}
         />
-      </div>
+      </aside>
 
       {/* Models Grid */}
-      {/* Opacity transition instead of unmounting prevents layout shift */}
-      <div className={`transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+      <main className={`flex-1 min-w-0 transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
         <ModelGrid initialModels={filteredModels} />
-      </div>
+      </main>
     </div>
   );
 }

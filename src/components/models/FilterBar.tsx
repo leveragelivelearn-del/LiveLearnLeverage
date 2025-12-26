@@ -63,12 +63,13 @@ export function FilterBar({ onFilterChange, industries }: FilterBarProps) {
 
   return (
     <div className="space-y-4">
-      {/* Search and Mobile Filter Trigger */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Search and Mobile/Tablet Filter Trigger */}
+      {/* Hide on Large screens as Sidebar takes over */}
+      <div className="flex flex-col sm:flex-row gap-4 lg:hidden sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-2 -mx-4 px-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search deals by title, description, or industry..."
+            placeholder="Search deals by title..."
             className="pl-9"
             value={filters.search}
             onChange={(e) => handleFilterChange('search', e.target.value)}
@@ -76,9 +77,10 @@ export function FilterBar({ onFilterChange, industries }: FilterBarProps) {
         </div>
         
         <div className="flex gap-2">
+          {/* Show Filter button on mobile AND tablet now, since sidebar is lg+ */}
           <Button
             variant="outline"
-            className="sm:hidden"
+            className="lg:hidden"
             onClick={() => setIsMobileFiltersOpen(true)}
           >
             <Filter className="mr-2 h-4 w-4" />
@@ -111,8 +113,22 @@ export function FilterBar({ onFilterChange, industries }: FilterBarProps) {
         </div>
       </div>
 
-      {/* Desktop Filters */}
-      <div className="hidden sm:grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg bg-card">
+      {/* Desktop Filters (Sidebar Style) */}
+      <div className="hidden lg:flex flex-col gap-6 p-4 border rounded-lg bg-card">
+        {/* Search in Sidebar */}
+        <div className="space-y-2">
+            <label className="text-sm font-medium">Search</label>
+            <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+                placeholder="Search deals..."
+                className="pl-9"
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+            />
+            </div>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Industry</label>
           <Select
@@ -170,14 +186,33 @@ export function FilterBar({ onFilterChange, industries }: FilterBarProps) {
           />
         </div>
 
-        <div className="flex items-end">
+        <div className="space-y-2">
+            <label className="text-sm font-medium">Sort By</label>
+            <Select
+            value={filters.sortBy}
+            onValueChange={(value) => handleFilterChange('sortBy', value)}
+            >
+            <SelectTrigger>
+                <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+                {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                </SelectItem>
+                ))}
+            </SelectContent>
+            </Select>
+        </div>
+
+        <div className="pt-2">
           <Button
             variant="outline"
             onClick={resetFilters}
             className="w-full"
           >
             <X className="mr-2 h-4 w-4" />
-            Clear Filters
+            Reset Filters
           </Button>
         </div>
       </div>
