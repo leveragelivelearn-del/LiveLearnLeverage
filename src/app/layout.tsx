@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import LenisProvider from "@/components/providers/LenisProvider";
 import ScrollToTop from "@/components/ui/ScrollToTop";
+import { SplashScreen } from "@/components/ui/SplashScreen";
 
 // Initialize the font (This defines 'inter' which you were missing)
 const inter = Inter({ subsets: ["latin"] });
@@ -99,6 +100,7 @@ export default function RootLayout({
         >
           <SessionProvider>
             <LenisProvider>
+              <SplashScreen />
               {children}
               <ScrollToTop />
             </LenisProvider>
