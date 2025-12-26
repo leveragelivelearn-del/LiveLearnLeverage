@@ -186,16 +186,17 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--secondary));
+  background: var(--secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary));
+  background: var(--primary);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.8);
+  background: var(--primary); /* Simplification for safety with oklch */
+  opacity: 0.8;
 }
 
 .theme-slide-bottom::view-transition-old(root) {
