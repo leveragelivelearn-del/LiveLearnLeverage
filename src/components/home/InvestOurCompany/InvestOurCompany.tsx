@@ -18,8 +18,8 @@ const FeatureItem: React.FC<FeatureItemProps> = ({ imageSrc, imageAlt, icon, tit
     <div className="flex flex-col gap-6 group">
       {/* Feature Image */}
       <div className="overflow-hidden bg-gray-100 aspect-[4/3] w-full rounded-lg">
-        <img 
-          src={imageSrc} 
+        <img
+          src={imageSrc}
           alt={imageAlt}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -31,7 +31,7 @@ const FeatureItem: React.FC<FeatureItemProps> = ({ imageSrc, imageAlt, icon, tit
         <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full border border-blue-100 text-[#001d4a] bg-blue-50/50">
           {icon}
         </div>
-        
+
         {/* Text Content */}
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-extrabold tracking-wider text-[#001d4a] uppercase leading-tight">
@@ -79,6 +79,7 @@ const InvestOurCompany: React.FC = () => {
           <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-6 tracking-tight leading-tight">
             Invest In Our Company And Have Healthy <br className="hidden md:block" /> Profits For Long Term
           </h2>
+          <div className="w-12 h-[3px] bg-primary mx-auto mb-8"></div>
           <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
             Partner with a growth-oriented organization dedicated to sustainable value creation. Our strategic approach ensures reliable returns while fostering innovation in global markets.
           </p>
@@ -87,7 +88,7 @@ const InvestOurCompany: React.FC = () => {
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           {features.map((feature, index) => (
-            <FeatureItem 
+            <FeatureItem
               key={index}
               imageSrc={feature.imageSrc}
               imageAlt={feature.imageAlt}

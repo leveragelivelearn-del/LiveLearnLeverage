@@ -28,25 +28,25 @@ const OurServices: React.FC = () => {
       duration: 0.8,
       ease: 'power3.out'
     })
-    .from('.service-header .divider', {
-      width: 0,
-      opacity: 0,
-      duration: 0.6,
-      ease: 'power3.out'
-    }, '-=0.4')
-    .from('.service-header p', {
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power3.out'
-    }, '-=0.4')
-    .from('.service-card-item', {
-      y: 100,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: 'back.out(1.7)'
-    }, '-=0.4');
+      .from('.service-header .divider', {
+        width: 0,
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power3.out'
+      }, '-=0.4')
+      .from('.service-header p', {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out'
+      }, '-=0.4')
+      .from('.service-card-item', {
+        y: 100,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'back.out(1.7)'
+      }, '-=0.4');
 
   }, { scope: containerRef });
 
@@ -58,7 +58,7 @@ const OurServices: React.FC = () => {
           <h2 className="text-foreground text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
             Our <span className='text-primary'>Services</span>
           </h2>
-          <div className="divider w-12 h-[3px] bg-blue-300 mx-auto mb-8"></div>
+          <div className="w-12 h-[3px] bg-primary mx-auto mb-8"></div>
           <p className="max-w-4xl mx-auto text-muted-foreground text-base md:text-lg leading-relaxed font-light">
             We provide comprehensive solutions across multiple sectors, combining industry expertise with innovative approaches to help our clients achieve sustainable success in an ever-evolving global market.
           </p>

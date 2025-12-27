@@ -68,14 +68,6 @@ export default async function ModelsPage() {
             <p className="text-xl text-gray-200">
               Explore detailed financial models and comprehensive analysis of M&A transactions across various industries.
             </p>
-            <div className="pt-4 flex justify-center gap-6 text-sm font-medium text-gray-300">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-lg">{models.length}</span> deals analyzed
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-lg">${formattedValue}B+</span> total transaction value
-              </div>
-            </div>
           </div>
         </div>
       </section>

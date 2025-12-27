@@ -69,22 +69,23 @@ const TestimonialsSection: React.FC = () => {
   return (
     <section className="bg-background overflow-hidden container mx-auto">
       <div className="text-center mb-16">
-       
-        <h2 className="text-3xl md:text-5xl font-bold text-primary mb-6">
-          What our clients say
+
+        <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-6">
+          What our <span className='text-primary'>clients </span>say
         </h2>
+        <div className="w-12 h-[3px] bg-primary mx-auto mb-8"></div>
         <p className="max-w-2xl mx-auto text-gray-500 text-lg leading-relaxed">
-          Trusted by leading corporations and private equity firms globally to navigate 
+          Trusted by leading corporations and private equity firms globally to navigate
           the complexities of high-stakes mergers, acquisitions, and strategic advisory.
         </p>
       </div>
 
-      <div 
+      <div
         className="relative overflow-hidden"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div 
+        <div
           className="flex transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
@@ -93,9 +94,9 @@ const TestimonialsSection: React.FC = () => {
               {/* Card 1 in Slide */}
               <div className="flex-1 bg-white p-10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100 relative group transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
                 <div className="flex items-center gap-5 mb-8">
-                  <img 
-                    src={testimonials[slideIndex * 2].image} 
-                    alt={testimonials[slideIndex * 2].name} 
+                  <img
+                    src={testimonials[slideIndex * 2].image}
+                    alt={testimonials[slideIndex * 2].name}
                     className="w-16 h-16 rounded-full object-cover border-2 border-[#FF4C60]/10"
                   />
                   <div>
@@ -107,38 +108,38 @@ const TestimonialsSection: React.FC = () => {
                   &quot;{testimonials[slideIndex * 2].content}&quot;
                 </p>
                 {/* Background Quote SVG */}
-                <div className="absolute top-10 right-10 opacity-[0.05] pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-300">
+                <div className="absolute top-10 right-10 opacity-[0.5] pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-300">
                   <svg width="100" height="80" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M40.2 0C25.2 0 13.8 4.5 6 13.5C2 18.1 0 24.3 0 32.1C0 49.3 11.2 64.1 33.6 76.5C31.4 82.3 26.6 86.9 19.2 90.3L22.2 100C39.6 94.6 51.6 85.1 58.2 71.5C62.4 63.3 64.5 54.1 64.5 43.8V0H40.2ZM104.7 0C89.7 0 78.3 4.5 70.5 13.5C66.5 18.1 64.5 24.3 64.5 32.1C64.5 49.3 75.7 64.1 98.1 76.5C95.9 82.3 91.1 86.9 83.7 90.3L86.7 100C104.1 94.6 116.1 85.1 122.7 71.5C126.9 63.3 129 54.1 129 43.8V0H104.7Z" fill="#FF4C60" fillOpacity="0.5"/>
+                    <path d="M40.2 0C25.2 0 13.8 4.5 6 13.5C2 18.1 0 24.3 0 32.1C0 49.3 11.2 64.1 33.6 76.5C31.4 82.3 26.6 86.9 19.2 90.3L22.2 100C39.6 94.6 51.6 85.1 58.2 71.5C62.4 63.3 64.5 54.1 64.5 43.8V0H40.2ZM104.7 0C89.7 0 78.3 4.5 70.5 13.5C66.5 18.1 64.5 24.3 64.5 32.1C64.5 49.3 75.7 64.1 98.1 76.5C95.9 82.3 91.1 86.9 83.7 90.3L86.7 100C104.1 94.6 116.1 85.1 122.7 71.5C126.9 63.3 129 54.1 129 43.8V0H104.7Z" fill="#FF4C60" fillOpacity="0.5" />
                   </svg>
                 </div>
                 {/* Animated Bottom Border */}
-                <div className="absolute bottom-0 left-0 w-0 h-1 bg-[#FF4C60] transition-all duration-500 group-hover:w-full rounded-b-xl"></div>
+                <div className="absolute bottom-0 left-0 w-0 h-1 bg-primary transition-all duration-500 group-hover:w-full rounded-b-xl"></div>
               </div>
 
               {/* Card 2 in Slide (Hidden on small mobile if you wanted, but here we show both on md+) */}
               {testimonials[slideIndex * 2 + 1] && (
                 <div className="hidden md:block flex-1 bg-white p-10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100 relative group transition-all duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
                   <div className="flex items-center gap-5 mb-8">
-                    <img 
-                      src={testimonials[slideIndex * 2 + 1].image} 
-                      alt={testimonials[slideIndex * 2 + 1].name} 
+                    <img
+                      src={testimonials[slideIndex * 2 + 1].image}
+                      alt={testimonials[slideIndex * 2 + 1].name}
                       className="w-16 h-16 rounded-full object-cover border-2 border-[#FF4C60]/10"
                     />
                     <div>
-                      <h4 className="text-[#FF4C60] font-bold text-lg">{testimonials[slideIndex * 2 + 1].name}</h4>
+                      <h4 className="text-foreground font-bold text-lg">{testimonials[slideIndex * 2 + 1].name}</h4>
                       <p className="text-gray-500 font-medium">{testimonials[slideIndex * 2 + 1].role}</p>
                     </div>
                   </div>
                   <p className="text-gray-600 leading-relaxed text-lg relative z-10 italic">
                     &quot;{testimonials[slideIndex * 2 + 1].content}&quot;
                   </p>
-                  <div className="absolute top-10 right-10 opacity-[0.05] pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-300">
+                  <div className="absolute top-10 right-10 opacity-[0.5] pointer-events-none group-hover:opacity-[0.1] transition-opacity duration-300">
                     <svg width="100" height="80" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M40.2 0C25.2 0 13.8 4.5 6 13.5C2 18.1 0 24.3 0 32.1C0 49.3 11.2 64.1 33.6 76.5C31.4 82.3 26.6 86.9 19.2 90.3L22.2 100C39.6 94.6 51.6 85.1 58.2 71.5C62.4 63.3 64.5 54.1 64.5 43.8V0H40.2ZM104.7 0C89.7 0 78.3 4.5 70.5 13.5C66.5 18.1 64.5 24.3 64.5 32.1C64.5 49.3 75.7 64.1 98.1 76.5C95.9 82.3 91.1 86.9 83.7 90.3L86.7 100C104.1 94.6 116.1 85.1 122.7 71.5C126.9 63.3 129 54.1 129 43.8V0H104.7Z" fill="#FF4C60" fillOpacity="0.5"/>
+                      <path d="M40.2 0C25.2 0 13.8 4.5 6 13.5C2 18.1 0 24.3 0 32.1C0 49.3 11.2 64.1 33.6 76.5C31.4 82.3 26.6 86.9 19.2 90.3L22.2 100C39.6 94.6 51.6 85.1 58.2 71.5C62.4 63.3 64.5 54.1 64.5 43.8V0H40.2ZM104.7 0C89.7 0 78.3 4.5 70.5 13.5C66.5 18.1 64.5 24.3 64.5 32.1C64.5 49.3 75.7 64.1 98.1 76.5C95.9 82.3 91.1 86.9 83.7 90.3L86.7 100C104.1 94.6 116.1 85.1 122.7 71.5C126.9 63.3 129 54.1 129 43.8V0H104.7Z" fill="#FF4C60" fillOpacity="0.5" />
                     </svg>
                   </div>
-                  <div className="absolute bottom-0 left-0 w-0 h-1 bg-[#FF4C60] transition-all duration-500 group-hover:w-full rounded-b-xl"></div>
+                  <div className="absolute bottom-0 left-0 w-0 h-1 bg-primary transition-all duration-500 group-hover:w-full rounded-b-xl"></div>
                 </div>
               )}
             </div>
@@ -152,11 +153,10 @@ const TestimonialsSection: React.FC = () => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              currentIndex === index 
-                ? 'bg-[#FF4C60] w-8' 
-                : 'bg-gray-300 hover:bg-gray-400'
-            }`}
+            className={`w-3 h-3 rounded-full transition-all duration-300 ${currentIndex === index
+              ? 'bg-primary w-8'
+              : 'bg-gray-300 hover:bg-gray-400'
+              }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

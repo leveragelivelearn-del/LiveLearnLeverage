@@ -19,26 +19,28 @@ const WhoWeAre: React.FC = () => {
     <section className="bg-background overflow-hidden">
       <div className="px-4 container mx-auto">
         {/* Section Header */}
-        <div 
+        <div
           className="text-center mb-16 md:mb-20"
           data-aos="fade-up"
         >
           <h2 className="text-3xl md:text-4xl font-extrabold text-primary tracking-wider uppercase mb-4">
             Who We Are
           </h2>
-          <div className="w-12 h-1 bg-blue-400 mx-auto mb-6"></div>
+          <div className="w-12 h-[3px] bg-primary mx-auto mb-8"></div>
+
+
           <p className="max-w-4xl mx-auto text-muted-foreground text-lg leading-relaxed px-4">
-            We are a strategic advisory firm dedicated to scaling businesses through 
-            evidence-based planning and precision execution. Our methodology combines 
+            We are a strategic advisory firm dedicated to scaling businesses through
+            evidence-based planning and precision execution. Our methodology combines
             deep industry insights with innovative problem-solving.
           </p>
         </div>
 
         {/* Content Grid */}
         <div className="relative flex flex-col lg:flex-row items-center justify-center">
-          
+
           {/* Left: Info Card (Overlaps image slightly on desktop) */}
-          <div 
+          <div
             className="w-full lg:w-3/5 z-10 lg:-mr-32"
             data-aos="fade-right"
             data-aos-delay="200"
@@ -48,14 +50,14 @@ const WhoWeAre: React.FC = () => {
                 Looking for a premier partner for <br className="hidden md:block" />
                 strategic business planning?
               </h3>
-              
+
               <div className="w-10 h-1 bg-blue-400 mb-8"></div>
-              
+
               <div className="space-y-6">
                 <p className="text-muted-foreground leading-relaxed font-normal">
-                  Our consultancy provides high-impact growth strategies that transform 
-                  operational challenges into scalable opportunities. We don&apos;t just draft 
-                  plans; we build blueprints for sustainable market leadership and 
+                  Our consultancy provides high-impact growth strategies that transform
+                  operational challenges into scalable opportunities. We don&apos;t just draft
+                  plans; we build blueprints for sustainable market leadership and
                   financial resilience.
                 </p>
 
@@ -64,8 +66,8 @@ const WhoWeAre: React.FC = () => {
                     Excellence in Corporate Responsibility
                   </h4>
                   <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                    Beyond profitability, we emphasize ethical governance and long-term 
-                    value creation. We work with organizations that are as committed to 
+                    Beyond profitability, we emphasize ethical governance and long-term
+                    value creation. We work with organizations that are as committed to
                     positive impact as they are to performance.
                   </p>
                 </div>
@@ -80,10 +82,10 @@ const WhoWeAre: React.FC = () => {
                       Efficiency Optimization
                     </span>
                   </div>
-                  
+
                   {/* Vertical Divider */}
                   <div className="hidden sm:block h-12 w-px bg-muted-foreground"></div>
-                  
+
                   <div className="flex flex-col">
                     <span className="text-4xl md:text-5xl font-bold text-primary mb-1">
                       18%
@@ -98,15 +100,15 @@ const WhoWeAre: React.FC = () => {
           </div>
 
           {/* Right: Featured Image */}
-          <div 
+          <div
             className="w-full lg:w-2/3 mt-12 lg:mt-0"
             data-aos="fade-left"
             data-aos-delay="400"
           >
             <div className="relative aspect-4/3 lg:aspect-square overflow-hidden rounded-sm shadow-2xl">
-              <Image 
-                src="/assets/whowerree.png" 
-                alt="Business Consultant Professional" 
+              <Image
+                src="/assets/whowerree.png"
+                alt="Business Consultant Professional"
                 fill
                 className="object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700"
                 sizes="(max-width: 1024px) 100vw, 66vw"

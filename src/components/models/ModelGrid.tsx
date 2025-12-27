@@ -14,12 +14,8 @@ export function ModelGrid({ initialModels }: ModelGridProps) {
 
   return (
     <div className="space-y-8">
-      {/* Results Count */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {initialModels.length} deals
-        </p>
-      </div>
+
+
 
       {initialModels.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
