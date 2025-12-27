@@ -34,18 +34,18 @@ export function ChatBot() {
 
     const userMessage = input.trim()
     setInput('')
-    
+
     // Add user message
     const newHistory: ChatMessage[] = [
-        ...messages,
-        { role: 'user', parts: userMessage }
+      ...messages,
+      { role: 'user', parts: userMessage }
     ]
     setMessages(newHistory)
     setIsLoading(true)
 
     try {
       const responseText = await getChatResponse(userMessage, messages)
-      
+
       setMessages(prev => [...prev, { role: 'model', parts: responseText }])
     } catch (error: any) {
       console.error('Chat error:', error)
@@ -70,12 +70,12 @@ export function ChatBot() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="relative h-8 w-8 rounded-full overflow-hidden border border-primary/20">
-                      <Image 
-                        src="/assets/gamaelle-charles.png" 
-                        alt="Gamaelle Charles" 
-                        fill 
-                        className="object-cover"
-                      />
+                    <Image
+                      src="/assets/gamaelle-charles.png"
+                      alt="Gamaelle Charles"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                   <CardTitle className="text-sm font-medium">Gamaelle's AI Assistant</CardTitle>
                 </div>
@@ -84,8 +84,8 @@ export function ChatBot() {
                 </Button>
               </div>
             </CardHeader>
-            
-            <CardContent 
+
+            <CardContent
               className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin touch-auto"
               data-lenis-prevent
             >
@@ -99,26 +99,26 @@ export function ChatBot() {
                 >
                   <div className={cn(
                     "flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full border overflow-hidden relative",
-                    msg.role === 'user' 
-                      ? "bg-primary text-primary-foreground border-primary" 
+                    msg.role === 'user'
+                      ? "bg-primary text-primary-foreground border-primary"
                       : "bg-muted text-muted-foreground border-muted"
                   )}>
                     {msg.role === 'user' ? (
-                        <User className="h-4 w-4" />
+                      <User className="h-4 w-4" />
                     ) : (
-                        <Image 
-                            src="/assets/gamaelle-charles.png" 
-                            alt="Gamaelle" 
-                            fill 
-                            className="object-cover"
-                        />
+                      <Image
+                        src="/assets/gamaelle-charles.png"
+                        alt="Gamaelle"
+                        fill
+                        className="object-cover"
+                      />
                     )}
                   </div>
-                  
+
                   <div className={cn(
                     "rounded-lg px-3 py-2 max-w-[80%]",
-                    msg.role === 'user' 
-                      ? "bg-primary text-primary-foreground" 
+                    msg.role === 'user'
+                      ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground"
                   )}>
                     {msg.parts}
@@ -128,11 +128,11 @@ export function ChatBot() {
               {isLoading && (
                 <div className="flex gap-3 text-sm">
                   <div className="flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-full border bg-muted text-muted-foreground border-muted overflow-hidden relative">
-                    <Image 
-                        src="/assets/gamaelle-charles.png" 
-                        alt="Gamaelle" 
-                        fill 
-                        className="object-cover"
+                    <Image
+                      src="/assets/gamaelle-charles.png"
+                      alt="Gamaelle"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                   <div className="bg-muted px-3 py-2 rounded-lg flex items-center">
@@ -142,12 +142,12 @@ export function ChatBot() {
               )}
               <div ref={messagesEndRef} />
             </CardContent>
-            
+
             <CardFooter className="p-4 border-t border-primary/10 bg-muted/20">
               <form onSubmit={handleSubmit} className="flex w-full gap-2">
-                <Input 
-                  placeholder="Ask about M&A..." 
-                  value={input} 
+                <Input
+                  placeholder="Ask about M&A..."
+                  value={input}
                   onChange={e => setInput(e.target.value)}
                   disabled={isLoading}
                   className="flex-1 focus-visible:ring-primary/20"
@@ -164,22 +164,22 @@ export function ChatBot() {
         animate={{ scale: isOpen ? 0 : 1, opacity: isOpen ? 0 : 1 }}
         transition={{ duration: 0.2 }}
         className={cn(
-            "fixed bottom-20 right-6 z-50 h-11 w-11 rounded-full shadow-xl flex items-center justify-center",
-            "bg-gradient-to-r from-primary to-purple-600 text-white hover:shadow-2xl hover:brightness-110 transition-all"
+          "fixed bottom-14 right-2 md:bottom-20 md:right-6 z-50 h-8 w-8 md:h-12 md:w-12 rounded-full shadow-xl flex items-center justify-center",
+          "bg-gradient-to-r from-primary to-purple-600 text-white hover:shadow-2xl hover:brightness-110 transition-all"
         )}
         onClick={() => setIsOpen(true)}
       >
         <div className="relative h-full w-full rounded-full overflow-hidden border-2 border-white/20">
-            <Image 
-                src="/assets/gamaelle-charles.png" 
-                alt="Gamaelle Charles" 
-                fill 
-                className="object-cover"
-            />
+          <Image
+            src="/assets/gamaelle-charles.png"
+            alt="Gamaelle Charles"
+            fill
+            className="object-cover"
+          />
         </div>
         <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
         </span>
       </motion.button>
     </AnimatePresence>

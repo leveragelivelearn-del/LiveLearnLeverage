@@ -28,10 +28,10 @@ interface ModelCardProps {
 
 export function ModelCard({ model }: ModelCardProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
-  
+
   // Get first 3 images only
-  const slides = model.slides && model.slides.length > 0 
-    ? model.slides.slice(0, 3) 
+  const slides = model.slides && model.slides.length > 0
+    ? model.slides.slice(0, 3)
     : []
 
   const nextSlide = (e: React.MouseEvent) => {
@@ -48,9 +48,9 @@ export function ModelCard({ model }: ModelCardProps) {
 
   return (
     <Card className="group flex flex-col h-full overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50">
-      
+
       {/* --- Image Carousel Section --- */}
-      <div className="relative w-full h-48 bg-muted/30 overflow-hidden">
+      <div className="relative w-full h-48 bg-muted/30 overflow-hidden shrink-0">
         {slides.length > 0 ? (
           <>
             <Image
@@ -60,36 +60,35 @@ export function ModelCard({ model }: ModelCardProps) {
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            
+
             {/* Gradient Overlay for Text Contrast if needed */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
             {/* Navigation Arrows (Only show if > 1 image) */}
             {slides.length > 1 && (
               <>
-                <button 
+                <button
                   onClick={prevSlide}
                   className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 z-10"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <button 
+                <button
                   onClick={nextSlide}
                   className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 z-10"
                   aria-label="Next image"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
-                
+
                 {/* Dots Indicator */}
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                   {slides.map((_, idx) => (
-                    <div 
+                    <div
                       key={idx}
-                      className={`h-1.5 w-1.5 rounded-full transition-all shadow-sm ${
-                        idx === currentSlide ? 'bg-white w-3' : 'bg-white/60'
-                      }`}
+                      className={`h-1.5 w-1.5 rounded-full transition-all shadow-sm ${idx === currentSlide ? 'bg-white w-3' : 'bg-white/60'
+                        }`}
                     />
                   ))}
                 </div>
@@ -116,7 +115,7 @@ export function ModelCard({ model }: ModelCardProps) {
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
             <CardTitle className="line-clamp-1 text-lg leading-tight">
-              <Link 
+              <Link
                 href={`/models/${model.slug}`}
                 className="hover:text-primary transition-colors block"
               >
@@ -137,12 +136,12 @@ export function ModelCard({ model }: ModelCardProps) {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pb-4 flex-grow">
         <p className="text-sm text-muted-foreground line-clamp-2 mb-5 leading-relaxed">
           {model.description}
         </p>
-        
+
         <div className="grid grid-cols-2 gap-3 p-3 bg-secondary/10 rounded-lg border border-border/50">
           <div className="space-y-0.5">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Deal Size</span>
@@ -158,7 +157,7 @@ export function ModelCard({ model }: ModelCardProps) {
           </div>
         </div>
       </CardContent>
-      
+
       <CardFooter className="pt-0 pb-5 px-6">
         <Button className="w-full group/btn" asChild>
           <Link href={`/models/${model.slug}`}>

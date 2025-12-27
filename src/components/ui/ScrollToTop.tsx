@@ -15,7 +15,7 @@ export default function ScrollToTop() {
   const center = size / 2; // Center point (22)
   const radius = (size / 2) - strokeWidth - 2; // Radius adjusted for stroke & padding
   const circumference = 2 * Math.PI * radius;
-  
+
   // Calculate offset based on scroll progress
   const offset = circumference - (scrollProgress / 100) * circumference;
   // ---------------------
@@ -26,7 +26,7 @@ export default function ScrollToTop() {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = (window.scrollY / totalHeight) * 100;
       setScrollProgress(progress);
-      
+
       // Show button when scrolled 20% down
       setIsVisible(window.scrollY > window.innerHeight * 0.2);
     };
@@ -52,7 +52,8 @@ export default function ScrollToTop() {
     <button
       onClick={scrollToTop}
       className={cn(
-        'fixed bottom-6 right-6 z-50',
+        'fixed bottom-2 right-0.5 md:bottom-6 md:right-6 z-50', // Adjusted right-0.5 to align center with ChatBot (which is right-2 w-8)
+        'scale-75 md:scale-100', // Smallest comfortable size on mobile
         'flex items-center justify-center',
         'rounded-full bg-primary text-primary-foreground', // Solid background
         'shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30',
@@ -68,7 +69,7 @@ export default function ScrollToTop() {
       style={{ width: size, height: size }}
     >
       {/* Progress ring SVG */}
-      <svg 
+      <svg
         className="absolute inset-0 transform -rotate-90 pointer-events-none"
         width={size}
         height={size}
@@ -84,7 +85,7 @@ export default function ScrollToTop() {
           fill="none"
           className="opacity-20" // Subtle track
         />
-        
+
         {/* Progress Circle (Indicator) */}
         <circle
           cx={center}
@@ -99,10 +100,10 @@ export default function ScrollToTop() {
           className="transition-all duration-200 ease-linear"
         />
       </svg>
-      
+
       {/* Arrow icon */}
       <ArrowUp className="h-5 w-5 relative z-10" />
-      
+
       {/* Tooltip */}
       <div className="absolute bottom-full mb-3 right-0 bg-popover text-popover-foreground text-xs py-1.5 px-3 rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-border">
         {Math.round(scrollProgress)}%
