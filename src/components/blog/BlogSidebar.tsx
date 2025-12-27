@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,7 @@ interface BlogSidebarProps {
     title: string
     slug: string
     views: number
+    featuredImage: string
   }>
   archiveMonths: Array<{
     _id: {
@@ -46,28 +48,50 @@ export function BlogSidebar({
 
   return (
     <div className="space-y-6">
-      {/* Search */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Search Articles</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSearch} className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search articles..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
+
+
+      {/* Popular Posts */}
+      {popularPosts.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Popular Articles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {popularPosts.map((post) => (
+                <div key={post.slug} className="border-b last:border-0 pb-4 last:pb-0">
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="flex gap-4 group hover:text-primary transition-colors"
+                  >
+                    {post.featuredImage && (
+                      <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded-md">
+                        <Image
+                          src={post.featuredImage}
+                          alt={post.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h4 className="font-medium line-clamp-2 mb-1 text-sm">
+                        {post.title}
+                      </h4>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{post.views.toLocaleString()} views</span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))}
             </div>
-            <Button type="submit" className="w-full">
-              Search
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Categories */}
       {categories.length > 0 && (
@@ -96,38 +120,6 @@ export function BlogSidebar({
           </CardContent>
         </Card>
       )}
-
-      {/* Popular Posts */}
-      {popularPosts.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Popular Articles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {popularPosts.map((post) => (
-                <div key={post.slug} className="border-b last:border-0 pb-4 last:pb-0">
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="block hover:text-primary transition-colors"
-                  >
-                    <h4 className="font-medium line-clamp-2 mb-1">
-                      {post.title}
-                    </h4>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{post.views.toLocaleString()} views</span>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
 
 
       {/* Archive */}

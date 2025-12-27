@@ -75,21 +75,10 @@ export default function BlogContent({
                                         tagParam ? `Articles tagged "${tagParam}"` :
                                             "Latest Articles"}
                             </h2>
-                            <p className="text-muted-foreground">
-                                {filteredBlogs.length} article{filteredBlogs.length !== 1 ? 's' : ''} found
-                            </p>
+
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm">
-                                <TrendingUp className="mr-2 h-4 w-4" />
-                                Most Popular
-                            </Button>
-                            <Button variant="outline" size="sm">
-                                <Calendar className="mr-2 h-4 w-4" />
-                                Archive
-                            </Button>
-                        </div>
+
                     </div>
 
                     <BlogGrid blogs={filteredBlogs} />

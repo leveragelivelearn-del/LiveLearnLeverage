@@ -10,7 +10,8 @@ async function getFeaturedContent() {
   const featuredBlogs = await Blog.find({ published: true })
     .sort({ publishedAt: -1 })
     .limit(3)
-    .select("title excerpt slug featuredImage publishedAt readTime")
+    .select("title excerpt slug featuredImage publishedAt readTime author")
+    .populate("author", "name image")
     .lean();
 
   return {
@@ -18,11 +19,11 @@ async function getFeaturedContent() {
   };
 }
 
-const FeaturedBlogSection = async() => {
-    const { blogs } = await getFeaturedContent();
-    return (
-       <FeaturedBlogClient blogs={blogs} />
-    );
+const FeaturedBlogSection = async () => {
+  const { blogs } = await getFeaturedContent();
+  return (
+    <FeaturedBlogClient blogs={blogs} />
+  );
 };
 
 export default FeaturedBlogSection;

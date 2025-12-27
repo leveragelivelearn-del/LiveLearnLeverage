@@ -36,12 +36,7 @@ export function BlogGrid({ blogs }: BlogGridProps) {
 
   return (
     <div className="space-y-8">
-      {/* Results Count */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Showing {Math.min(currentBlogs.length, itemsPerPage)} of {blogs.length} articles
-        </p>
-      </div>
+
 
       {/* Blog Grid */}
       {currentBlogs.length > 0 ? (
@@ -51,7 +46,7 @@ export function BlogGrid({ blogs }: BlogGridProps) {
               <BlogCard
                 key={blog._id}
                 blog={blog}
-                variant={index === 0 ? 'featured' : 'default'}
+                variant='default'
               />
             ))}
           </div>

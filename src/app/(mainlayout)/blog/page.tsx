@@ -59,7 +59,7 @@ async function getBlogData() {
   })
     .sort({ views: -1 })
     .limit(5)
-    .select('title slug views')
+    .select('title slug views featuredImage')
     .lean()
 
   // Get archive dates
