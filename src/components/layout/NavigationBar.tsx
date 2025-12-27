@@ -28,6 +28,7 @@ import { useTheme } from "next-themes";
 import { ThemeToggle } from "../theme-toggle";
 import Logo from "../logo";
 
+
 const navItems = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },
@@ -42,6 +43,7 @@ export function NavigationBar() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { theme } = useTheme();
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -117,6 +119,8 @@ export function NavigationBar() {
                 {item.name}
               </Link>
             ))}
+            
+
         </nav>
 
         {/* Right side - Auth, Theme & User Menu */}

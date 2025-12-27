@@ -72,9 +72,11 @@ export default function AboutPage() {
                     </h2>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chart-4/10 border border-chart-4/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-chart-4 animate-pulse"></span>
-                      <span className="text-[10px] font-bold text-chart-4 uppercase tracking-wider">Active</span>
+                      <span className="text-[10px] font-bold text-chart-4 uppercase tracking-wider">Active Scholar</span>
                     </div>
-                    <p className="text-primary font-medium text-sm pt-1">Private Credit Analyst</p>
+                    <p className="text-primary font-medium text-xs pt-1 leading-relaxed">
+                      Junior at Babson College | Fidelity Scholar | MLT Fellow | GWI SIP ’25
+                    </p>
                   </div>
 
                   {/* Contact Details */}
@@ -102,9 +104,11 @@ export default function AboutPage() {
                   </div>
 
                   {/* Resume Button */}
-                  <Button className="w-full rounded-xl py-5 bg-transparent border border-border hover:bg-foreground hover:text-background transition-all text-foreground font-medium text-sm group">
-                     Download My CV
-                     <Download className="ml-2 h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
+                  <Button asChild className="w-full rounded-xl py-5 bg-transparent border border-border hover:bg-foreground hover:text-background transition-all text-foreground font-medium text-sm group">
+                     <a href="/assets/gamaelle-charles-resume.pdf" download="Gamaelle_Charles_Resume.pdf">
+                       Download My CV
+                       <Download className="ml-2 h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
+                     </a>
                   </Button>
                 </div>
              </div>
@@ -127,13 +131,13 @@ export default function AboutPage() {
                        About Me
                      </div>
                      <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight text-foreground">
-                       Boost Business Strategic Solutions with Us
+                       Finance Student & Aspiring Investment Banker
                      </h2>
                      <p className="text-muted-foreground leading-relaxed text-sm md:text-base mb-4">
-                       Hello! I&apos;m Gamaelle Charles, a passionate Finance student. With a strong focus on creativity, innovation, and a commitment to continuous learning, I bring a unique blend of technical skills and strategic vision to each project I undertake.
+                       Finance student passionate about fair and free markets, civil duty, and investment banking/private equity with hands-on internship experience in private credit analysis and equity research.
                      </p>
                      <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                       I specialize in Private Credit Analysis, Financial Modeling, and Equity Research. My approach combines rigorous data analysis with forward-thinking strategy to drive sustainable growth.
+                       Developing expertise in financial modeling (DCF, LBO, pro forma), due diligence, and transaction analysis through professional experience and coursework. Fellow at Management Leadership for Tomorrow (MLT) and Girls Who Invest (GWI).
                      </p>
                   </div>
                 </div>
@@ -190,9 +194,10 @@ export default function AboutPage() {
                    </h3>
                    <div className="space-y-8 border-l-2 border-border pl-8 ml-4">
                       {[
-                        { role: 'VP of M&A', company: 'Global Investment Bank', period: '2020 - Present', desc: 'Led cross-border M&A transactions totaling over $5B in enterprise value.' },
-                        { role: 'Associate Director', company: 'Private Equity Firm', period: '2017 - 2020', desc: 'Managed portfolio company acquisitions and growth strategies.' },
-                        { role: 'Investment Banking Analyst', company: 'Boutique Advisory', period: '2014 - 2017', desc: 'Executed sell-side and buy-side M&A transactions across multiple sectors.' }
+                        { role: 'Private Credit Analyst', company: 'TPG Twin Brook Capital Partners', period: 'Jul 2025 - Aug 2025', desc: 'Incoming Summer Intern. Focusing on private credit analysis.' },
+                        { role: 'Fall Analyst', company: 'Thresher Fixed', period: 'Sep 2024 - May 2025', desc: 'Remote internship. Conducting fixed income research and analysis.' },
+                        { role: 'Finance Analyst', company: 'Charles River Development', period: 'Jul 2022 - Aug 2022', desc: 'Gained experience in financial operations and creative problem solving.' },
+                        { role: 'Client Solutions', company: 'State Street Global Advisors', period: 'Jul 2021 - Aug 2021', desc: 'Learned about client services and learning management systems.' }
                       ].map((item, i) => (
                         <div key={i} className="relative">
                            <span className="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-background border-2 border-primary"></span>
@@ -210,8 +215,10 @@ export default function AboutPage() {
                    </h3>
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {[
-                        { degree: 'MBA in Finance', school: 'Wharton School', year: '2014' },
-                        { degree: 'BSc in Economics', school: 'University of Chicago', year: '2010' }
+                        { degree: 'Finance, General', school: 'The London School of Economics (LSE)', year: '2025 - 2026' },
+                        { degree: 'BS Accounting & Finance', school: 'Babson College', year: '2023 - 2027' },
+                        { degree: 'Career Prep Fellow', school: 'Management Leadership for Tomorrow', year: '2024 - 2025' },
+                        { degree: 'High School Diploma', school: 'Boston Latin Academy', year: '2019 - 2023' }
                       ].map((item, i) => (
                         <div key={i} className="bg-accent p-6 rounded-xl border border-border">
                            <span className="text-xs text-chart-2 font-bold tracking-wider">{item.year}</span>
