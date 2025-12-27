@@ -7,9 +7,8 @@ import FAQClient from './FAQClient';
 export const revalidate = 300;
 
 async function getFAQs() {
-  await dbConnect();
-
   try {
+    await dbConnect();
     const settings = await Settings.findOne().lean();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
