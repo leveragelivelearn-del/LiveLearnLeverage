@@ -67,8 +67,7 @@ export function BlogCard({ blog, variant = 'default', className }: BlogCardProps
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8 border border-border">
             <AvatarImage src={blog.author.image} alt={blog.author.name} />
-            <AvatarFallback>{blog.author.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
+            <AvatarFallback>{blog.author.name.substring(0, 2).toUpperCase() || 'AN'}</AvatarFallback>          </Avatar>
           <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
             {blog.author.name}
           </span>
