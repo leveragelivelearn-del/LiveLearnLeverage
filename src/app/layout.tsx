@@ -9,8 +9,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import LenisProvider from "@/components/providers/LenisProvider";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { SplashScreen } from "@/components/ui/SplashScreen";
-import { ChatBot } from "@/components/ai/ChatBot";
-import { ChatProvider } from "@/components/providers/ChatProvider";
 
 // Initialize the font (This defines 'inter' which you were missing)
 const inter = Inter({ subsets: ["latin"] });
@@ -101,14 +99,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider>
-            <ChatProvider>
-              <LenisProvider>
-                <SplashScreen />
-                {children}
-                <ScrollToTop />
-                <ChatBot />
-              </LenisProvider>
-            </ChatProvider>
+            <LenisProvider>
+              <SplashScreen />
+              {children}
+              <ScrollToTop />
+
+            </LenisProvider>
             <Toaster />
           </SessionProvider>
         </ThemeProvider>

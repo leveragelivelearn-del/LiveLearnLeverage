@@ -86,40 +86,40 @@ export function NavigationBar() {
       )}
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6 relative">
-        
+
         {/* Logo */}
         <div className="flex items-center gap-6 z-20">
-            <div className={cn("transition-all duration-300", !isTransparent ? "" : "brightness-0 invert")}> 
-               <Logo />
-            </div>
+          <div className={cn("transition-all duration-300", !isTransparent ? "" : "brightness-0 invert")}>
+            <Logo />
+          </div>
         </div>
 
         {/* Desktop Navigation in Rounded Bar */}
-        <nav 
+        <nav
           className={cn(
             "hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2",
             "px-2 py-1.5 rounded-full transition-all duration-300",
-            !isTransparent 
+            !isTransparent
               ? "bg-background/50 border border-border shadow-sm" // Solid Pill
               : "bg-white/10 border border-white/20 backdrop-blur-md shadow-lg" // Glassy Pill
           )}
         >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "text-xs font-bold tracking-widest uppercase transition-all duration-300 relative group px-5 py-2.5 rounded-full",
-                  textColorClass,
-                  pathname === item.href
-                    ? "bg-primary text-white shadow-md"
-                    : "hover:bg-white/10"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "text-xs font-bold tracking-widest uppercase transition-all duration-300 relative group px-5 py-2.5 rounded-full",
+                textColorClass,
+                pathname === item.href
+                  ? "bg-primary text-white shadow-md"
+                  : "hover:bg-white/10"
+              )}
+            >
+              {item.name}
+            </Link>
+          ))}
+
 
         </nav>
 
@@ -127,7 +127,7 @@ export function NavigationBar() {
         <div className="flex items-center gap-4 z-20">
           <div className="hidden md:block">
             <div className={!isTransparent ? "" : "[&_button]:text-white"}>
-                 <ThemeToggle />
+              <ThemeToggle />
             </div>
           </div>
 
@@ -142,8 +142,8 @@ export function NavigationBar() {
                   <Button
                     variant="ghost"
                     className={cn(
-                        "hidden md:flex items-center rounded-full transition-all focus-visible:ring-0 focus-visible:ring-offset-0 px-2",
-                        !isTransparent ? "hover:bg-accent/50" : "hover:bg-white/10 text-white"
+                      "hidden md:flex items-center rounded-full transition-all focus-visible:ring-0 focus-visible:ring-offset-0 px-2",
+                      !isTransparent ? "hover:bg-accent/50" : "hover:bg-white/10 text-white"
                     )}
                   >
                     <div className="relative">
@@ -185,24 +185,31 @@ export function NavigationBar() {
                   <DropdownMenuSeparator />
                   {(session.user?.role === "admin" ||
                     session.user?.role === "editor") && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin" className="cursor-pointer">
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin/models" className="cursor-pointer">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Manage Content
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin" className="cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin/models" className="cursor-pointer">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Manage Content
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
 
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+
                   <DropdownMenuItem
                     onClick={handleSignOut}
                     className="cursor-pointer text-red-600 focus:text-red-600"
@@ -232,18 +239,18 @@ export function NavigationBar() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                   <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuLabel>
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{session.user?.name}</span>
-                          <span className="text-xs text-muted-foreground">{session.user?.email}</span>
-                        </div>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                        <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                     </DropdownMenuItem>
-                   </DropdownMenuContent>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{session.user?.name}</span>
+                        <span className="text-xs text-muted-foreground">{session.user?.email}</span>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </>
@@ -254,10 +261,10 @@ export function NavigationBar() {
                 size="sm"
                 onClick={() => router.push("/login")}
                 className={cn(
-                    "hidden md:flex items-center gap-2 transition-all",
-                    !isTransparent 
-                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
-                        : "border-white text-white hover:bg-white hover:text-black bg-transparent"
+                  "hidden md:flex items-center gap-2 transition-all",
+                  !isTransparent
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                    : "border-white text-white hover:bg-white hover:text-black bg-transparent"
                 )}
               >
                 <User className="h-4 w-4" />
@@ -282,32 +289,32 @@ export function NavigationBar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-               <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between mb-6">
-                      <span className="font-bold text-lg">Menu</span>
-                      <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                          <X className="h-5 w-5"/>
-                      </Button>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between mb-6">
+                  <span className="font-bold text-lg">Menu</span>
+                  <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <nav className="flex-1 space-y-1">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={cn(
+                        "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+                        pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent"
+                      )}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                  <div className="border-t my-3 pt-3">
+                    <ThemeToggle />
                   </div>
-                  <nav className="flex-1 space-y-1">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setIsOpen(false)}
-                            className={cn(
-                                "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-                                pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent"
-                            )}
-                        >
-                            {item.name}
-                        </Link>
-                    ))}
-                    <div className="border-t my-3 pt-3">
-                        <ThemeToggle />
-                    </div>
-                  </nav>
-               </div>
+                </nav>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

@@ -3,6 +3,7 @@ import { Facebook, Linkedin, Twitter, Mail, Instagram, MapPin, Phone } from 'luc
 import dbConnect from '@/lib/db'
 import Settings from '@/models/settings'
 import Logo from '../logo'
+import { WhatsAppIcon } from '../icons/WhatsappIcon'
 
 async function getSettings() {
   try {
@@ -18,9 +19,9 @@ async function getSettings() {
 export async function Footer() {
   const settings = await getSettings()
   const currentYear = new Date().getFullYear()
-  
+
   const socialLinks = []
-  
+
   if (settings?.socialLinks?.linkedin) {
     socialLinks.push({ icon: Linkedin, href: settings.socialLinks.linkedin, label: 'LinkedIn' })
   }
@@ -32,6 +33,9 @@ export async function Footer() {
   }
   if (settings?.socialLinks?.instagram) {
     socialLinks.push({ icon: Instagram, href: settings.socialLinks.instagram, label: 'Instagram' })
+  }
+  if (settings?.socialLinks?.whatsapp) {
+    socialLinks.push({ icon: WhatsAppIcon, href: settings.socialLinks.whatsapp, label: 'WhatsApp' })
   }
   // Optional: Add email to social row if desired, or keep just in contact section below
   if (settings?.contactEmail) {
@@ -51,7 +55,7 @@ export async function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
-            <Logo/>
+            <Logo />
             <p className="text-sm text-muted-foreground">
               {settings?.siteDescription || 'Showcasing M&A expertise, financial models, and investment insights.'}
             </p>
@@ -105,15 +109,15 @@ export async function Footer() {
                   </div>
                 )}
               </div>
-              
+
               {/* Phone Section */}
               {settings?.contactPhone && (
-                 <div className="flex items-center gap-3">
-                   <Phone className="h-4 w-4 shrink-0" />
-                   <a href={`tel:${settings.contactPhone}`} className="hover:text-primary transition-colors">
-                     {settings.contactPhone}
-                   </a>
-                 </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <a href={`tel:${settings.contactPhone}`} className="hover:text-primary transition-colors">
+                    {settings.contactPhone}
+                  </a>
+                </div>
               )}
 
               {/* Email Section */}

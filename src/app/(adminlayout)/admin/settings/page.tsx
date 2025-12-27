@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
+import {
   Save,
   Globe,
   Mail,
@@ -27,7 +27,7 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [settings, setSettings] = useState<any>({
-    socialLinks: {}, 
+    socialLinks: {},
     faqs: [] // Initialize faqs array
   })
 
@@ -151,44 +151,48 @@ export default function SettingsPage() {
                 <Label>Site Description</Label>
                 <Textarea value={settings.siteDescription || ''} onChange={(e) => handleChange('siteDescription', e.target.value)} />
               </div>
-              
+
               <div className="space-y-2 pt-4 border-t">
                 <h3 className="text-lg font-medium">Contact Info (Footer)</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Contact Email</Label>
-                        <Input value={settings.contactEmail || ''} onChange={(e) => handleChange('contactEmail', e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Contact Phone</Label>
-                        <Input value={settings.contactPhone || ''} onChange={(e) => handleChange('contactPhone', e.target.value)} />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                        <Label>Address</Label>
-                        <Textarea rows={2} value={settings.contactAddress || ''} onChange={(e) => handleChange('contactAddress', e.target.value)} />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Contact Email</Label>
+                    <Input value={settings.contactEmail || ''} onChange={(e) => handleChange('contactEmail', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contact Phone</Label>
+                    <Input value={settings.contactPhone || ''} onChange={(e) => handleChange('contactPhone', e.target.value)} />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Address</Label>
+                    <Textarea rows={2} value={settings.contactAddress || ''} onChange={(e) => handleChange('contactAddress', e.target.value)} />
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-2 pt-4 border-t">
                 <h3 className="text-lg font-medium">Social Links</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>LinkedIn</Label>
-                        <Input placeholder="https://linkedin.com/in/..." value={settings.socialLinks?.linkedin || ''} onChange={(e) => handleSocialChange('linkedin', e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Twitter/X</Label>
-                        <Input placeholder="https://twitter.com/..." value={settings.socialLinks?.twitter || ''} onChange={(e) => handleSocialChange('twitter', e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Facebook</Label>
-                        <Input placeholder="https://facebook.com/..." value={settings.socialLinks?.facebook || ''} onChange={(e) => handleSocialChange('facebook', e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Instagram</Label>
-                        <Input placeholder="https://instagram.com/..." value={settings.socialLinks?.instagram || ''} onChange={(e) => handleSocialChange('instagram', e.target.value)} />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>LinkedIn</Label>
+                    <Input placeholder="https://linkedin.com/in/..." value={settings.socialLinks?.linkedin || ''} onChange={(e) => handleSocialChange('linkedin', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Twitter/X</Label>
+                    <Input placeholder="https://twitter.com/..." value={settings.socialLinks?.twitter || ''} onChange={(e) => handleSocialChange('twitter', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Facebook</Label>
+                    <Input placeholder="https://facebook.com/..." value={settings.socialLinks?.facebook || ''} onChange={(e) => handleSocialChange('facebook', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Instagram</Label>
+                    <Input placeholder="https://instagram.com/..." value={settings.socialLinks?.instagram || ''} onChange={(e) => handleSocialChange('instagram', e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>WhatsApp</Label>
+                    <Input placeholder="https://wa.me/..." value={settings.socialLinks?.whatsapp || ''} onChange={(e) => handleSocialChange('whatsapp', e.target.value)} />
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -218,25 +222,25 @@ export default function SettingsPage() {
                     <div className="flex-1 space-y-4">
                       <div className="space-y-2">
                         <Label>Question {index + 1}</Label>
-                        <Input 
-                          value={faq.question} 
+                        <Input
+                          value={faq.question}
                           onChange={(e) => handleFAQChange(index, 'question', e.target.value)}
-                          placeholder="e.g. How can your product help me?" 
+                          placeholder="e.g. How can your product help me?"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label>Answer</Label>
-                        <Textarea 
-                          value={faq.answer} 
+                        <Textarea
+                          value={faq.answer}
                           onChange={(e) => handleFAQChange(index, 'answer', e.target.value)}
-                          placeholder="Answer here..." 
+                          placeholder="Answer here..."
                           rows={3}
                         />
                       </div>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="text-destructive hover:text-destructive/90 mt-8"
                       onClick={() => handleRemoveFAQ(index)}
                     >
@@ -285,23 +289,23 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="email">
-            <Card>
-                <CardHeader><CardTitle>Email Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>SMTP Host</Label>
-                            <Input value={settings.smtpHost || ''} onChange={(e) => handleChange('smtpHost', e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>SMTP Port</Label>
-                            <Input value={settings.smtpPort || ''} onChange={(e) => handleChange('smtpPort', e.target.value)} />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+          <Card>
+            <CardHeader><CardTitle>Email Settings</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>SMTP Host</Label>
+                  <Input value={settings.smtpHost || ''} onChange={(e) => handleChange('smtpHost', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>SMTP Port</Label>
+                  <Input value={settings.smtpPort || ''} onChange={(e) => handleChange('smtpPort', e.target.value)} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

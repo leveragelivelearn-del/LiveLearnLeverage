@@ -25,11 +25,11 @@ interface BlogSidebarProps {
   }>
 }
 
-export function BlogSidebar({ 
-  categories, 
-  tags, 
-  popularPosts, 
-  archiveMonths 
+export function BlogSidebar({
+  categories,
+  tags,
+  popularPosts,
+  archiveMonths
 }: BlogSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -110,7 +110,7 @@ export function BlogSidebar({
             <div className="space-y-4">
               {popularPosts.map((post) => (
                 <div key={post.slug} className="border-b last:border-0 pb-4 last:pb-0">
-                  <Link 
+                  <Link
                     href={`/blog/${post.slug}`}
                     className="block hover:text-primary transition-colors"
                   >
@@ -128,35 +128,7 @@ export function BlogSidebar({
         </Card>
       )}
 
-      {/* Tags */}
-      {tags.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Popular Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {tags.slice(0, 15).map((tag) => (
-                /* FIX: Wrapped Badge with Link instead of using asChild */
-                <Link 
-                  key={tag} 
-                  href={`/blog?tag=${encodeURIComponent(tag)}`}
-                >
-                  <Badge
-                    variant="secondary"
-                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    {tag}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+
 
       {/* Archive */}
       {archiveMonths.length > 0 && (
@@ -176,7 +148,7 @@ export function BlogSidebar({
                   className="w-full justify-between"
                   asChild
                 >
-                  <Link 
+                  <Link
                     href={`/blog?year=${archive._id.year}&month=${archive._id.month}`}
                   >
                     <span>{formatMonth(archive._id.year, archive._id.month)}</span>

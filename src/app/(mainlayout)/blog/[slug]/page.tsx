@@ -11,16 +11,21 @@ import { BlogCard } from '@/components/blog/BlogCard'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 import { formatDate } from '@/lib/utils'
-import { 
-  ArrowLeft, 
-  CalendarDays, 
-  Clock, 
-  User as UserIcon, 
+import {
+  ArrowLeft,
+  CalendarDays,
+  Clock,
+  User as UserIcon,
   Eye,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
 import ReadOnlyEditor from '@/components/tiptap-templates/simple/read-only-editor'
+import { CommentSection } from '@/components/blog/CommentSection'
+import { BookmarkButton } from '@/components/blog/BookmarkButton'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import User from '@/models/User'
 
 // Correct type for Next.js 15+ dynamic params
 interface BlogDetailPageProps {
@@ -32,7 +37,7 @@ interface BlogDetailPageProps {
 export async function generateMetadata(props: BlogDetailPageProps): Promise<Metadata> {
   const params = await props.params;
   await dbConnect()
-  
+
   // FIX: Added <any> to lean() to tell TypeScript the author field is populated
   const blog = await Blog.findOne({ slug: params.slug })
     .populate('author', 'name')
@@ -66,36 +71,36 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
 
 async function getBlogPostAndRelated(slug: string) {
   await dbConnect()
-  
+
   // FIX: Added <any> to lean() here as well for consistency
   const blog = await Blog.findOne({ slug })
     .populate('author', 'name image bio')
     .lean<any>()
-  
+
   if (!blog || !blog.published) {
     return null
   }
-  
+
   await Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } })
-  
+
   const [prevPost, nextPost] = await Promise.all([
     Blog.findOne({
       published: true,
       publishedAt: { $lt: blog.publishedAt }
     })
-    .sort({ publishedAt: -1 })
-    .select('title slug')
-    .lean(),
-    
+      .sort({ publishedAt: -1 })
+      .select('title slug')
+      .lean(),
+
     Blog.findOne({
       published: true,
       publishedAt: { $gt: blog.publishedAt }
     })
-    .sort({ publishedAt: 1 })
-    .select('title slug')
-    .lean(),
+      .sort({ publishedAt: 1 })
+      .select('title slug')
+      .lean(),
   ])
-  
+
   const relatedPosts = await Blog.find({
     _id: { $ne: blog._id },
     published: true,
@@ -104,12 +109,12 @@ async function getBlogPostAndRelated(slug: string) {
       { tags: { $in: blog.tags } }
     ]
   })
-  .sort({ publishedAt: -1 })
-  .limit(3)
-  .populate('author', 'name image')
-  .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
-  .lean<any>() // Also treating related posts as any to handle populated author safely
-  
+    .sort({ publishedAt: -1 })
+    .limit(3)
+    .populate('author', 'name image')
+    .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
+    .lean<any>() // Also treating related posts as any to handle populated author safely
+
   return {
     blog: JSON.parse(JSON.stringify(blog)),
     prevPost: JSON.parse(JSON.stringify(prevPost)),
@@ -121,12 +126,26 @@ async function getBlogPostAndRelated(slug: string) {
 export default async function BlogDetailPage(props: BlogDetailPageProps) {
   const params = await props.params;
   const data = await getBlogPostAndRelated(params.slug)
-  
+
   if (!data) {
     notFound()
   }
-  
+
   const { blog, prevPost, nextPost, relatedPosts } = data
+
+
+
+  // Check if bookmarked
+  const session = await getServerSession(authOptions)
+  let isBookmarked = false
+  if (session?.user?.id) {
+    await dbConnect()
+    const user = await User.findById(session.user.id).select('bookmarks').lean()
+    if (user && user.bookmarks) {
+      // user.bookmarks is an array of ObjectIds, we need to convert to string for comparison
+      isBookmarked = user.bookmarks.some((id: any) => id.toString() === blog._id.toString())
+    }
+  }
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -174,7 +193,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
               <span className="mx-2">/</span>
               {blog.category && (
                 <>
-                  <Link 
+                  <Link
                     href={`/blog?category=${encodeURIComponent(blog.category)}`}
                     className="hover:text-primary transition-colors"
                   >
@@ -199,7 +218,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                 Back to Articles
               </Link>
             </Button>
-            
+
             <div className="space-y-6">
               {/* Category and Tags */}
               <div className="flex flex-wrap items-center gap-2">
@@ -214,12 +233,12 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                   </Badge>
                 ))}
               </div>
-              
+
               {/* Title */}
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-tight">
                 {blog.title}
               </h1>
-              
+
               {/* Meta Info Grid */}
               <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground border-y py-4">
                 <div className="flex items-center gap-2 min-w-fit">
@@ -233,7 +252,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                     />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <UserIcon className="h-5 w-5 text-primary" />
+                      <UserIcon className="h-5 w-5 text-primary" />
                     </div>
                   )}
                   <div className="flex flex-col">
@@ -241,19 +260,22 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                     <span className="font-medium">{blog.author.name}</span>
                   </div>
                 </div>
-                
+
                 <div className="w-px h-8 bg-border hidden sm:block" />
 
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4" />
                   <span>{formatDate(blog.publishedAt)}</span>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <span>{blog.readTime} min read</span>
                 </div>
-              
+
+                <div className="w-px h-8 bg-border hidden sm:block" />
+
+                <BookmarkButton blogId={blog._id.toString()} initialIsBookmarked={isBookmarked} />
               </div>
             </div>
           </div>
@@ -281,13 +303,13 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
           {/* FIX: Increased max-w to 7xl to allow sidebar room */}
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex flex-col lg:flex-row gap-12">
-              
+
               {/* Article Content Column (2/3 width) */}
               <div className="lg:w-3/4">
                 <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
                   <ReadOnlyEditor content={blog.content} />
                 </article>
-                
+
                 {/* Bottom Tags */}
                 {blog.tags.length > 0 && (
                   <div className="mt-12 pt-8 border-t">
@@ -303,17 +325,22 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Mobile Share Buttons (Visible only on small screens) */}
                 <div className="lg:hidden mt-8">
-                   <ShareButtons
+                  <ShareButtons
                     url={shareUrl}
                     title={blog.title}
                     description={blog.excerpt}
                   />
                 </div>
-                
-              
+
+
+                {/* Comment Section */}
+                <div className="mt-12 pt-8 border-t">
+                  <CommentSection postId={blog._id.toString()} postType="blog" />
+                </div>
+
                 {/* Post Navigation */}
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {prevPost ? (
@@ -331,7 +358,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                       </Card>
                     </Link>
                   ) : <div />}
-                  
+
                   {nextPost && (
                     <Link href={`/blog/${nextPost.slug}`} className="group block">
                       <Card className="h-full hover:border-primary/50 transition-colors">
@@ -348,39 +375,40 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                     </Link>
                   )}
                 </div>
+
               </div>
-              
+
               {/* Sidebar Column (1/3 width) - Sticky */}
               <aside className="lg:w-1/4 space-y-8">
                 {/* Sticky Wrapper */}
                 <div className="sticky top-24 space-y-8">
-                    {/* Table of Contents */}
-                    
+                  {/* Table of Contents */}
 
-                    {/* Desktop Share Buttons */}
-                    <div className="hidden lg:block">
-                        <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                            Share this article
-                        </h3>
-                        <ShareButtons
-                            url={shareUrl}
-                            title={blog.title}
-                            description={blog.excerpt}
-                        />
-                    </div>
 
-                    {/* Simple CTA/Ad placeholder */}
-                    <Card className="bg-primary/5 border-primary/20">
-                        <CardContent className="p-6">
-                            <h4 className="font-bold mb-2">Need Financial Models?</h4>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                Download professional M&A and valuation templates.
-                            </p>
-                            <Button className="w-full" size="sm" asChild>
-                                <Link href="/models">Browse Models</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
+                  {/* Desktop Share Buttons */}
+                  <div className="hidden lg:block">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
+                      Share this article
+                    </h3>
+                    <ShareButtons
+                      url={shareUrl}
+                      title={blog.title}
+                      description={blog.excerpt}
+                    />
+                  </div>
+
+                  {/* Simple CTA/Ad placeholder */}
+                  <Card className="bg-primary/5 border-primary/20">
+                    <CardContent className="p-6">
+                      <h4 className="font-bold mb-2">Need Financial Models?</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Download professional M&A and valuation templates.
+                      </p>
+                      <Button className="w-full" size="sm" asChild>
+                        <Link href="/models">Browse Models</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
               </aside>
 
@@ -394,14 +422,14 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
             <div className="container mx-auto px-4 max-w-7xl">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h2 className="text-2xl font-bold">Related Articles</h2>
-                    <p className="text-muted-foreground">More insights from {blog.category}</p>
+                  <h2 className="text-2xl font-bold">Related Articles</h2>
+                  <p className="text-muted-foreground">More insights from {blog.category}</p>
                 </div>
                 <Button variant="outline" asChild>
-                    <Link href="/blog">View All</Link>
+                  <Link href="/blog">View All</Link>
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {relatedPosts.map((post: any) => (
                   <BlogCard key={post._id} blog={post} />
@@ -422,7 +450,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
               <p className="text-muted-foreground text-lg">
                 Get the latest financial insights, M&A trends, and modeling tips delivered directly to your inbox.
               </p>
-              
+
               <form className="max-w-md mx-auto flex gap-2 pt-4">
                 <input
                   type="email"
@@ -447,7 +475,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 export async function generateStaticParams() {
   await dbConnect()
   const blogs = await Blog.find({ published: true }).select('slug').lean()
-  
+
   return blogs.map((blog) => ({
     slug: blog.slug,
   }))

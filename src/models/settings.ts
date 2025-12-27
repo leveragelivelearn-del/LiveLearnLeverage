@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const SettingsSchema = new mongoose.Schema({
-  
+
   // General
   siteName: { type: String, default: 'LiveLearnLeverage' },
   siteUrl: { type: String, default: 'https://livelearnleverage.com' },
@@ -16,6 +16,7 @@ const SettingsSchema = new mongoose.Schema({
     facebook: { type: String, default: '' },
     instagram: { type: String, default: '' },
     youtube: { type: String, default: '' },
+    whatsapp: { type: String, default: '' },
   },
 
   // Contact Info

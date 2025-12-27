@@ -1,11 +1,12 @@
 import { Metadata } from 'next';
+import Image from 'next/image';
 import ModelsContent from './ModelsContent';
 import dbConnect from '@/lib/db';
 import Model from '@/models/Model';
 
 // --- ISR CONFIGURATION ---
 // Revalidate this page every 5 minutes (300 seconds)
-export const revalidate = 300; 
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'M&A Models & Deal Analysis | LiveLearnLeverage',
@@ -44,21 +45,36 @@ export default async function ModelsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-12 md:py-20 bg-gradient-to-br from-primary/5 to-purple-500/5">
-        <div className="container mx-auto px-4">
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-32 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/assets/modelbanner.png"
+            alt="M&A Models Banner"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/60" />
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10 text-white">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
               M&A Models & Deal Analysis
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-gray-200">
               Explore detailed financial models and comprehensive analysis of M&A transactions across various industries.
             </p>
-            <div className="pt-4">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold">{models.length}</span> deals analyzed
-                <span className="mx-2">•</span>
-                <span className="font-semibold">${formattedValue}B+</span> total transaction value
-              </p>
+            <div className="pt-4 flex justify-center gap-6 text-sm font-medium text-gray-300">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white text-lg">{models.length}</span> deals analyzed
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white text-lg">${formattedValue}B+</span> total transaction value
+              </div>
             </div>
           </div>
         </div>

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { ModelCard } from '@/components/models/ModelCard';
 import { BlogCard } from '@/components/blog/BlogCard';
+import { WhatsAppIcon } from '@/components/icons/WhatsappIcon';
 
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState('about');
@@ -31,6 +32,21 @@ export default function AboutPage() {
   const [models, setModels] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [blogs, setBlogs] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch('/api/settings');
+        const data = await res.json();
+        setSettings(data);
+      } catch (error) {
+        console.error("Failed to fetch settings", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'portfolio' && models.length === 0) {
@@ -132,16 +148,33 @@ export default function AboutPage() {
 
                 {/* Socials */}
                 <div className="flex justify-center gap-2 mb-6">
-                  {[
-                    { icon: Facebook, href: '#' },
-                    { icon: Twitter, href: '#' },
-                    { icon: Linkedin, href: 'https://linkedin.com' },
-                    { icon: Instagram, href: '#' }
-                  ].map((Item, i) => (
-                    <Button key={i} variant="outline" size="icon" className="rounded-full bg-accent border-border hover:bg-gradient-to-r hover:from-primary hover:to-chart-4 hover:text-primary-foreground hover:border-transparent transition-all text-muted-foreground h-9 w-9">
-                      <Item.icon className="h-4 w-4" />
-                    </Button>
-                  ))}
+                  {(() => {
+                    const links = [];
+                    if (settings?.socialLinks?.facebook) links.push({ icon: Facebook, href: settings.socialLinks.facebook });
+                    if (settings?.socialLinks?.twitter) links.push({ icon: Twitter, href: settings.socialLinks.twitter });
+                    if (settings?.socialLinks?.linkedin) links.push({ icon: Linkedin, href: settings.socialLinks.linkedin });
+                    if (settings?.socialLinks?.instagram) links.push({ icon: Instagram, href: settings.socialLinks.instagram });
+                    if (settings?.socialLinks?.whatsapp) links.push({ icon: WhatsAppIcon, href: settings.socialLinks.whatsapp });
+
+                    if (links.length === 0) {
+                      // Fallback static links if no settings yet (or loading)
+                      return (
+                        <>
+                          <Button variant="outline" size="icon" className="rounded-full bg-accent border-border hover:bg-gradient-to-r hover:from-primary hover:to-chart-4 hover:text-primary-foreground hover:border-transparent transition-all text-muted-foreground h-9 w-9">
+                            <Linkedin className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )
+                    }
+
+                    return links.map((Item, i) => (
+                      <a key={i} href={Item.href} target="_blank" rel="noopener noreferrer">
+                        <Button variant="outline" size="icon" className="rounded-full bg-accent border-border hover:bg-gradient-to-r hover:from-primary hover:to-chart-4 hover:text-primary-foreground hover:border-transparent transition-all text-muted-foreground h-9 w-9">
+                          <Item.icon className="h-4 w-4" />
+                        </Button>
+                      </a>
+                    ));
+                  })()}
                 </div>
 
                 {/* Resume Button */}

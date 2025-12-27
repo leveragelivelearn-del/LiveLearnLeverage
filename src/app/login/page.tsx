@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,15 +11,24 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Lock } from 'lucide-react'
 import { toast } from 'sonner'
+import { Suspense } from 'react'
 
-export default function AdminLoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || '/auth/post-login'
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
+
+  // Google Login Handler
+  const handleGoogleLogin = () => {
+    signIn('google', { callbackUrl })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -38,7 +47,11 @@ export default function AdminLoginPage() {
         toast.error('Login failed')
       } else {
         toast.success('Logged in successfully')
-        router.push('/admin')
+        // Use the same callback logic for credentials too if desired, 
+        // but typically Admin Login Page implies Admin intention.
+        // For now, let's respect the callbackUrl or go to admin for explicit credential login?
+        // The original code went to /admin. Let's keep it but respect callback if present.
+        router.push(callbackUrl === '/auth/post-login' ? '/admin' : callbackUrl)
         router.refresh()
       }
     } catch (error) {
@@ -59,16 +72,16 @@ export default function AdminLoginPage() {
             </div>
           </div>
           <CardTitle className="text-2xl text-center">
-            Admin Login
+            Login
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access the dashboard
+            Sign in to your account
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <div className="grid gap-4">
-            <Button variant="outline" onClick={() => signIn('google')} type="button" disabled={isLoading}>
+            <Button variant="outline" onClick={handleGoogleLogin} type="button" disabled={isLoading}>
               <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
                 <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
               </svg>
@@ -90,7 +103,7 @@ export default function AdminLoginPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -103,7 +116,7 @@ export default function AdminLoginPage() {
                 disabled={isLoading}
               />
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
@@ -124,7 +137,7 @@ export default function AdminLoginPage() {
                 disabled={isLoading}
               />
             </div>
-            
+
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <>
@@ -137,7 +150,7 @@ export default function AdminLoginPage() {
             </Button>
           </form>
         </CardContent>
-        
+
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm text-muted-foreground">
             <p>
@@ -147,7 +160,7 @@ export default function AdminLoginPage() {
               Contact support if you need access.
             </p>
           </div>
-          
+
           <Button variant="outline" className="w-full" asChild>
             <Link href="/">
               ← Back to Home
@@ -156,5 +169,14 @@ export default function AdminLoginPage() {
         </CardFooter>
       </Card>
     </div>
+  )
+}
+
+// Main export wrapped in Suspense
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }

@@ -52,10 +52,42 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
+        await dbConnect()
+        try {
+          const existingUser = await User.findOne({ email: user.email })
+          if (!existingUser) {
+            const newUser = await User.create({
+              name: user.name || profile?.name || 'Google User',
+              email: user.email,
+              image: user.image,
+              password: bcrypt.hashSync(Math.random().toString(36).slice(-8), 10), // Dummy password
+              role: 'user',
+            })
+          }
+          return true
+        } catch (error) {
+          console.error("Error creating user from Google login", error)
+          return false
+        }
+      }
+      return true
+    },
+    async jwt({ token, user, account }) {
       if (user) {
         token.role = user.role
         token.id = user.id
+
+        // FIX: If Google login, fetch the REAL MongoDB ID
+        if (account?.provider === 'google') {
+          await dbConnect()
+          const dbUser = await User.findOne({ email: user.email })
+          if (dbUser) {
+            token.id = dbUser._id.toString()
+            token.role = dbUser.role
+          }
+        }
       }
       return token
     },

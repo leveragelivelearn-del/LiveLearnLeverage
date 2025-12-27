@@ -12,6 +12,12 @@ const CommentSchema = new mongoose.Schema({
     required: true,
     trim: true,
     lowercase: true,
+
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false // Optional for now to support old comments or guests if we ever allow that
   },
   content: {
     type: String,
@@ -45,19 +51,11 @@ const CommentSchema = new mongoose.Schema({
     ref: 'Comment',
     default: null,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-})
+}, { timestamps: true })
 
-CommentSchema.pre('save', function (next: any) {
-  this.updatedAt = new Date()
-  next()
-})
+// FIX: Force delete model to clear bad cache from previous HMR
+if (process.env.NODE_ENV === 'development' && mongoose.models && mongoose.models.Comment) {
+  delete mongoose.models.Comment
+}
 
 export default mongoose.models.Comment || mongoose.model('Comment', CommentSchema)

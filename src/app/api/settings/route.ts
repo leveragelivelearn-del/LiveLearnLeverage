@@ -9,10 +9,10 @@ import Settings from '@/models/settings'
 export async function GET() {
   try {
     await dbConnect()
-    
+
     // Find the first (and only) settings document, or create default
     let settings = await Settings.findOne().lean()
-    
+
     if (!settings) {
       settings = await Settings.create({})
     }
@@ -31,7 +31,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -41,18 +41,17 @@ export async function POST(request: NextRequest) {
 
     await dbConnect()
     const data = await request.json()
-
     // Update the single settings document, or create if it doesn't exist
     // upsert: true creates it if it doesn't exist
     const settings = await Settings.findOneAndUpdate(
-      {}, 
+      {},
       { ...data, updatedAt: new Date() },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     )
 
-    return NextResponse.json({ 
-      message: 'Settings saved successfully', 
-      settings 
+    return NextResponse.json({
+      message: 'Settings saved successfully',
+      settings
     })
   } catch (error) {
     console.error('Error saving settings:', error)

@@ -6,88 +6,40 @@ import { BlogCard } from './BlogCard'
 import { Button } from '@/components/ui/button'
 
 interface BlogGridProps {
-  initialBlogs: any[]
+  blogs: any[]
 }
 
-export function BlogGrid({ initialBlogs }: BlogGridProps) {
-  const [blogs, setBlogs] = useState(initialBlogs)
-  const [filters, setFilters] = useState({
-    category: 'all',
-    tag: 'all',
-    search: '',
-    sortBy: 'newest',
-  })
+export function BlogGrid({ blogs }: BlogGridProps) {
   const [currentPage, setCurrentPage] = useState(1)
-  
-  const itemsPerPage = 9
 
-  // Memoize filtered and sorted blogs
-  const filteredBlogs = useMemo(() => {
-    let result = [...blogs]
-    
-    // Apply category filter
-    if (filters.category !== 'all') {
-      result = result.filter(blog => blog.category === filters.category)
-    }
-    
-    // Apply tag filter
-    if (filters.tag !== 'all') {
-      result = result.filter(blog => 
-        blog.tags?.includes(filters.tag)
-      )
-    }
-    
-    // Apply search filter
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
-      result = result.filter(blog => 
-        blog.title.toLowerCase().includes(searchLower) ||
-        blog.excerpt.toLowerCase().includes(searchLower) ||
-        blog.tags?.some((tag: string) => tag.toLowerCase().includes(searchLower)) ||
-        blog.category?.toLowerCase().includes(searchLower)
-      )
-    }
-    
-    // Apply sorting
-    switch (filters.sortBy) {
-      case 'newest':
-        result.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-        break
-      case 'oldest':
-        result.sort((a, b) => new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime())
-        break
-      case 'popular':
-        result.sort((a, b) => (b.views || 0) - (a.views || 0))
-        break
-      case 'read-time':
-        result.sort((a, b) => (b.readTime || 0) - (a.readTime || 0))
-        break
-    }
-    
-    return result
-  }, [blogs, filters])
+  const itemsPerPage = 9
 
   // Memoize current page blogs
   const currentBlogs = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
-    return filteredBlogs.slice(startIndex, endIndex)
-  }, [filteredBlogs, currentPage, itemsPerPage])
+    return blogs.slice(startIndex, endIndex)
+  }, [blogs, currentPage, itemsPerPage])
 
   // Calculate total pages
-  const totalPages = Math.ceil(filteredBlogs.length / itemsPerPage)
+  const totalPages = Math.ceil(blogs.length / itemsPerPage)
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Reset page when blogs result changes (e.g. filter applied)
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [blogs]);
+
   return (
     <div className="space-y-8">
       {/* Results Count */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {Math.min(currentBlogs.length, itemsPerPage)} of {filteredBlogs.length} articles
+          Showing {Math.min(currentBlogs.length, itemsPerPage)} of {blogs.length} articles
         </p>
       </div>
 
@@ -96,9 +48,9 @@ export function BlogGrid({ initialBlogs }: BlogGridProps) {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentBlogs.map((blog, index) => (
-              <BlogCard 
-                key={blog._id} 
-                blog={blog} 
+              <BlogCard
+                key={blog._id}
+                blog={blog}
                 variant={index === 0 ? 'featured' : 'default'}
               />
             ))}
@@ -115,7 +67,7 @@ export function BlogGrid({ initialBlogs }: BlogGridProps) {
               >
                 Previous
               </Button>
-              
+
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum
                 if (totalPages <= 5) {
@@ -127,7 +79,7 @@ export function BlogGrid({ initialBlogs }: BlogGridProps) {
                 } else {
                   pageNum = currentPage - 2 + i
                 }
-                
+
                 return (
                   <Button
                     key={pageNum}
@@ -139,7 +91,7 @@ export function BlogGrid({ initialBlogs }: BlogGridProps) {
                   </Button>
                 )
               })}
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -156,17 +108,6 @@ export function BlogGrid({ initialBlogs }: BlogGridProps) {
           <div className="text-muted-foreground mb-4">
             No articles found matching your filters.
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setFilters({
-              category: 'all',
-              tag: 'all',
-              search: '',
-              sortBy: 'newest',
-            })}
-          >
-            Clear all filters
-          </Button>
         </div>
       )}
     </div>

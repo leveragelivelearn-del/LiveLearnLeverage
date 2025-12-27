@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { CalendarDays, Clock, User } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
+import { BookmarkButton } from './BookmarkButton'
+
 interface BlogCardProps {
   blog: {
     _id: string
@@ -22,6 +24,7 @@ interface BlogCardProps {
     publishedAt: string
     readTime: number
     views: number
+    isBookmarked?: boolean
   }
   variant?: 'default' | 'featured'
 }
@@ -46,11 +49,11 @@ export function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
           )}
         </div>
       )}
-      
+
       <CardHeader className="pb-3">
         <div className="space-y-2">
           <CardTitle className={`line-clamp-2 ${variant === 'featured' ? 'text-xl' : 'text-lg'}`}>
-            <Link 
+            <Link
               href={`/blog/${blog.slug}`}
               className="hover:text-primary transition-colors"
             >
@@ -73,32 +76,23 @@ export function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
           </CardDescription>
         </div>
       </CardHeader>
-      
-      <CardContent className="pb-3">
-        <p className="text-muted-foreground line-clamp-3 text-sm">
-          {blog.excerpt}
-        </p>
-      </CardContent>
-      
+
+
       <CardFooter className="border-t pt-4">
         <div className="flex justify-between items-center w-full">
-          <div className="flex flex-wrap gap-2">
-            {blog.tags.slice(0, 2).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-            {blog.tags.length > 2 && (
-              <Badge variant="outline" className="text-xs">
-                +{blog.tags.length - 2} more
-              </Badge>
-            )}
+
+          <div className="flex gap-2">
+            <BookmarkButton
+              blogId={blog._id}
+              initialIsBookmarked={blog.isBookmarked}
+              showText={false}
+            />
+            <Button variant="ghost" size="sm" asChild>
+              <Link href={`/blog/${blog.slug}`}>
+                Read More
+              </Link>
+            </Button>
           </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/blog/${blog.slug}`}>
-              Read More
-            </Link>
-          </Button>
         </div>
       </CardFooter>
     </Card>
