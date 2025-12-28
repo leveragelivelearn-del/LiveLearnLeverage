@@ -3,8 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { BlogGrid } from "@/components/blog/BlogGrid";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
-import { Button } from "@/components/ui/button";
-import { TrendingUp, Calendar } from "lucide-react";
 import { useMemo } from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

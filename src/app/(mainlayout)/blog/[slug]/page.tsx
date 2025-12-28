@@ -209,59 +209,63 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
           </div>
         </div>
 
-        {/* Hero Section */}
-        <section className="pt-8 pb-8 md:pt-12 md:pb-12">
-          <div className="container mx-auto px-4 max-w-5xl">
-            <Button variant="ghost" size="sm" asChild className="mb-8 pl-0 hover:pl-2 transition-all">
+        {/* Hero Banner Section */}
+        <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center overflow-hidden py-16">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            {blog.featuredImage ? (
+              <Image
+                src="/assets/blogbanner.png"
+                alt={blog.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full bg-muted" />
+            )}
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+
+          <div className="container mx-auto px-4 relative z-10 text-white">
+            <Button variant="ghost" size="sm" asChild className="mb-2 pl-0 hover:pl-2 transition-all text-white hover:text-white/80 hover:bg-white/10">
               <Link href="/blog">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Articles
               </Link>
             </Button>
 
-            <div className="space-y-6">
-              {/* Category and Tags */}
-              <div className="flex flex-wrap items-center gap-2">
-                {blog.category && (
-                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0">
-                    {blog.category}
-                  </Badge>
-                )}
-                {blog.tags.slice(0, 3).map((tag: string) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+            <div className="max-w-4xl mx-auto text-center space-y-2">
 
               {/* Title */}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
                 {blog.title}
               </h1>
 
               {/* Meta Info Grid */}
-              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground border-y py-4">
-                <div className="flex items-center gap-2 min-w-fit">
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-200 py-4">
+                <div className="flex items-center gap-2">
                   {blog.author.image ? (
                     <Image
                       src={blog.author.image}
                       alt={blog.author.name}
                       width={40}
                       height={40}
-                      className="rounded-full border"
+                      className="rounded-full border border-white/20"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <UserIcon className="h-5 w-5 text-primary" />
+                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                      <UserIcon className="h-5 w-5 text-white" />
                     </div>
                   )}
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium text-foreground">Written by</span>
-                    <span className="font-medium">{blog.author.name}</span>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-medium text-gray-300">Written by</span>
+                    <span className="font-medium text-white">{blog.author.name}</span>
                   </div>
                 </div>
 
-                <div className="w-px h-8 bg-border hidden sm:block" />
+                <div className="w-px h-8 bg-white/20 hidden sm:block" />
 
                 <div className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4" />
@@ -273,33 +277,22 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                   <span>{blog.readTime} min read</span>
                 </div>
 
-                <div className="w-px h-8 bg-border hidden sm:block" />
+                <div className="w-px h-8 bg-white/20 hidden sm:block" />
 
-                <BookmarkButton blogId={blog._id.toString()} initialIsBookmarked={isBookmarked} />
+                <div className="text-white">
+                  <BookmarkButton
+                    blogId={blog._id.toString()}
+                    initialIsBookmarked={isBookmarked}
+                    className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Featured Image - Wide but not full width */}
-        {blog.featuredImage && (
-          <section className="mb-12">
-            <div className="container mx-auto px-4 max-w-6xl">
-              <div className="relative aspect-[21/9] md:aspect-[2/1] rounded-2xl overflow-hidden shadow-lg border">
-                <Image
-                  src={blog.featuredImage}
-                  alt={blog.title}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Main Content Layout */}
-        <section className="pb-20">
+        <section className="pb-20 pt-12">
           {/* FIX: Increased max-w to 7xl to allow sidebar room */}
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex flex-col lg:flex-row gap-12">

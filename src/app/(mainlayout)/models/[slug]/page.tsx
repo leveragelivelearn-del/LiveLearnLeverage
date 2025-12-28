@@ -3,6 +3,7 @@ export const revalidate = 3600;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -143,73 +144,82 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
           </div>
         </div>
 
-        {/* Hero Section */}
-        <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="space-y-6">
-              <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <Button variant="ghost" size="sm" asChild className="mb-4">
-                    <Link href="/models">
-                      <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back to Models
-                    </Link>
-                  </Button>
+        {/* Hero Banner Section */}
+        <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center overflow-hidden py-16">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/assets/modelbanner.png"
+              alt="Model Banner"
+              fill
+              className="object-cover"
+              priority
+            />
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
 
-                  <div className="space-y-2">
-                    <h1 className="text-3xl md:text-4xl font-bold">
-                      {model.title}
-                    </h1>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <Badge variant="outline" className="text-sm">
-                        {model.industry}
-                      </Badge>
-                      <Badge variant="secondary" className="text-sm">
-                        {model.dealType}
-                      </Badge>
-                      {model.featured && (
-                        <Badge className="bg-primary">Featured</Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
+          <div className="container mx-auto px-4 relative z-10 text-white">
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="mb-2 pl-0 hover:pl-2 transition-all text-white hover:text-white/80 hover:bg-white/10"
+            >
+              <Link href="/models">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Models
+              </Link>
+            </Button>
 
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon">
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                </div>
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              {/* Badges */}
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/10"
+                >
+                  {model.industry}
+                </Badge>
+                <Badge
+                  variant="secondary"
+                  className="bg-white/10 text-white hover:bg-white/20 border-0"
+                >
+                  {model.dealType}
+                </Badge>
+                {model.featured && (
+                  <Badge className="bg-primary text-primary-foreground">
+                    Featured
+                  </Badge>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-lg">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Deal Size</p>
-                    <p className="text-lg font-semibold">
-                      {formatCurrency(model.dealSize, model.currency)}
-                    </p>
-                  </div>
+              {/* Title */}
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+                {model.title}
+              </h1>
+
+              {/* Meta Grid */}
+              <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-200 py-4">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span className="font-semibold">
+                    {formatCurrency(model.dealSize, model.currency)}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-lg">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Completion Date
-                    </p>
-                    <p className="text-lg font-semibold">
-                      {formatDate(model.completionDate)}
-                    </p>
-                  </div>
+                <div className="w-px h-8 bg-white/20 hidden sm:block" />
+
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>{formatDate(model.completionDate)}</span>
                 </div>
 
-                <div className="flex items-center gap-3 p-4 bg-secondary/30 rounded-lg">
-                  <Eye className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Views</p>
-                    <p className="text-lg font-semibold">{model.views + 1}</p>
-                  </div>
+                <div className="w-px h-8 bg-white/20 hidden sm:block" />
+
+                <div className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  <span>{model.views + 1} views</span>
                 </div>
               </div>
             </div>
@@ -234,12 +244,19 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
                   </Card>
                 )}
 
-                {/* Tabs for Rationale and Metrics */}
-                <Tabs defaultValue="rationale" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
+                {/* Tabs for Rationale, Metrics, and Description */}
+                <Tabs defaultValue="description" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="description">Description</TabsTrigger>
                     <TabsTrigger value="rationale">Deal Rationale</TabsTrigger>
                     <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
                   </TabsList>
+
+                  <TabsContent value="description" className="space-y-4 pt-4">
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">{model.description}</p>
+                    </div>
+                  </TabsContent>
 
                   <TabsContent value="rationale" className="space-y-4 pt-4">
                     <div className="prose prose-sm max-w-none dark:prose-invert" />

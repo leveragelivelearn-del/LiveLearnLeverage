@@ -115,9 +115,15 @@ export const ToolbarGroup = forwardRef<HTMLDivElement, BaseProps>(
 )
 ToolbarGroup.displayName = "ToolbarGroup"
 
-export const ToolbarSeparator = forwardRef<HTMLDivElement, BaseProps>(
-  ({ ...props }, ref) => (
-    <Separator ref={ref} orientation="vertical" decorative {...props} />
-  )
-)
+export const ToolbarSeparator = forwardRef<
+  HTMLDivElement,
+  BaseProps & { orientation?: "horizontal" | "vertical" }
+>(({ orientation = "vertical", ...props }, ref) => (
+  <Separator
+    ref={ref}
+    orientation={orientation}
+    decorative
+    {...props}
+  />
+))
 ToolbarSeparator.displayName = "ToolbarSeparator"

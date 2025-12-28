@@ -35,19 +35,19 @@ const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => 
       stagger: 0.2,
       ease: 'power3.out'
     })
-    .from('.featured-view-all', {
-      x: 20,
-      opacity: 0,
-      duration: 0.6,
-      ease: 'power3.out'
-    }, '-=0.6')
-    .from('.featured-card-wrapper', { // Updated selector
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: 'back.out(1.7)'
-    }, '-=0.4');
+      .from('.featured-view-all', {
+        x: 20,
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power3.out'
+      }, '-=0.6')
+      .from('.featured-card-wrapper', { // Updated selector
+        y: 50,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'back.out(1.7)'
+      }, '-=0.4');
 
   }, { scope: containerRef });
 
@@ -71,10 +71,10 @@ const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {models.map((model: any) => (
-            <div key={model._id} className="featured-card-wrapper h-full"> 
-               <ModelCard model={model} />
+            <div key={model._id} className="featured-card-wrapper h-full">
+              <ModelCard model={model} />
             </div>
           ))}
         </div>

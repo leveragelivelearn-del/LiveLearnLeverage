@@ -2,6 +2,7 @@
 import React from 'react';
 import dbConnect from "@/lib/db";
 import Blog from '@/models/Blog';
+import "@/models/User";
 import FeaturedBlogClient from './FeaturedBlogClient';
 
 async function getFeaturedContent() {
@@ -9,7 +10,7 @@ async function getFeaturedContent() {
 
   const featuredBlogs = await Blog.find({ published: true })
     .sort({ publishedAt: -1 })
-    .limit(3)
+    .limit(4)
     .select("title excerpt slug featuredImage publishedAt readTime author")
     .populate("author", "name image")
     .lean();

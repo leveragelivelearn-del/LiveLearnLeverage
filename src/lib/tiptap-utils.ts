@@ -1,4 +1,4 @@
-import type { Node as PMNode } from "@tiptap/pm/model"
+import type { Node as TiptapNode } from "@tiptap/pm/model"
 import type { Transaction } from "@tiptap/pm/state"
 import {
   AllSelection,
@@ -6,12 +6,7 @@ import {
   Selection,
   TextSelection,
 } from "@tiptap/pm/state"
-import { cellAround, CellSelection } from "@tiptap/pm/tables"
-import {
-  findParentNodeClosestToPos,
-  type Editor,
-  type NodeWithPos,
-} from "@tiptap/react"
+import type { Editor, NodeWithPos } from "@tiptap/react"
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
@@ -230,9 +225,9 @@ export function findNodeAtPosition(editor: Editor, position: number) {
  */
 export function findNodePosition(props: {
   editor: Editor | null
-  node?: PMNode | null
+  node?: TiptapNode | null
   nodePos?: number | null
-}): { pos: number; node: PMNode } | null {
+}): { pos: number; node: TiptapNode } | null {
   const { editor, node, nodePos } = props
 
   if (!editor || !editor.state?.doc) return null
@@ -248,7 +243,7 @@ export function findNodePosition(props: {
   // First search for the node in the document if we have a node
   if (hasValidNode) {
     let foundPos = -1
-    let foundNode: PMNode | null = null
+    let foundNode: TiptapNode | null = null
 
     editor.state.doc.descendants((currentNode, pos) => {
       // TODO: Needed?
@@ -352,7 +347,7 @@ export function selectionWithinConvertibleTypes(
 }
 
 /**
- * Handles image upload with progress tracking and abort capability
+ * Handles image upload to ImgBB with progress tracking and abort capability
  * @param file The file to upload
  * @param onProgress Optional callback for tracking upload progress
  * @param abortSignal Optional AbortSignal for cancelling the upload
@@ -363,29 +358,96 @@ export const handleImageUpload = async (
   onProgress?: (event: { progress: number }) => void,
   abortSignal?: AbortSignal
 ): Promise<string> => {
-  // Validate file
-  if (!file) {
-    throw new Error("No file provided")
-  }
-
-  if (file.size > MAX_FILE_SIZE) {
-    throw new Error(
-      `File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`
-    )
-  }
-
-  // For demo/testing: Simulate upload progress. In production, replace the following code
-  // with your own upload implementation.
-  for (let progress = 0; progress <= 100; progress += 10) {
-    if (abortSignal?.aborted) {
-      throw new Error("Upload cancelled")
+  try {
+    // Validate file
+    if (!file) {
+      throw new Error("No file provided");
     }
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    onProgress?.({ progress })
-  }
 
-  return "/images/tiptap-ui-placeholder-image.jpg"
-}
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error(
+        `File size exceeds maximum allowed (${MAX_FILE_SIZE / (1024 * 1024)}MB)`
+      );
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error("Only image files are allowed");
+    }
+
+    // Create FormData for ImgBB API
+    const formData = new FormData();
+    formData.append('image', file);
+
+    // Get API key from environment or use the provided one
+    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || 'd08120f6a6e1af75c0d2755245d6dee1';
+
+    if (!apiKey) {
+      throw new Error("ImgBB API key is not configured");
+    }
+
+    // Simulate initial progress
+    onProgress?.({ progress: 10 });
+
+    const controller = new AbortController();
+    const signal = abortSignal || controller.signal;
+
+    // Upload to ImgBB
+    const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+      method: 'POST',
+      body: formData,
+      signal,
+    });
+
+    onProgress?.({ progress: 60 });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      let errorMessage = `Upload failed with status: ${response.status}`;
+
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error?.message || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    onProgress?.({ progress: 80 });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error?.message || 'Upload failed');
+    }
+
+    // Get the image URL from ImgBB response
+    const imageUrl = data.data.url;
+
+    if (!imageUrl) {
+      throw new Error('No image URL returned from ImgBB');
+    }
+
+    onProgress?.({ progress: 100 });
+
+    console.log('Image uploaded successfully to ImgBB:', imageUrl);
+    return imageUrl;
+
+  } catch (error) {
+    console.error('Image upload error:', error);
+
+    if (error instanceof Error) {
+      // Handle specific error cases
+      if (error.name === 'AbortError') {
+        throw new Error('Upload cancelled');
+      }
+      throw error;
+    }
+
+    throw new Error('Upload failed due to an unknown error');
+  }
+};
 
 type ProtocolOptions = {
   /**
@@ -556,57 +618,4 @@ export function selectCurrentBlockContent(editor: Editor) {
       }
     }
   }
-}
-
-/**
- * Retrieves all nodes of specified types from the current selection.
- * @param selection The current editor selection
- * @param allowedNodeTypes An array of node type names to look for (e.g., ["image", "table"])
- * @returns An array of objects containing the node and its position
- */
-export function getSelectedNodesOfType(
-  selection: Selection,
-  allowedNodeTypes: string[]
-): NodeWithPos[] {
-  const results: NodeWithPos[] = []
-  const allowed = new Set(allowedNodeTypes)
-
-  if (selection instanceof CellSelection) {
-    selection.forEachCell((node: PMNode, pos: number) => {
-      if (allowed.has(node.type.name)) {
-        results.push({ node, pos })
-      }
-    })
-    return results
-  }
-
-  if (selection instanceof NodeSelection) {
-    const { node, from: pos } = selection
-    if (node && allowed.has(node.type.name)) {
-      results.push({ node, pos })
-    }
-    return results
-  }
-
-  const { $anchor } = selection
-  const cell = cellAround($anchor)
-
-  if (cell) {
-    const cellNode = selection.$anchor.doc.nodeAt(cell.pos)
-    if (cellNode && allowed.has(cellNode.type.name)) {
-      results.push({ node: cellNode, pos: cell.pos })
-      return results
-    }
-  }
-
-  // Fallback: find parent nodes of allowed types
-  const parentNode = findParentNodeClosestToPos($anchor, (node) =>
-    allowed.has(node.type.name)
-  )
-
-  if (parentNode) {
-    results.push({ node: parentNode.node, pos: parentNode.pos })
-  }
-
-  return results
 }

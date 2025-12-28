@@ -35,7 +35,7 @@ export default async function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-background py-12 md:py-20">
+        <div className="min-h-screen bg-background py-12 md:py-24">
             <div className="container mx-auto px-4 max-w-5xl">
                 <div className="flex flex-col md:flex-row gap-8">
 

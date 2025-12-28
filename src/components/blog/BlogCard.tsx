@@ -33,7 +33,7 @@ interface BlogCardProps {
 
 export function BlogCard({ blog, variant = 'default', className }: BlogCardProps) {
   return (
-    <Card className={`group overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full !p-0 !gap-0 ${variant === 'featured' ? 'md:col-span-2' : ''} ${className || ''}`}>
+    <Card className={`group overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full !p-0 !gap-0 rounded-sm ${variant === 'featured' ? 'md:col-span-2' : ''} ${className || ''}`}>
       {blog.featuredImage && (
         <div className="relative h-56 w-full overflow-hidden">
           <Image

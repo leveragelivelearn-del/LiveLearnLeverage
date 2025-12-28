@@ -47,7 +47,7 @@ export function ModelCard({ model }: ModelCardProps) {
   }
 
   return (
-    <Card className="group flex flex-col h-full overflow-hidden hover:shadow-lg transition-all duration-300 border-border/50">
+    <Card className="group flex flex-col h-full overflow-hidden hover:shadow-lg transition-all duration-300 rounded-sm border-border/50 py-0 gap-0">
 
       {/* --- Image Carousel Section --- */}
       <div className="relative w-full h-48 bg-muted/30 overflow-hidden shrink-0">

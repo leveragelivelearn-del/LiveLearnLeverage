@@ -10,7 +10,7 @@ async function getFeaturedContent() {
 
   const featuredModels = await Model.find({ featured: true })
     .sort({ createdAt: -1 })
-    .limit(3)
+    .limit(4)
     .select("title description slug industry dealSize dealType completionDate currency views slides featured")
     .lean();
 
@@ -19,13 +19,13 @@ async function getFeaturedContent() {
   };
 }
 
-const FeaturedModelSection = async() => {
-    const { models } = await getFeaturedContent();
-    return (
-        <div>
-            <FeaturedModelClient models={models} />
-        </div>
-    );
+const FeaturedModelSection = async () => {
+  const { models } = await getFeaturedContent();
+  return (
+    <div>
+      <FeaturedModelClient models={models} />
+    </div>
+  );
 };
 
 export default FeaturedModelSection;

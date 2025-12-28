@@ -72,7 +72,6 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import { useCursorVisibility } from "@/hooks/use-cursor-visibility";
 
 // --- Components ---
-// import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
@@ -92,8 +91,7 @@ const MainToolbarContent = ({
   isMobile: boolean;
 }) => {
   return (
-    <div className="flex flex-col w-full gap-2 py-1">
-      {/* --- ROW 1: Structure & Major Actions --- */}
+    <div className="flex w-full flex-col gap-2">
       <div className="flex flex-wrap items-center gap-1">
         <ToolbarGroup>
           <UndoRedoButton action="undo" />
@@ -115,16 +113,6 @@ const MainToolbarContent = ({
         <ToolbarSeparator />
 
         <ToolbarGroup>
-          <TextAlignButton align="left" />
-          <TextAlignButton align="center" />
-          <TextAlignButton align="right" />
-          <TextAlignButton align="justify" />
-        </ToolbarGroup>
-      </div>
-
-      {/* --- ROW 2: Formatting, Inserts & Theme --- */}
-      <div className="flex flex-wrap items-center gap-1">
-        <ToolbarGroup>
           <MarkButton type="bold" />
           <MarkButton type="italic" />
           <MarkButton type="strike" />
@@ -137,9 +125,11 @@ const MainToolbarContent = ({
           )}
           {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
         </ToolbarGroup>
+      </div>
 
-        <ToolbarSeparator />
+      <ToolbarSeparator className="w-full" orientation="horizontal" />
 
+      <div className="flex flex-wrap items-center gap-1">
         <ToolbarGroup>
           <MarkButton type="superscript" />
           <MarkButton type="subscript" />
@@ -148,15 +138,17 @@ const MainToolbarContent = ({
         <ToolbarSeparator />
 
         <ToolbarGroup>
-          <ImageUploadButton text="Image" />
+          <TextAlignButton align="left" />
+          <TextAlignButton align="center" />
+          <TextAlignButton align="right" />
+          <TextAlignButton align="justify" />
         </ToolbarGroup>
 
-        {/* Pushes Theme Toggle to the far right
-        <div className="ml-auto">
-          <ToolbarGroup>
-            <ThemeToggle />
-          </ToolbarGroup>
-        </div> */}
+        <ToolbarSeparator />
+
+        <ToolbarGroup>
+          <ImageUploadButton text="Add Image" />
+        </ToolbarGroup>
       </div>
     </div>
   );
@@ -191,7 +183,6 @@ const MobileToolbarContent = ({
   </>
 );
 
-// Define the ref interface
 export interface SimpleEditorRef {
   getContent: () => string;
   getTextContent: () => string;
@@ -341,13 +332,12 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, SimpleEditorProps>((prop
       <EditorContext.Provider value={{ editor }}>
         <Toolbar
           ref={toolbarRef}
-          className="sticky top-0 z-20 bg-background border-b"
+          className="flex-col !items-start gap-0 py-2 h-auto block"
           style={{
-            backgroundColor: "var(--background)",
             ...(isMobile
               ? {
-                  bottom: `calc(100% - ${height - rect.y}px)`,
-                }
+                bottom: `calc(100% - ${height - rect.y}px)`,
+              }
               : {}),
           }}
         >
