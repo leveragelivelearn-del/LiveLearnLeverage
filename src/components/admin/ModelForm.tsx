@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,7 +17,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { ExcelUpload } from '@/components/admin/ExcelUpload'
 import { SlidesUpload } from '@/components/admin/SlidesUpload'
-import { 
+import {
   Save,
   Eye,
   X,
@@ -87,28 +87,28 @@ interface ModelFormProps {
 export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
   const router = useRouter()
   const editorRef = useRef<SimpleEditorRef>(null)
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+
   // Initialize state directly from props
   const [excelFile, setExcelFile] = useState<any>(
-    initialData?.excelFileUrl 
-      ? { 
-          url: initialData.excelFileUrl, 
-          fileName: 'Existing Excel File', // Default name if not stored
-          fileSize: 0, // Default size if not stored
-          uploadedAt: new Date() // Default date if not stored
-        } 
+    initialData?.excelFileUrl
+      ? {
+        url: initialData.excelFileUrl,
+        fileName: 'Existing Excel File', // Default name if not stored
+        fileSize: 0, // Default size if not stored
+        uploadedAt: new Date() // Default date if not stored
+      }
       : null
   )
-  
+
   const [slides, setSlides] = useState<any[]>(initialData?.slides ? initialData.slides.map((s: any) => ({
     url: s.imageUrl,
     caption: s.caption,
     id: Math.random().toString(36).substr(2, 9)
   })) : [])
-  
-  const [keyMetrics, setKeyMetrics] = useState<Array<{key: string, value: string}>>(() => {
+
+  const [keyMetrics, setKeyMetrics] = useState<Array<{ key: string, value: string }>>(() => {
     if (initialData?.keyMetrics) {
       const metrics = Object.entries(initialData.keyMetrics).map(([key, value]) => ({
         key,
@@ -122,7 +122,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
       { key: 'Revenue Multiple', value: '' },
     ]
   })
-  
+
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     slug: initialData?.slug || '',
@@ -159,7 +159,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
       const modelData = {
         ...formData,
         // Only slugify if creating new or if user cleared the slug, otherwise keep existing or manually edited
-        slug: formData.slug ? slugify(formData.slug) : slugify(formData.title), 
+        slug: formData.slug ? slugify(formData.slug) : slugify(formData.title),
         rationale: rationaleContent,
         dealSize: parseFloat(formData.dealSize.replace(/,/g, '')),
         slides: slides.map((slide, index) => ({
@@ -217,18 +217,18 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
     // Actually, distinct behavior:
     // Create: update slug matching title
     // Edit: don't auto-update slug when title changes to avoid breaking links, user must edit slug manually if desired
-    
+
     if (!isEdit) {
-        setFormData({
-            ...formData,
-            title,
-            slug: slugify(title),
-        })
+      setFormData({
+        ...formData,
+        title,
+        slug: slugify(title),
+      })
     } else {
-        setFormData({
-            ...formData,
-            title,
-        })
+      setFormData({
+        ...formData,
+        title,
+      })
     }
   }
 
@@ -251,13 +251,9 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
         <div className="flex items-center gap-3">
           <Button variant="ghost" asChild>
             <Link href="/admin/models">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
             </Link>
-          </Button>
-          <Button variant="outline" disabled={isSubmitting}>
-            <Eye className="mr-2 h-4 w-4" />
-            Preview
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
             <Save className="mr-2 h-4 w-4" />
@@ -288,7 +284,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
@@ -300,7 +296,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                   required
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="industry">Industry *</Label>
@@ -320,7 +316,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="dealType">Deal Type *</Label>
                   <Select
@@ -340,7 +336,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="dealSize">Deal Size *</Label>
@@ -359,7 +355,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="currency">Currency</Label>
                   <Select
@@ -379,7 +375,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="completionDate">Completion Date *</Label>
                 <div className="flex items-center gap-2">
@@ -486,12 +482,12 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
                 <Switch
                   id="featured"
                   checked={formData.featured}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setFormData({ ...formData, featured: checked })
                   }
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="slug">URL Slug</Label>
                 <Input

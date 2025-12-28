@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -11,30 +11,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Search, 
-  MoreHorizontal, 
-  UserPlus,
-  Edit, 
-  Trash2,
-  Mail,
-  Calendar,
+import {
+  Search,
   Shield,
   UserCheck,
-  UserX
+  Mail,
+  Calendar,
 } from 'lucide-react'
 import dbConnect from '@/lib/db'
 import User from '@/models/User'
 import { formatDate } from '@/lib/utils'
+import UserActions from '@/components/admin/UserActions'
 
 export const metadata: Metadata = {
   title: 'User Management | Admin | LiveLearnLeverage',
@@ -42,12 +30,12 @@ export const metadata: Metadata = {
 
 async function getUsers() {
   await dbConnect()
-  
+
   const users = await User.find()
     .sort({ createdAt: -1 })
     .select('-password') // Don't return passwords
     .lean()
-  
+
   return JSON.parse(JSON.stringify(users))
 }
 
@@ -75,12 +63,6 @@ export default async function UserManagementPage() {
             Manage user accounts and permissions
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin/users/new">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add User
-          </Link>
-        </Button>
       </div>
 
       {/* Stats */}
@@ -185,35 +167,7 @@ export default async function UserManagementPage() {
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/users/edit/${user._id}`}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit User
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Mail className="mr-2 h-4 w-4" />
-                        Send Email
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600">
-                        <UserX className="mr-2 h-4 w-4" />
-                        Disable User
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <UserActions user={user} />
                 </TableCell>
               </TableRow>
             ))}

@@ -12,6 +12,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "www.livelearnleverage.org",
+      },
+      {
+        protocol: "https",
         hostname: "picsum.photos",
       },
       {
@@ -48,10 +52,10 @@ const nextConfig = {
   compiler:
     process.env.NODE_ENV === "production"
       ? {
-          removeConsole: {
-            exclude: ["error", "warn"],
-          },
-        }
+        removeConsole: {
+          exclude: ["error", "warn"],
+        },
+      }
       : undefined,
 
   async headers() {

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { 
+import {
   Save,
   Eye,
   Upload,
@@ -47,7 +47,7 @@ interface BlogPostFormProps {
 export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps) {
   const router = useRouter()
   const editorRef = useRef<SimpleEditorRef>(null)
-  
+
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -55,7 +55,7 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
   const [isUploading, setIsUploading] = useState(false)
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || [])
   const [newTag, setNewTag] = useState('')
-  
+
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     slug: initialData?.slug || '',
@@ -76,7 +76,7 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
     try {
       setIsUploading(true)
       const uploadData = new FormData()
-      uploadData.append('image', file) 
+      uploadData.append('image', file)
 
       const response = await fetch('/api/admin/upload', {
         method: 'POST',
@@ -115,18 +115,18 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
         setIsSubmitting(false);
         return;
       }
-      
+
       const payload = {
         ...formData,
         content: editorContent,
         tags: selectedTags,
         status: 'published',
-        published: true 
+        published: true
       }
 
       const url = isEdit ? `/api/admin/blog/${initialData.slug}` : '/api/admin/blog'
       const method = isEdit ? 'PUT' : 'POST'
-      
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -164,17 +164,17 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
 
   const handleTitleChange = (title: string) => {
     if (!isEdit) {
-        setFormData({
-            ...formData,
-            title,
-            slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-            seoTitle: title,
-        })
+      setFormData({
+        ...formData,
+        title,
+        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        seoTitle: title,
+      })
     } else {
-        setFormData({
-            ...formData,
-            title,
-        })
+      setFormData({
+        ...formData,
+        title,
+      })
     }
   }
 
@@ -190,19 +190,15 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
         <div className="flex items-center gap-3">
           <Button variant="ghost" asChild>
             <Link href="/admin/blog">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
             </Link>
-          </Button>
-          <Button variant="outline" disabled={isSubmitting}>
-            <Eye className="mr-2 h-4 w-4" />
-            Preview
           </Button>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="grid gap-6">
-        
+
         {/* Main Content Area */}
         <Card>
           <CardHeader>
@@ -221,7 +217,7 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
                 className="text-lg font-medium"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Content</Label>
               <SimpleEditor ref={editorRef} initialContent={initialData?.content} />
@@ -311,10 +307,10 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
               <CardTitle>Featured Image</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
                 accept="image/*"
                 onChange={handleFeaturedImageUpload}
               />
@@ -338,7 +334,7 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
                   </Button>
                 </div>
               ) : (
-                <div 
+                <div
                   className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-muted/50 transition-colors"
                   onClick={() => fileInputRef.current?.click()}
                 >
@@ -346,8 +342,8 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
                   <p className="text-sm text-muted-foreground mb-4">
                     Click to upload a featured image
                   </p>
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     type="button"
                     disabled={isUploading}
                   >
@@ -398,9 +394,9 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
 
         {/* Action Button at the very end */}
         <div className="flex justify-end pt-4 border-t mt-4">
-          <Button 
-            type="submit" 
-            size="lg" 
+          <Button
+            type="submit"
+            size="lg"
             disabled={isSubmitting}
             className="w-full md:w-auto px-8"
           >

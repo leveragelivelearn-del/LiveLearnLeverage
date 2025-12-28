@@ -2,12 +2,12 @@
 import { Metadata } from 'next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { 
-  BarChart3, 
-  FileText, 
-  Users, 
-  Eye, 
-  TrendingUp, 
+import {
+  BarChart3,
+  FileText,
+  Users,
+  Eye,
+  TrendingUp,
   ArrowUpRight,
   Plus,
   Calendar,
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 async function getDashboardStats() {
   await dbConnect()
-  
+
   const [
     totalPosts,
     totalModels,
@@ -90,14 +90,7 @@ export default async function AdminDashboard() {
       change: '+23%',
       trend: 'up',
     },
-    {
-      title: 'Total Views',
-      value: stats.views.toLocaleString(),
-      icon: Eye,
-      description: 'All-time views',
-      change: '+18%',
-      trend: 'up',
-    },
+
   ]
 
   return (
@@ -110,16 +103,11 @@ export default async function AdminDashboard() {
             Welcome back! Here&apos;s what&apos;s happening with your content.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Post
-          </Button>
-        </div>
+
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {statCards.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -136,11 +124,9 @@ export default async function AdminDashboard() {
                 <p className="text-xs text-muted-foreground">
                   {stat.description}
                 </p>
-                <div className={`flex items-center text-xs ${
-                  stat.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                }`}>
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                  {stat.change}
+                <div className={`flex items-center text-xs ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                  }`}>
+
                 </div>
               </div>
             </CardContent>
@@ -171,7 +157,7 @@ export default async function AdminDashboard() {
                 <div key={post._id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate">
-                      <Link 
+                      <Link
                         href={`/admin/blog/edit/${post.slug}`}
                         className="hover:text-primary transition-colors"
                       >
@@ -221,7 +207,7 @@ export default async function AdminDashboard() {
                 <div key={model._id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate">
-                      <Link 
+                      <Link
                         href={`/admin/models/edit/${model.slug}`}
                         className="hover:text-primary transition-colors"
                       >
@@ -258,7 +244,7 @@ export default async function AdminDashboard() {
           <CardDescription>Common tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Button variant="outline" className="h-auto py-4 justify-start" asChild>
               <Link href="/admin/blog/new">
                 <FileText className="mr-3 h-5 w-5" />
@@ -268,7 +254,7 @@ export default async function AdminDashboard() {
                 </div>
               </Link>
             </Button>
-            
+
             <Button variant="outline" className="h-auto py-4 justify-start" asChild>
               <Link href="/admin/models/new">
                 <BarChart3 className="mr-3 h-5 w-5" />
@@ -278,17 +264,8 @@ export default async function AdminDashboard() {
                 </div>
               </Link>
             </Button>
-            
-            <Button variant="outline" className="h-auto py-4 justify-start" asChild>
-              <Link href="/admin/media">
-                <Eye className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Media Library</div>
-                  <div className="text-xs text-muted-foreground">Manage images & files</div>
-                </div>
-              </Link>
-            </Button>
-            
+
+
             <Button variant="outline" className="h-auto py-4 justify-start" asChild>
               <Link href="/admin/analytics">
                 <TrendingUp className="mr-3 h-5 w-5" />
