@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import LenisProvider from "@/components/providers/LenisProvider";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { SplashScreen } from "@/components/ui/SplashScreen";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 // Initialize the font (This defines 'inter' which you were missing)
 const inter = Inter({ subsets: ["latin"] });
@@ -71,9 +72,12 @@ export const metadata: Metadata = {
     creator: "@livelearnleverage",
   },
   verification: {
-    google: "your-google-verification-code",
+    google: "JxoybtT5MnhJwsAEeAkNS0j4ksJJti9VyE9g9HTIwaw",
     yandex: "your-yandex-verification-code",
     yahoo: "your-yahoo-verification-code",
+    other: {
+      "msvalidate.01": "your-bing-verification-code",
+    },
   },
   alternates: {
     canonical: "https://livelearnleverage.com",
@@ -92,6 +96,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -103,11 +108,11 @@ export default function RootLayout({
               <SplashScreen />
               {children}
               <ScrollToTop />
-
             </LenisProvider>
             <Toaster />
           </SessionProvider>
         </ThemeProvider>
+        <GoogleAnalytics gaId="G-RKWHQZC16V" />
       </body>
     </html>
   );
