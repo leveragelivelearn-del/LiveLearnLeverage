@@ -5,19 +5,19 @@ import Model from '@/models/Model'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await dbConnect()
-  
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://livelearnleverage.com'
-  
+
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://www.livelearnleverage.org'
+
   // Get all published blog posts
   const blogs = await Blog.find({ published: true })
     .select('slug updatedAt publishedAt')
     .lean()
-  
+
   // Get all models
   const models = await Model.find()
     .select('slug updatedAt completionDate')
     .lean()
-  
+
   // Static pages
   const staticPages = [
     {
