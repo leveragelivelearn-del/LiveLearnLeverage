@@ -43,6 +43,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          image: user.image,
         }
       },
     }),
@@ -74,27 +75,49 @@ export const authOptions: NextAuthOptions = {
       }
       return true
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      if (trigger === 'update' && session) {
+        token.name = session.name
+        token.email = session.email
+        token.image = session.image
+      }
+
       if (user) {
         token.role = user.role
         token.id = user.id
+        token.image = user.image
 
-        // FIX: If Google login, fetch the REAL MongoDB ID
+        // If Google login, fetch the REAL MongoDB ID
         if (account?.provider === 'google') {
           await dbConnect()
           const dbUser = await User.findOne({ email: user.email })
           if (dbUser) {
             token.id = dbUser._id.toString()
             token.role = dbUser.role
+            token.image = dbUser.image
           }
         }
       }
+
+      // Always fetch fresh user data from DB to ensure session stays in sync
+      if (token.id) {
+        await dbConnect()
+        const dbUser = await User.findById(token.id)
+        if (dbUser) {
+          token.name = dbUser.name
+          token.email = dbUser.email
+          token.image = dbUser.image
+          token.role = dbUser.role
+        }
+      }
+
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.role = token.role as string
         session.user.id = token.id as string
+        session.user.image = token.image as string
       }
       return session
     },
