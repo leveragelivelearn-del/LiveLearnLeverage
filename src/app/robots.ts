@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXTAUTH_URL || 'https://livelearnleverage.com'
-  
+  const baseUrl = process.env.NEXTAUTH_URL || 'https://www.livelearnleverage.org'
+
   return {
     rules: {
       userAgent: '*',
