@@ -59,7 +59,8 @@ export default function AnalyticsPage() {
 
   const loading = isLoadingOverview || isLoadingPerformance || isLoadingContent
 
-  const stats = overviewData || {
+  // Fix: Check if data is valid and not an error response
+  const stats = (overviewData && !overviewData.error) ? overviewData : {
     totalViews: 0,
     totalUsers: 0,
     totalEvents: 0,
@@ -68,11 +69,11 @@ export default function AnalyticsPage() {
     eventChange: 0,
   }
 
-  const pageViewsData = performanceData?.pageViewsData || []
-  const trafficSources = performanceData?.trafficSources || []
+  const pageViewsData = (performanceData && !performanceData.error) ? performanceData.pageViewsData || [] : []
+  const trafficSources = (performanceData && !performanceData.error) ? performanceData.trafficSources || [] : []
 
-  const topPages = contentData?.topPages || []
-  const searchQueries = contentData?.searchQueries || []
+  const topPages = (contentData && !contentData.error) ? contentData.topPages || [] : []
+  const searchQueries = (contentData && !contentData.error) ? contentData.searchQueries || [] : []
 
   if (loading) {
     return (
@@ -130,7 +131,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.totalViews.toLocaleString()}
+              {(stats.totalViews || 0).toLocaleString()}
             </div>
             <div className="flex items-center text-sm mt-2">
               <span className="text-muted-foreground">in selected period</span>
@@ -147,7 +148,7 @@ export default function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {stats.totalUsers.toLocaleString()}
+              {(stats.totalUsers || 0).toLocaleString()}
             </div>
             <div className="flex items-center text-sm mt-2">
               <span className="text-muted-foreground">active users</span>
@@ -163,7 +164,7 @@ export default function AnalyticsPage() {
             <MousePointer className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalEvents.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{(stats.totalEvents || 0).toLocaleString()}</div>
             <div className="flex items-center text-sm mt-2">
               <span className="text-muted-foreground">total interactions</span>
             </div>
@@ -269,7 +270,7 @@ export default function AnalyticsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold">{page.views.toLocaleString()}</span>
+                      <span className="text-sm font-bold">{(page.views || 0).toLocaleString()}</span>
                       <Eye className="h-3 w-3 text-muted-foreground" />
                     </div>
                   </div>
