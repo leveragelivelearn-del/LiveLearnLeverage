@@ -122,7 +122,7 @@ export default async function ModelsPage() {
             </p>
             <div className="pt-4">
               <a
-                href="mailto:contact@livelearnleverage.com"
+                href="mailto:contact@livelearnleverage.org"
                 className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
               >
                 Contact for Custom Analysis

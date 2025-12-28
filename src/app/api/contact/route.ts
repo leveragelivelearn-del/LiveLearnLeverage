@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     // Rate limiting check
     const forwardedFor = request.headers.get('x-forwarded-for')
     const identifier = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'
-    
+
     const isRateLimited = await limiter.check(identifier, 5) // 5 requests per minute
-    
+
     if (isRateLimited) {
       return NextResponse.json(
         { error: 'Too many requests. Please try again later.' },
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       'make money', 'work from home', 'buy now', 'click here', 'discount',
       'free trial', 'winner', 'congratulations', 'urgent', 'important'
     ]
-    
+
     const messageLower = message.toLowerCase()
     if (spamKeywords.some(keyword => messageLower.includes(keyword))) {
       console.log('Potential spam detected:', { email, subject })
@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
 
     // Send email using Resend
     const { error } = await resend.emails.send({
-      from: 'LiveLearnLeverage <contact@livelearnleverage.com>',
-      to: [process.env.ADMIN_EMAIL || 'admin@livelearnleverage.com'],
+      from: 'LiveLearnLeverage <contact@livelearnleverage.org>',
+      to: [process.env.ADMIN_EMAIL || 'admin@livelearnleverage.org'],
       replyTo: email,
       subject: `Contact Form: ${subject || 'New Message'}`,
       text: `
@@ -116,7 +116,7 @@ Sent via LiveLearnLeverage Contact Form
 
     // Send confirmation email to user
     await resend.emails.send({
-      from: 'LiveLearnLeverage <contact@livelearnleverage.com>',
+      from: 'LiveLearnLeverage <contact@livelearnleverage.org>',
       to: [email],
       subject: 'Thank you for contacting LiveLearnLeverage',
       text: `
@@ -159,9 +159,9 @@ LiveLearnLeverage
       `,
     })
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Message sent successfully' 
+    return NextResponse.json({
+      success: true,
+      message: 'Message sent successfully'
     })
   } catch (error) {
     console.error('Contact form error:', error)

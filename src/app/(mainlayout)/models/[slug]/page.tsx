@@ -403,7 +403,7 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <a href="mailto:contact@livelearnleverage.com">
+                  <a href="mailto:contact@livelearnleverage.org">
                     Request Consultation
                   </a>
                 </Button>

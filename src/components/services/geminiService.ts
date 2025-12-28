@@ -78,7 +78,7 @@ export const getChatResponse = async (message: string, history: ChatMessage[]): 
         method: "POST",
         headers: {
           "Authorization": `Bearer ${apiKey}`,
-          "HTTP-Referer": "https://livelearnleverage.com", // Optional
+          "HTTP-Referer": "https://www.livelearnleverage.org", // Optional
           "X-Title": "Live Learn Leverage", // Optional
           "Content-Type": "application/json"
         },

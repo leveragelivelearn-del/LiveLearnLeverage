@@ -4,7 +4,7 @@ const SettingsSchema = new mongoose.Schema({
 
   // General
   siteName: { type: String, default: 'LiveLearnLeverage' },
-  siteUrl: { type: String, default: 'https://livelearnleverage.com' },
+  siteUrl: { type: String, default: 'https://www.livelearnleverage.org' },
   siteDescription: { type: String, default: '' },
   contactEmail: { type: String, default: '' },
   maintenanceMode: { type: Boolean, default: false },

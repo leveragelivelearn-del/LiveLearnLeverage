@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://livelearnleverage.com",
+    url: "https://www.livelearnleverage.org",
     siteName: "LiveLearnLeverage",
     title: "LiveLearnLeverage - M&A Insights & Financial Models",
     description:
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://livelearnleverage.com",
+    canonical: "https://www.livelearnleverage.org",
   },
   category: "finance",
 };

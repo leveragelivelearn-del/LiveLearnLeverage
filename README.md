@@ -42,8 +42,8 @@ A full-stack blog and portfolio website showcasing M&A models, deal rationales, 
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/yourusername/livelearnleverage.com.git
-cd livelearnleverage.com
+git clone https://github.com/yourusername/livelearnleverage.org.git
+cd livelearnleverage.org
 ```
 
 **2. Install dependencies**
@@ -177,7 +177,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 📞 Support
 
-- **Email**: contact@livelearnleverage.com
+- **Email**: contact@livelearnleverage.org
 - **Issues**: Open an issue on GitHub
 
 ---

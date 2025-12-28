@@ -164,16 +164,16 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
       name: 'LiveLearnLeverage',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://livelearnleverage.com/logo.png',
+        url: 'https://www.livelearnleverage.org/logo.png',
       }
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://livelearnleverage.com/blog/${blog.slug}`,
+      '@id': `https://www.livelearnleverage.org/blog/${blog.slug}`,
     },
   }
 
-  const shareUrl = `https://livelearnleverage.com/blog/${blog.slug}`
+  const shareUrl = `https://www.livelearnleverage.org/blog/${blog.slug}`
 
   return (
     <>
