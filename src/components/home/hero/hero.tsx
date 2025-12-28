@@ -140,10 +140,10 @@ const Hero: React.FC = () => {
                             variants={fadeUpVariants}
                             initial="hidden"
                             animate="visible"
-                            className="flex items-center gap-4"
+                            className="flex items-center gap-3 md:gap-4"
                           >
-                            <div className="h-[2px] w-12 bg-white" />
-                            <span className="text-white font-bold tracking-[0.2em] text-sm md:text-base">
+                            <div className="h-[2px] w-8 md:w-12 bg-white" />
+                            <span className="text-white font-bold tracking-[0.15em] md:tracking-[0.2em] text-[10px] md:text-base">
                               {slide.label}
                             </span>
                           </motion.div>
@@ -154,7 +154,7 @@ const Hero: React.FC = () => {
                             variants={fadeUpVariants}
                             initial="hidden"
                             animate="visible"
-                            className="text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.1] text-white"
+                            className="text-2xl md:text-4xl lg:text-6xl font-bold leading-tight text-white max-w-3xl"
                           >
                             {slide.title}
                           </motion.h1>
@@ -165,7 +165,7 @@ const Hero: React.FC = () => {
                             variants={fadeUpVariants}
                             initial="hidden"
                             animate="visible"
-                            className="text-lg md:text-xl text-white/80 max-w-2xl font-light leading-relaxed"
+                            className="text-sm md:text-xl text-white/80 max-w-xl font-light leading-relaxed"
                           >
                             {slide.description}
                           </motion.p>
@@ -176,15 +176,15 @@ const Hero: React.FC = () => {
                             variants={fadeUpVariants}
                             initial="hidden"
                             animate="visible"
-                            className="flex flex-wrap gap-4  pt-6"
+                            className="flex flex-row items-center gap-3 md:gap-4 pt-4 md:pt-6"
                           >
                             <Link href="/models">
-                              <button className="bg-[#e23645] hover:bg-[#c92d3a] cursor-pointer text-white px-8 py-4 rounded-md font-bold text-sm tracking-wider transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg">
+                              <button className="bg-[#e23645] hover:bg-[#c92d3a] cursor-pointer text-white px-5 py-2.5 md:px-8 md:py-4 rounded-md font-bold text-[10px] md:text-sm tracking-widest transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg whitespace-nowrap">
                                 EXPLORE MODELS
                               </button>
                             </Link>
                             <Link href="/blog">
-                              <button className="bg-transparent border-2 border-white hover:bg-white hover:text-black cursor-pointer text-white px-8 py-4 rounded-md font-bold text-sm tracking-wider transition-all duration-300 transform hover:scale-105 active:scale-95">
+                              <button className="bg-transparent border md:border-2 border-white hover:bg-white hover:text-black cursor-pointer text-white px-5 py-2.5 md:px-8 md:py-4 rounded-md font-bold text-[10px] md:text-sm tracking-widest transition-all duration-300 transform hover:scale-105 active:scale-95 whitespace-nowrap">
                                 READ INSIGHTS
                               </button>
                             </Link>

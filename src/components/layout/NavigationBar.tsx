@@ -82,213 +82,22 @@ export function NavigationBar() {
         "fixed top-0 z-50 w-full transition-all duration-300",
         !isTransparent
           ? "bg-background/95 backdrop-blur-md border-b shadow-sm py-2" // Solid look (Scrolled OR Not Home)
-          : "bg-transparent border-transparent py-6" // Transparent look (Home & Top)
+          : "bg-transparent border-transparent py-4 md:py-6" // Transparent look (Home & Top)
       )}
     >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6 relative">
+      <div className="container mx-auto flex h-12 md:h-16 items-center justify-between px-4 md:px-6 relative">
 
-        {/* Logo */}
-        <div className="flex items-center gap-6 z-20">
-          <div className={cn("transition-all duration-300", !isTransparent ? "" : "brightness-0 invert")}>
-            <Logo />
-          </div>
-        </div>
-
-        {/* Desktop Navigation in Rounded Bar */}
-        <nav
-          className={cn(
-            "hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2",
-            "px-2 py-1.5 rounded-full transition-all duration-300",
-            !isTransparent
-              ? "bg-background/50 border border-border shadow-sm" // Solid Pill
-              : "bg-white/10 border border-white/20 backdrop-blur-md shadow-lg" // Glassy Pill
-          )}
-        >
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-xs font-bold tracking-widest uppercase transition-all duration-300 relative group px-5 py-2.5 rounded-full",
-                textColorClass,
-                pathname === item.href
-                  ? "bg-primary text-white shadow-md"
-                  : "hover:bg-white/10"
-              )}
-            >
-              {item.name}
-            </Link>
-          ))}
-
-
-        </nav>
-
-        {/* Right side - Auth, Theme & User Menu */}
+        {/* --- LEFT SIDE --- */}
         <div className="flex items-center gap-4 z-20">
-          <div className="hidden md:block">
-            <div className={!isTransparent ? "" : "[&_button]:text-white"}>
-              <ThemeToggle />
-            </div>
-          </div>
 
-          {status === "loading" ? (
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-muted/20 animate-pulse" />
-            </div>
-          ) : session ? (
-            <>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "hidden md:flex items-center rounded-full transition-all focus-visible:ring-0 focus-visible:ring-offset-0 px-2",
-                      !isTransparent ? "hover:bg-accent/50" : "hover:bg-white/10 text-white"
-                    )}
-                  >
-                    <div className="relative">
-                      <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
-                        <AvatarImage
-                          src={session.user?.image || ""}
-                          alt={session.user?.name || "User"}
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                          {getInitials(session.user?.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 mt-2">
-                  <DropdownMenuLabel className="flex flex-col">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage
-                          src={session.user?.image || ""}
-                          alt={session.user?.name || "User"}
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
-                          {getInitials(session.user?.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 overflow-hidden">
-                        <p className="font-semibold truncate">
-                          {session.user?.name || "User"}
-                        </p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {session.user?.email}
-                        </p>
-                      </div>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {(session.user?.role === "admin" ||
-                    session.user?.role === "editor") && (
-                      <>
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin" className="cursor-pointer">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            Dashboard
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin/models" className="cursor-pointer">
-                            <Settings className="mr-2 h-4 w-4" />
-                            Manage Content
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                      </>
-                    )}
-
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem
-                    onClick={handleSignOut}
-                    className="cursor-pointer text-red-600 focus:text-red-600"
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="md:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={cn("rounded-full", !isTransparent ? "" : "text-white hover:bg-white/10")}
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={session.user?.image || ""}
-                          alt={session.user?.name || "User"}
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
-                          {getInitials(session.user?.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{session.user?.name}</span>
-                        <span className="text-xs text-muted-foreground">{session.user?.email}</span>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </>
-          ) : (
-            <>
-              <Button
-                variant={!isTransparent ? "default" : "outline"}
-                size="sm"
-                onClick={() => router.push("/login")}
-                className={cn(
-                  "hidden md:flex items-center gap-2 transition-all",
-                  !isTransparent
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
-                    : "border-white text-white hover:bg-white hover:text-black bg-transparent"
-                )}
-              >
-                <User className="h-4 w-4" />
-                Login
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.push("/login")}
-                className={cn("md:hidden", !isTransparent ? "" : "text-white hover:bg-white/10")}
-              >
-                <User className="h-5 w-5" />
-              </Button>
-            </>
-          )}
-
+          {/* Mobile Hamburger (Now on Left) */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className={!isTransparent ? "" : "text-white hover:bg-white/10"}>
+              <Button variant="ghost" size="icon" className={!isTransparent ? "-ml-2" : "text-white hover:bg-white/10 -ml-2"}>
                 {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between mb-6">
                   <span className="font-bold text-lg">Menu</span>
@@ -317,6 +126,200 @@ export function NavigationBar() {
               </div>
             </SheetContent>
           </Sheet>
+
+          {/* Desktop Logo */}
+          <div className={cn("hidden md:block transition-all duration-300", !isTransparent ? "" : "brightness-0 invert")}>
+            <Logo showText={true} />
+          </div>
+        </div>
+
+        {/* --- CENTER (Mobile Only) --- */}
+        {/* Mobile Logo (Centered, No Text) */}
+        <div className={cn("md:hidden absolute left-1/2 -translate-x-1/2 z-20 transition-all duration-300", !isTransparent ? "" : "brightness-0 invert")}>
+          <Logo showText={false} />
+        </div>
+
+        {/* --- CENTER (Desktop Only) --- */}
+        {/* Desktop Navigation in Rounded Bar */}
+        <nav
+          className={cn(
+            "hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2",
+            "px-2 py-1.5 rounded-full transition-all duration-300",
+            !isTransparent
+              ? "bg-background/50 border border-border shadow-sm" // Solid Pill
+              : "bg-white/10 border border-white/20 backdrop-blur-md shadow-lg" // Glassy Pill
+          )}
+        >
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "text-xs font-bold tracking-widest uppercase transition-all duration-300 relative group px-5 py-2.5 rounded-full",
+                textColorClass,
+                pathname === item.href
+                  ? "bg-primary text-white shadow-md"
+                  : "hover:bg-white/10"
+              )}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* --- RIGHT SIDE --- */}
+        <div className="flex items-center gap-2 md:gap-4 z-20">
+          <div className="hidden md:block">
+            <div className={!isTransparent ? "" : "[&_button]:text-white"}>
+              <ThemeToggle />
+            </div>
+          </div>
+
+          {status === "loading" ? (
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-muted/20 animate-pulse" />
+            </div>
+          ) : session ? (
+            <>
+              {/* Desktop User Menu (Name + Avatar) */}
+              <div className="hidden md:block">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "flex items-center rounded-full transition-all focus-visible:ring-0 focus-visible:ring-offset-0 px-2",
+                        !isTransparent ? "hover:bg-accent/50" : "hover:bg-white/10 text-white"
+                      )}
+                    >
+                      <div className="relative">
+                        <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+                          <AvatarImage
+                            src={session.user?.image || ""}
+                            alt={session.user?.name || "User"}
+                          />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                            {getInitials(session.user?.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                      </div>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  {/* ... Dropdown Content (Same as before) ... */}
+                  <DropdownMenuContent align="end" className="w-64 mt-2">
+                    <DropdownMenuLabel className="flex flex-col">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} />
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">{getInitials(session?.user?.name)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 overflow-hidden">
+                          <p className="font-semibold truncate">{session?.user?.name || "User"}</p>
+                          <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+                        </div>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {(session?.user?.role === "admin" || session?.user?.role === "editor") && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin" className="cursor-pointer">
+                            <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin/models" className="cursor-pointer">
+                            <Settings className="mr-2 h-4 w-4" /> Manage Content
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" /> Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Mobile User Menu (Avatar Only) */}
+              <div className="md:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn("rounded-full h-8 w-8", !isTransparent ? "" : "text-white hover:bg-white/10")}
+                    >
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage
+                          src={session.user?.image || ""}
+                          alt={session.user?.name || "User"}
+                        />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-[10px]">
+                          {getInitials(session.user?.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col">
+                        <span className="font-semibold">{session?.user?.name}</span>
+                        <span className="text-xs text-muted-foreground">{session?.user?.email}</span>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" /> Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Desktop Login Button */}
+              <Button
+                variant={!isTransparent ? "default" : "outline"}
+                size="sm"
+                onClick={() => router.push("/login")}
+                className={cn(
+                  "hidden md:flex items-center gap-2 transition-all",
+                  !isTransparent
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                    : "border-white text-white hover:bg-white hover:text-black bg-transparent"
+                )}
+              >
+                <User className="h-4 w-4" />
+                Login
+              </Button>
+
+              {/* Mobile Login Button (Icon Only) */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push("/login")}
+                className={cn("md:hidden h-9 w-9", !isTransparent ? "" : "text-white hover:bg-white/10")}
+              >
+                <User className="h-5 w-5" />
+              </Button>
+            </>
+          )}
+
+          {/* Mobile Menu Trigger - REMOVED (Moved to left) */}
         </div>
       </div>
     </header>
