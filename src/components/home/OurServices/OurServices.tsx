@@ -51,7 +51,7 @@ const OurServices: React.FC = () => {
   }, { scope: containerRef });
 
   return (
-    <section ref={containerRef} className="bg-background overflow-hidden py-20">
+    <section ref={containerRef} className="bg-background overflow-hidden">
       <div className="container mx-auto px-4">
         {/* Header Section */}
         <div className="service-header text-center mb-16">

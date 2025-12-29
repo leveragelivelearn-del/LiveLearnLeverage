@@ -76,11 +76,11 @@ const InvestOurCompany: React.FC = () => {
       <div className="container px-4  mx-auto">
         {/* Header Section */}
         <div className="text-center mb-16 max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-6 tracking-tight leading-tight">
-            Invest In Our Company And Have Healthy <br className="hidden md:block" /> Profits For Long Term
+          <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-6 tracking-tight leading-tight">
+            Invest In <span className="text-primary">Our Company</span>
           </h2>
           <div className="w-12 h-[3px] bg-primary mx-auto mb-8"></div>
-          <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-sm md:text-base leading-relaxed max-w-4xl mx-auto">
             Partner with a growth-oriented organization dedicated to sustainable value creation. Our strategic approach ensures reliable returns while fostering innovation in global markets.
           </p>
         </div>

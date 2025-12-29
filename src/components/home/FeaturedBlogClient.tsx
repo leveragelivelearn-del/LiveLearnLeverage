@@ -28,19 +28,24 @@ const FeaturedBlogClient: React.FC<FeaturedBlogClientProps> = ({ blogs }) => {
       }
     });
 
-    tl.from('.blog-header-text', {
+    tl.from('.blog-header h2', {
       y: 30,
       opacity: 0,
       duration: 0.8,
-      stagger: 0.2,
       ease: 'power3.out'
     })
-      .from('.blog-view-all', {
-        x: 20,
+      .from('.blog-header .divider', {
+        width: 0,
         opacity: 0,
         duration: 0.6,
         ease: 'power3.out'
-      }, '-=0.6')
+      }, '-=0.4')
+      .from('.blog-header p', {
+        y: 20,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out'
+      }, '-=0.4')
       .from('.blog-card', {
         y: 50,
         opacity: 0,
@@ -54,21 +59,15 @@ const FeaturedBlogClient: React.FC<FeaturedBlogClientProps> = ({ blogs }) => {
   return (
     <section ref={containerRef} className="bg-background overflow-hidden">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="blog-header-text text-3xl font-bold">Latest Insights</h2>
-            <p className="blog-header-text text-muted-foreground">
-              Thoughts on finance and M&A
-            </p>
-          </div>
-          <div className="blog-view-all">
-            <Button variant="ghost" asChild>
-              <Link href="/blog">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+        {/* Header Section */}
+        <div className="blog-header text-center mb-16">
+          <h2 className="text-foreground text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
+            Latest <span className='text-primary'>Insights</span>
+          </h2>
+          <div className="divider w-12 h-[3px] bg-primary mx-auto mb-8"></div>
+          <p className="max-w-4xl mx-auto text-muted-foreground text-base md:text-lg leading-relaxed font-light">
+            Explore our latest thoughts on finance, M&A, and strategic growth. We provide in-depth analysis and expert perspectives to help you stay ahead in a dynamic market environment.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
