@@ -16,15 +16,20 @@ export default function ScrollToTop() {
   const radius = (size / 2) - strokeWidth - 2; // Radius adjusted for stroke & padding
   const circumference = 2 * Math.PI * radius;
 
-  // Calculate offset based on scroll progress
-  const offset = circumference - (scrollProgress / 100) * circumference;
+  // Calculate offset based on scroll progress (prevent NaN)
+  const offset = isNaN(scrollProgress) || !isFinite(scrollProgress)
+    ? circumference
+    : circumference - (scrollProgress / 100) * circumference;
   // ---------------------
 
   useEffect(() => {
     const handleScroll = () => {
       // Calculate scroll progress
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (window.scrollY / totalHeight) * 100;
+      // Prevent division by zero or negative values
+      const progress = totalHeight > 0
+        ? Math.min(100, Math.max(0, (window.scrollY / totalHeight) * 100))
+        : 0;
       setScrollProgress(progress);
 
       // Show button when scrolled 20% down

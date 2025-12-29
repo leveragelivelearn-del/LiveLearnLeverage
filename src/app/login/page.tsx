@@ -66,11 +66,6 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-purple-500/5 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="bg-primary/10 p-3 rounded-full">
-              <Lock className="h-6 w-6 text-primary" />
-            </div>
-          </div>
           <CardTitle className="text-2xl text-center">
             Login
           </CardTitle>
@@ -118,15 +113,7 @@ function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+              <Label>Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -151,22 +138,7 @@ function LoginForm() {
           </form>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4">
-          <div className="text-center text-sm text-muted-foreground">
-            <p>
-              This area is restricted to authorized personnel only.
-            </p>
-            <p className="mt-1">
-              Contact support if you need access.
-            </p>
-          </div>
 
-          <Button variant="outline" className="w-full" asChild>
-            <Link href="/">
-              ← Back to Home
-            </Link>
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   )

@@ -144,7 +144,7 @@ const FAQClient: React.FC<FAQClientProps> = ({ faqs }) => {
                 </div>
 
                 {/* Right Side: Visual Section & Overlapping Images */}
-                <div className="relative w-full lg:w-[35%] min-h-[500px] lg:min-h-full flex flex-col">
+                <div className="hidden lg:flex relative w-full lg:w-[35%] min-h-[500px] lg:min-h-full flex-col">
 
                     {/* Main Blue Block with Stats */}
                     <div
