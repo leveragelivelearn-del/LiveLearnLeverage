@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { Suspense } from 'react'
 import BlogContent from './BlogContent'
 import { BlogSearch } from '@/components/blog/BlogSearch'
-import { NewsletterForm } from '@/components/blog/NewsletterForm'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 import User from '@/models/User'
@@ -142,21 +141,7 @@ export default async function BlogPage() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
-      <section className="py-12 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl mx-auto text-center space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold">Stay Updated</h2>
-              <p className="text-muted-foreground">
-                Get the latest M&A insights and financial analysis delivered to your inbox.
-              </p>
-            </div>
 
-            <NewsletterForm />
-          </div>
-        </div>
-      </section>
     </div>
   )
 }

@@ -2,8 +2,6 @@ import HomeHeroSection from "@/components/home/hero/hero";
 import FeaturedModelSection from "@/components/home/FeaturedModelSection";
 import FeaturedBlogSection from "@/components/home/FeaturedBlogSection";
 import IndustryExpertise from "@/components/home/IndustryExpertise";
-import TestimonialsSection from "@/components/home/testimonials/TestimonialsSection";
-import FAQSection from "@/components/home/FAQSection";
 import WhoWeAare from "@/components/home/whoweare";
 import OurServices from "@/components/home/OurServices/OurServices";
 import InvestOurCompany from "@/components/home/InvestOurCompany/InvestOurCompany";
@@ -21,13 +19,12 @@ export default async function HomePage() {
       {/* Featured Blog Posts */}
 
       <FeaturedBlogSection />
-      <WhoWeAare/>
-      <OurServices/>
-      <CaseStudies/>
-      <InvestOurCompany/>
-      <IndustryExpertise/>
-      <TestimonialsSection/>
-      <FAQSection/>
+      <WhoWeAare />
+      <OurServices />
+      <CaseStudies />
+      <InvestOurCompany />
+      <IndustryExpertise />
+      {/* <TestimonialsSection/> */}
       {/* CTA Section */}
     </div>
   );
