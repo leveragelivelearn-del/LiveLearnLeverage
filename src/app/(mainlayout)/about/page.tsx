@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,7 @@ import {
 import { ModelCard } from '@/components/models/ModelCard';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { WhatsAppIcon } from '@/components/icons/WhatsappIcon';
+import emailjs from '@emailjs/browser';
 
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState('about');
@@ -34,6 +35,51 @@ export default function AboutPage() {
   const [blogs, setBlogs] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [settings, setSettings] = useState<any>(null);
+
+  // Contact form state
+  const form = useRef<HTMLFormElement>(null);
+  const [status, setStatus] = useState<'sending' | 'success' | 'error' | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  });
+
+  // Contact form handlers
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const sendEmail = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus('sending');
+
+    if (!form.current) return;
+
+    emailjs
+      .sendForm(
+        'service_s0xbdhx',
+        'template_iwhkvfp',
+        form.current,
+        'EE6saf3Fn1bDUun_g'
+      )
+      .then(
+        (result) => {
+          console.log(result.text);
+          setStatus('success');
+          setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+          setTimeout(() => setStatus(null), 3000);
+        },
+        (error) => {
+          console.log(error.text);
+          setStatus('error');
+          setTimeout(() => setStatus(null), 3000);
+        }
+      );
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -356,36 +402,85 @@ export default function AboutPage() {
                   </p>
                 </div>
 
-                <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <form ref={form} className="space-y-6" onSubmit={sendEmail}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-muted-foreground uppercase">Your Name</label>
-                      <Input placeholder="Enter your name" className="bg-accent border-border focus:border-primary h-12" />
+                      <Input
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Enter your name"
+                        className="bg-accent border-border focus:border-primary h-12"
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-muted-foreground uppercase">Phone Number</label>
-                      <Input placeholder="Enter phone number" className="bg-accent border-border focus:border-primary h-12" />
+                      <Input
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="Enter phone number"
+                        className="bg-accent border-border focus:border-primary h-12"
+                      />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-muted-foreground uppercase">Your Email</label>
-                      <Input type="email" placeholder="Enter your email" className="bg-accent border-border focus:border-primary h-12" />
+                      <Input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="Enter your email"
+                        className="bg-accent border-border focus:border-primary h-12"
+                        required
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-muted-foreground uppercase">Your Subject</label>
-                      <Input placeholder="Enter subject" className="bg-accent border-border focus:border-primary h-12" />
+                      <Input
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleChange}
+                        placeholder="Enter subject"
+                        className="bg-accent border-border focus:border-primary h-12"
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-muted-foreground uppercase">Your Message</label>
-                    <Textarea placeholder="Write your message here" className="bg-accent border-border focus:border-primary min-h-[150px] resize-none" />
+                    <Textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Write your message here"
+                      className="bg-accent border-border focus:border-primary min-h-[150px] resize-none"
+                      required
+                    />
                   </div>
 
-                  <Button className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-chart-4 hover:from-primary/80 hover:to-chart-4/80 shadow-lg shadow-primary/20 text-primary-foreground">
-                    Send Message
+                  {status && (
+                    <div className={`p-4 rounded-lg text-center font-medium ${status === 'sending' ? 'bg-blue-500/10 text-blue-500' :
+                        status === 'success' ? 'bg-green-500/10 text-green-500' :
+                          'bg-red-500/10 text-red-500'
+                      }`}>
+                      {status === 'sending' && 'Sending message...'}
+                      {status === 'success' && '✓ Message sent successfully!'}
+                      {status === 'error' && '✗ Failed to send message. Please try again.'}
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={status === 'sending'}
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-chart-4 hover:from-primary/80 hover:to-chart-4/80 shadow-lg shadow-primary/20 text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {status === 'sending' ? 'Sending...' : 'Send Message'}
                   </Button>
                 </form>
               </div>
