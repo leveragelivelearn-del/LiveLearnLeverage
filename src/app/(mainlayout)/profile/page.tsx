@@ -11,6 +11,7 @@ import { Bookmark } from 'lucide-react'
 
 import ProfileOverview from '@/components/profile/ProfileOverview'
 import { ProfileSidebar } from '@/components/profile/ProfileSidebar'
+import { PasswordChangeForm } from '@/components/profile/PasswordChangeForm'
 
 export default async function ProfilePage() {
     const session = await getServerSession(authOptions)
@@ -48,9 +49,10 @@ export default async function ProfilePage() {
                     {/* Right Content */}
                     <div className="w-full md:w-2/3 lg:w-3/4">
                         <Tabs defaultValue="overview" className="w-full">
-                            <TabsList className="w-full grid grid-cols-2 mb-8">
+                            <TabsList className="w-full grid grid-cols-3 mb-8">
                                 <TabsTrigger value="overview">Overview</TabsTrigger>
                                 <TabsTrigger value="bookmarks">Bookmarks ({user.bookmarks?.length || 0})</TabsTrigger>
+                                <TabsTrigger value="settings">Settings</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="overview">
@@ -90,6 +92,10 @@ export default async function ProfilePage() {
                                         </Card>
                                     )}
                                 </div>
+                            </TabsContent>
+
+                            <TabsContent value="settings">
+                                <PasswordChangeForm />
                             </TabsContent>
                         </Tabs>
                     </div>
