@@ -61,10 +61,10 @@ export default function AboutPage() {
 
     emailjs
       .sendForm(
-        'service_s0xbdhx',
-        'template_iwhkvfp',
+        'service_vgs5pnk',
+        'template_uw8xbk6',
         form.current,
-        'EE6saf3Fn1bDUun_g'
+        '9HWquHx5aqMLa0d6l'
       )
       .then(
         (result) => {
@@ -466,8 +466,8 @@ export default function AboutPage() {
 
                   {status && (
                     <div className={`p-4 rounded-lg text-center font-medium ${status === 'sending' ? 'bg-blue-500/10 text-blue-500' :
-                        status === 'success' ? 'bg-green-500/10 text-green-500' :
-                          'bg-red-500/10 text-red-500'
+                      status === 'success' ? 'bg-green-500/10 text-green-500' :
+                        'bg-red-500/10 text-red-500'
                       }`}>
                       {status === 'sending' && 'Sending message...'}
                       {status === 'success' && '✓ Message sent successfully!'}
