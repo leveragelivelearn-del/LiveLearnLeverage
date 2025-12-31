@@ -9,6 +9,9 @@ import { Loader2, KeyRound } from 'lucide-react'
 import { toast } from 'sonner' // Assuming sonner is used, if not I'll check for toast provider
 
 import { Button } from '@/components/ui/button'
+
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
     Form,
     FormControl,
@@ -16,9 +19,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+} from '../ui/form'
 
 const passwordFormSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required'),
