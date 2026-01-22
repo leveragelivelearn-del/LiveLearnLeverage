@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Interface defined here to avoid import cycles
 export interface ChatMessage {
   role: 'user' | 'model';

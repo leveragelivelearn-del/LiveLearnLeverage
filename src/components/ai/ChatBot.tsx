@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
@@ -77,7 +78,7 @@ export function ChatBot() {
                       className="object-cover"
                     />
                   </div>
-                  <CardTitle className="text-sm font-medium">Gamaelle's AI Assistant</CardTitle>
+                  <CardTitle className="text-sm font-medium">Gamaelle&apos;s AI Assistant</CardTitle>
                 </div>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" onClick={() => setIsOpen(false)}>
                   <X className="h-4 w-4" />
