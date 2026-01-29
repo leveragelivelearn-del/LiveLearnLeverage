@@ -47,6 +47,7 @@ export async function Footer() {
     { name: 'Models', href: '/models' },
     { name: 'Blog', href: '/blog' },
     { name: 'Contact', href: '/about#contact' },
+    { name: 'Contact Web Developer', href: 'https://www.jiapixel.com' },
   ]
 
   return (
