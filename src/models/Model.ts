@@ -21,8 +21,8 @@ const ModelSchema = new mongoose.Schema({
   dealType: { type: String, required: true },
   completionDate: { type: Date, required: true },
   excelFileUrl: { type: String },
+  pdfFileUrl: { type: String },
   slides: [slideSchema],
-  rationale: { type: String, required: true },
   keyMetrics: { type: Map, of: String },
   featured: { type: Boolean, default: false },
   views: { type: Number, default: 0 },
@@ -38,6 +38,11 @@ ModelSchema.pre('save', async function () {
 // FIXED: Singleton Pattern
 // If the model exists, use it. If not, create it.
 // This prevents "OverwriteModelError" without deleting the cache.
+// However, in development, we want to clear the cache so the updated schema (like pdfFileUrl) takes effect immediately.
+if (process.env.NODE_ENV !== 'production' && mongoose.models.Model) {
+  delete mongoose.models.Model
+}
+
 const Model = mongoose.models.Model || mongoose.model('Model', ModelSchema)
 
 export default Model

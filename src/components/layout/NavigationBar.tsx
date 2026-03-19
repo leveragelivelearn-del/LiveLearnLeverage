@@ -39,6 +39,7 @@ const navItems = [
 export function NavigationBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -46,10 +47,12 @@ export function NavigationBar() {
 
 
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -175,7 +178,7 @@ export function NavigationBar() {
             </div>
           </div>
 
-          {status === "loading" ? (
+          {!mounted || status === "loading" ? (
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-full bg-muted/20 animate-pulse" />
             </div>

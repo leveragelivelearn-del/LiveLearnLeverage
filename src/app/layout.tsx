@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css"; // Ensure you have your global css imported here
+import "./globals.css";
+import "./prosemirror.css";
 
 // Your Custom Components
 import { SessionProvider } from "@/components/providers/SessionProvider";

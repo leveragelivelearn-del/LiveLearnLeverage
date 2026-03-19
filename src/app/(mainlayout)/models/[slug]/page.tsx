@@ -1,18 +1,22 @@
-export const revalidate = 3600;
 /* eslint-disable @typescript-eslint/no-explicit-any */
+export const dynamicParams = true;
+
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { ModelAdminActions } from "@/components/models/ModelAdminActions";
+import { PdfViewer } from "@/components/models/PdfViewer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageCarousel } from "@/components/models/ImageCarousel";
 import { ModelCard } from "@/components/models/ModelCard";
-import dbConnect from "@/lib/db";
-import Model from "@/models/Model";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate, formatCurrency, getBaseUrl } from "@/lib/utils";
+import { generateHtml } from "@/lib/server-html";
 import {
   Download,
   Eye,
@@ -21,6 +25,7 @@ import {
   ArrowLeft,
   Share2,
   FileSpreadsheet,
+  ExternalLink,
 } from "lucide-react";
 import ReadOnlyEditor from "@/components/tiptap-templates/simple/read-only-editor";
 
@@ -31,16 +36,43 @@ interface ModelDetailPageProps {
   }>;
 }
 
+const getModelData = async (slug: string) => {
+  try {
+    const baseUrl = getBaseUrl();
+    const apiUrl = `${baseUrl}/api/models/${slug}`;
+
+    console.log(`[ModelPage] Requesting: ${apiUrl}`);
+
+    const response = await fetch(apiUrl, {
+      cache: 'force-cache',
+      next: {
+        tags: ['models', `model-${slug}`]
+      }
+    });
+
+    console.log(`[ModelPage] Response Status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[ModelPage] Failed. Status: ${response.status} ${response.statusText}. Body: ${errorText}`);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log(`[ModelPage] Success. Model found: ${!!data.model}`);
+    return data;
+  } catch (error) {
+    console.error("[ModelPage] Network/Fetch Error:", error);
+    return null;
+  }
+};
+
 export async function generateMetadata(
   props: ModelDetailPageProps
 ): Promise<Metadata> {
   const params = await props.params;
-  await dbConnect();
-
-  // Use regex to make the slug lookup Case-Insensitive to prevent 404s on "Voluptatem-Veniam"
-  const model = await Model.findOne({
-    slug: { $regex: new RegExp(`^${params.slug}$`, "i") },
-  }).lean();
+  const data = await getModelData(params.slug);
+  const model = data?.model;
 
   if (!model) {
     return {
@@ -62,49 +94,19 @@ export async function generateMetadata(
   };
 }
 
-async function getModelAndRelated(slug: string) {
-  await dbConnect();
-
-  // FIXED: Add Case-Insensitive Regex lookup
-  // This ensures /models/Voluptatem finds /models/voluptatem
-  const model = await Model.findOne({
-    slug: { $regex: new RegExp(`^${slug}$`, "i") },
-  }).lean();
-
-  if (!model) {
-    return null;
-  }
-
-  // Increment view count
-  await Model.updateOne({ _id: model._id }, { $inc: { views: 1 } });
-
-  // Get related models (same industry or similar deal size)
-  const relatedModels = await Model.find({
-    _id: { $ne: model._id },
-    $or: [{ industry: model.industry }, { dealType: model.dealType }],
-  })
-    .sort({ completionDate: -1 })
-    .limit(3)
-    .select(
-      "title slug description dealSize currency industry dealType completionDate views featured slides"
-    )
-    .lean();
-
-  return {
-    model: JSON.parse(JSON.stringify(model)),
-    relatedModels: JSON.parse(JSON.stringify(relatedModels)),
-  };
-}
-
 export default async function ModelDetailPage(props: ModelDetailPageProps) {
   const params = await props.params;
-  const data = await getModelAndRelated(params.slug);
+  const data = await getModelData(params.slug);
 
-  if (!data) {
+  if (!data || !data.model) {
     notFound();
   }
 
-  const { model, relatedModels } = data;
+  const session = await getServerSession(authOptions);
+  const isAdmin = session?.user?.role === "admin";
+
+  const model = data.model;
+  const relatedModels = data.relatedModels || [];
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -144,8 +146,8 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
           </div>
         </div>
 
-        {/* Hero Banner Section */}
-        <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center overflow-hidden py-16">
+        {/* Hero Banner Section - Reduced padding on mobile */}
+        <section className="relative min-h-[40vh] md:min-h-[60vh] flex items-center overflow-hidden py-8 md:py-16">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -160,6 +162,7 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
           </div>
 
           <div className="container mx-auto px-4 relative z-10 text-white">
+            <ModelAdminActions modelSlug={model.slug} modelId={model._id} isAdmin={isAdmin} />
             <Button
               variant="ghost"
               size="sm"
@@ -172,21 +175,9 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
               </Link>
             </Button>
 
-            <div className="max-w-4xl mx-auto text-center space-y-6">
-              {/* Badges */}
+            <div className="max-w-4xl mx-auto text-center space-y-4">
+              {/* Featured Badge Only - Removed Industry and Deal Type */}
               <div className="flex flex-wrap items-center justify-center gap-2">
-                <Badge
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  {model.industry}
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="bg-white/10 text-white hover:bg-white/20 border-0"
-                >
-                  {model.dealType}
-                </Badge>
                 {model.featured && (
                   <Badge className="bg-primary text-primary-foreground">
                     Featured
@@ -194,8 +185,8 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
                 )}
               </div>
 
-              {/* Title */}
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+              {/* Title - Reduced size on mobile */}
+              <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
                 {model.title}
               </h1>
 
@@ -244,23 +235,35 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
                   </Card>
                 )}
 
+                {/* PDF Presentation */}
+                {model.pdfFileUrl && (
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-4">
+                      <CardTitle className="text-xl sm:text-2xl">PDF Presentation</CardTitle>
+                      <Button variant="outline" size="icon" asChild className="h-8 w-8">
+                        <a href={model.pdfFileUrl} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <PdfViewer url={model.pdfFileUrl} />
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Tabs for Rationale, Metrics, and Description */}
                 <Tabs defaultValue="description" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="description">Description</TabsTrigger>
-                    <TabsTrigger value="rationale">Deal Rationale</TabsTrigger>
                     <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="description" className="space-y-4 pt-4">
-                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                      <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">{model.description}</p>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="rationale" className="space-y-4 pt-4">
-                    <div className="prose prose-sm max-w-none dark:prose-invert" />
-                    <ReadOnlyEditor content={model.rationale} />
+                    <div 
+                      className="prose prose-sm max-w-none dark:prose-invert"
+                      dangerouslySetInnerHTML={{ __html: generateHtml(model.description) }}
+                    />
                   </TabsContent>
 
                   <TabsContent value="metrics" className="space-y-4 pt-4">
@@ -282,9 +285,9 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
               </div>
 
               {/* Right Column - Sidebar */}
-              <div className="space-y-6">
+              <div className="space-y-6 lg:sticky lg:top-24 h-fit">
                 {/* Download Section */}
-                {model.excelFileUrl && (
+                {(model.excelFileUrl || model.pdfFileUrl) && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -293,16 +296,30 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Button className="w-full" asChild>
-                        <a href={model.excelFileUrl} download>
-                          <Download className="mr-2 h-4 w-4" />
-                          Download Excel Model
-                        </a>
-                      </Button>
-                      <p className="text-xs text-muted-foreground">
-                        Includes full financial model with assumptions,
-                        projections, and sensitivity analysis.
-                      </p>
+                      {model.excelFileUrl && (
+                        <div>
+                          <Button className="w-full" asChild>
+                            <a href={model.excelFileUrl} download>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download Excel Model
+                            </a>
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Includes full financial model with assumptions, projections, and sensitivity analysis.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {model.pdfFileUrl && (
+                        <div className={model.excelFileUrl ? "pt-2 border-t" : ""}>
+                          <Button className="w-full" variant={model.excelFileUrl ? "outline" : "default"} asChild>
+                            <a href={model.pdfFileUrl} download>
+                              <Download className="mr-2 h-4 w-4" />
+                              Download PDF Presentation
+                            </a>
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 )}
@@ -368,52 +385,8 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
           </div>
         </section>
 
-        {/* Related Deals */}
-        {relatedModels.length > 0 && (
-          <section className="py-12 bg-secondary/30">
-            <div className="container mx-auto px-4">
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold">Related Deals</h2>
-                  <p className="text-muted-foreground">
-                    Explore similar M&A transactions in the same industry
-                  </p>
-                </div>
+        {/* Removed Related Deals */}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {relatedModels.map((relatedModel: any) => (
-                    <ModelCard key={relatedModel._id} model={relatedModel} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* CTA Section */}
-        <section className="py-12">
-          <div className="container mx-auto px-4 text-center">
-            <div className="max-w-2xl mx-auto space-y-6">
-              <h2 className="text-3xl font-bold">
-                Need Help With Your Next Deal?
-              </h2>
-              <p className="text-muted-foreground">
-                Leverage expert M&A analysis and financial modeling for your
-                transaction.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" asChild>
-                  <a href="mailto:contact@livelearnleverage.org">
-                    Request Consultation
-                  </a>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/models">Browse All Models</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
     </>
   );
@@ -421,10 +394,20 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
 
 // Generate static paths for ISR
 export async function generateStaticParams() {
-  await dbConnect();
-  const models = await Model.find({}).select("slug").lean();
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/models?limit=1000`, {
+      cache: 'force-cache'
+    });
 
-  return models.map((model) => ({
-    slug: model.slug, // FIXED: Return slug instead of id
-  }));
+    if (!response.ok) return [];
+
+    const data = await response.json();
+    return data.models?.map((model: any) => ({
+      slug: model.slug,
+    })) || [];
+  } catch (error) {
+    console.error("Error generating static params:", error);
+    return [];
+  }
 }

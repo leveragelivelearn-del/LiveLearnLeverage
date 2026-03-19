@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import dbConnect from '@/lib/db'
 import Model from '@/models/Model'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 // Next.js 15+ Params Interface
 interface Params {
@@ -28,6 +29,12 @@ export async function DELETE(request: NextRequest, props: Params) {
 
     if (!deletedModel) {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 })
+    }
+
+    if (deletedModel.slug) {
+      revalidatePath('/models')
+      revalidatePath(`/models/${deletedModel.slug}`)
+      revalidateTag(`model-${deletedModel.slug}`, 'default')
     }
 
     return NextResponse.json({ message: 'Model deleted successfully' })
@@ -70,9 +77,9 @@ export async function PUT(request: NextRequest, props: Params) {
 
     const params = await props.params
     await dbConnect()
-    
+
     const data = await request.json()
-    
+
     // Prevent modifying immutable fields
     delete data._id
     delete data.createdAt
@@ -86,6 +93,16 @@ export async function PUT(request: NextRequest, props: Params) {
 
     if (!updatedModel) {
       return NextResponse.json({ error: 'Model not found' }, { status: 404 })
+    }
+
+    revalidatePath('/models')
+    if (params.slug && params.slug !== updatedModel.slug) {
+      revalidatePath(`/models/${params.slug}`)
+      revalidateTag(`model-${params.slug}`, 'default')
+    }
+    if (updatedModel.slug) {
+      revalidatePath(`/models/${updatedModel.slug}`)
+      revalidateTag(`model-${updatedModel.slug}`, 'default')
     }
 
     return NextResponse.json({ model: updatedModel })

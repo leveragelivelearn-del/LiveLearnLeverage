@@ -1,7 +1,17 @@
 'use client';
 
-import { ReactLenis } from 'lenis/react';
-import { ReactNode } from 'react';
+import { ReactLenis, useLenis } from 'lenis/react';
+import { ReactNode, useEffect } from 'react';
+
+function LenisExposer() {
+  const lenis = useLenis()
+  useEffect(() => {
+    if (lenis) {
+      (window as any).__lenis = lenis
+    }
+  }, [lenis])
+  return null
+}
 
 interface LenisProviderProps {
   children: ReactNode;
@@ -24,6 +34,7 @@ export default function LenisProvider({ children }: LenisProviderProps) {
         infinite: false,
       }}
     >
+      <LenisExposer />
       {children}
     </ReactLenis>
   );

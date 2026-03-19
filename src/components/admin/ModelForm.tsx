@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,10 +15,10 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { ExcelUpload } from '@/components/admin/ExcelUpload'
+import { PdfUpload } from '@/components/admin/PdfUpload'
 import { SlidesUpload } from '@/components/admin/SlidesUpload'
 import {
   Save,
-  Eye,
   X,
   Plus,
   Calendar,
@@ -27,8 +26,8 @@ import {
   ArrowLeft
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { SimpleEditor, SimpleEditorRef } from '@/components/tiptap-templates/simple/simple-editor'
 import Link from 'next/link'
+import NovelEditor from '@/components/admin/editor/NovelEditor'
 
 const industries = [
   'Technology',
@@ -86,7 +85,6 @@ interface ModelFormProps {
 
 export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
   const router = useRouter()
-  const editorRef = useRef<SimpleEditorRef>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -98,6 +96,17 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
         fileName: 'Existing Excel File', // Default name if not stored
         fileSize: 0, // Default size if not stored
         uploadedAt: new Date() // Default date if not stored
+      }
+      : null
+  )
+
+  const [pdfFile, setPdfFile] = useState<any>(
+    initialData?.pdfFileUrl
+      ? {
+        url: initialData.pdfFileUrl,
+        fileName: 'Existing PDF File',
+        fileSize: 0,
+        uploadedAt: new Date()
       }
       : null
   )
@@ -140,13 +149,32 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
     setIsSubmitting(true)
 
     try {
-      let rationaleContent = '';
-      if (editorRef.current) {
-        rationaleContent = editorRef.current.getContent();
+      let isDescEmpty = false;
+      if (!formData.description || formData.description.trim() === '') {
+        isDescEmpty = true;
+      } else {
+        try {
+          const parsed = JSON.parse(formData.description);
+          if (!parsed || Object.keys(parsed).length === 0) {
+            isDescEmpty = true;
+          } else if (parsed.type === 'doc') {
+            if (!parsed.content || parsed.content.length === 0) {
+              isDescEmpty = true;
+            } else {
+              const allEmpty = parsed.content.every((node: any) => node.type === 'paragraph' && (!node.content || node.content.length === 0));
+              if (allEmpty) isDescEmpty = true;
+            }
+          } else if (Array.isArray(parsed)) {
+            const allEmpty = parsed.every((node: any) => node.type === 'paragraph' && (!node.content || node.content.length === 0));
+            if (parsed.length === 0 || allEmpty) isDescEmpty = true;
+          }
+        } catch (e) {
+          isDescEmpty = formData.description.trim() === '';
+        }
       }
 
-      if (!rationaleContent || rationaleContent.trim() === '<p></p>') {
-        throw new Error('Deal Rationale is required');
+      if (isDescEmpty) {
+        throw new Error('Description is required');
       }
 
       const metricsMap: Record<string, string> = {}
@@ -156,12 +184,16 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
         }
       })
 
+      const dealSize = parseFloat(formData.dealSize.replace(/,/g, ''))
+      if (isNaN(dealSize)) {
+        throw new Error('Deal Size is required and must be a valid number')
+      }
+
       const modelData = {
         ...formData,
         // Only slugify if creating new or if user cleared the slug, otherwise keep existing or manually edited
         slug: formData.slug ? slugify(formData.slug) : slugify(formData.title),
-        rationale: rationaleContent,
-        dealSize: parseFloat(formData.dealSize.replace(/,/g, '')),
+        dealSize,
         slides: slides.map((slide, index) => ({
           imageUrl: slide.url,
           caption: slide.caption || '',
@@ -169,6 +201,7 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
         })),
         keyMetrics: metricsMap,
         excelFileUrl: excelFile?.url,
+        pdfFileUrl: pdfFile?.url,
       }
 
       const url = isEdit ? `/api/admin/models/${initialData.slug}` : '/api/admin/models'
@@ -213,11 +246,6 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
   }
 
   const handleTitleChange = (title: string) => {
-    // Only auto-update slug if we are NOT in edit mode, or if the slug hasn't been manually touched yet (simplification: only on create)
-    // Actually, distinct behavior:
-    // Create: update slug matching title
-    // Edit: don't auto-update slug when title changes to avoid breaking links, user must edit slug manually if desired
-
     if (!isEdit) {
       setFormData({
         ...formData,
@@ -238,270 +266,289 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
     return num.toLocaleString('en-US')
   }
 
+  // Helper to handle Novel editor content as JSON object
+  const handleDescriptionChange = (content: any) => {
+    setFormData(prev => ({ ...prev, description: JSON.stringify(content) }));
+  }
+
+  // Parse initial content for Novel
+  const initialDescriptionContent = (() => {
+    if (!initialData?.description) return undefined;
+    try {
+      return JSON.parse(initialData.description);
+    } catch (e) {
+      // If it's old plain text, create a simple doc structure
+      return {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: initialData.description }] }]
+      };
+    }
+  })();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8 pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{isEdit ? 'Edit M&A Model' : 'New M&A Model'}</h1>
           <p className="text-muted-foreground">
             {isEdit ? 'Update existing model details' : 'Create a new M&A model with financial analysis'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" asChild>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Button variant="ghost" asChild className="flex-1 sm:flex-none">
             <Link href="/admin/models">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Link>
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button onClick={handleSubmit} disabled={isSubmitting} className="flex-1 sm:flex-none">
             <Save className="mr-2 h-4 w-4" />
             {isSubmitting ? 'Saving...' : (isEdit ? 'Update Model' : 'Create Model')}
           </Button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-              <CardDescription>
-                Enter the basic details of the M&A transaction
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Information */}
+        <Card className="shadow-sm border-muted/50">
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+            <CardDescription>
+              Enter the core details of the M&A transaction
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm font-semibold">Deal Title *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Acquisition of Company XYZ by ABC Corp"
+                value={formData.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                required
+                className="bg-muted/10 border-muted/50 focus:border-primary"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Description *</Label>
+              <NovelEditor 
+                initialValue={initialDescriptionContent} 
+                onChange={handleDescriptionChange} 
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Deal Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Acquisition of Company XYZ by ABC Corp"
-                  value={formData.title}
-                  onChange={(e) => handleTitleChange(e.target.value)}
-                  required
-                />
+                <Label htmlFor="industry" className="text-sm font-semibold">Industry *</Label>
+                <Select
+                  value={formData.industry}
+                  onValueChange={(value) => setFormData({ ...formData, industry: value })}
+                >
+                  <SelectTrigger className="bg-muted/10 border-muted/50">
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {industries.map((industry) => (
+                      <SelectItem key={industry} value={industry}>
+                        {industry}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Brief description of the deal and its significance"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
-                  required
-                />
+                <Label htmlFor="dealType" className="text-sm font-semibold">Deal Type *</Label>
+                <Select
+                  value={formData.dealType}
+                  onValueChange={(value) => setFormData({ ...formData, dealType: value })}
+                >
+                  <SelectTrigger className="bg-muted/10 border-muted/50">
+                    <SelectValue placeholder="Select deal type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dealTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="industry">Industry *</Label>
-                  <Select
-                    value={formData.industry}
-                    onValueChange={(value) => setFormData({ ...formData, industry: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {industries.map((industry) => (
-                        <SelectItem key={industry} value={industry}>
-                          {industry}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="dealType">Deal Type *</Label>
-                  <Select
-                    value={formData.dealType}
-                    onValueChange={(value) => setFormData({ ...formData, dealType: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select deal type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {dealTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="dealSize">Deal Size *</Label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="dealSize"
-                      placeholder="100,000,000"
-                      value={formData.dealSize}
-                      onChange={(e) => {
-                        const formatted = formatCurrency(e.target.value)
-                        setFormData({ ...formData, dealSize: formatted })
-                      }}
-                      className="pl-9"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="currency">Currency</Label>
-                  <Select
-                    value={formData.currency}
-                    onValueChange={(value) => setFormData({ ...formData, currency: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.map((currency) => (
-                        <SelectItem key={currency} value={currency}>
-                          {currency}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="dealSize" className="text-sm font-semibold">Deal Size *</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="dealSize"
+                    placeholder="100,000,000"
+                    value={formData.dealSize}
+                    onChange={(e) => {
+                      const formatted = formatCurrency(e.target.value)
+                      setFormData({ ...formData, dealSize: formatted })
+                    }}
+                    className="pl-9 bg-muted/10 border-muted/50 focus:border-primary"
+                    required
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="completionDate">Completion Date *</Label>
+                <Label htmlFor="currency" className="text-sm font-semibold">Currency</Label>
+                <Select
+                  value={formData.currency}
+                  onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                >
+                  <SelectTrigger className="bg-muted/10 border-muted/50">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.map((currency) => (
+                      <SelectItem key={currency} value={currency}>
+                        {currency}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="completionDate" className="text-sm font-semibold">Completion Date *</Label>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
                   <Input
                     id="completionDate"
                     type="date"
                     value={formData.completionDate}
                     onChange={(e) => setFormData({ ...formData, completionDate: e.target.value })}
                     required
+                    className="bg-muted/10 border-muted/50"
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Deal Rationale */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Deal Rationale</CardTitle>
-              <CardDescription>
-                Detailed analysis and rationale behind the transaction
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* Note: In edit mode, we'd need to pass content to simple editor. 
-                  Assuming SimpleEditor accepts `initialContent` prop. 
-                  If not, we might need to update SimpleEditor or use the ref to set content when data loads. 
-              */}
-              <SimpleEditor ref={editorRef} initialContent={initialData?.rationale} />
-            </CardContent>
-          </Card>
-
-          {/* Key Financial Metrics */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Key Financial Metrics</CardTitle>
-              <CardDescription>
-                Add key valuation and financial metrics
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                {keyMetrics.map((metric, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input
-                      placeholder="Metric name (e.g., EV/EBITDA)"
-                      value={metric.key}
-                      onChange={(e) => handleMetricChange(index, 'key', e.target.value)}
-                      className="flex-1"
-                    />
-                    <Input
-                      placeholder="Value (e.g., 12.5x)"
-                      value={metric.value}
-                      onChange={(e) => handleMetricChange(index, 'value', e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveMetric(index)}
-                      disabled={keyMetrics.length <= 1}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAddMetric}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Metric
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Excel Upload */}
-          <ExcelUpload
-            onUploadComplete={(fileInfo) => setExcelFile(fileInfo)}
-            existingFile={excelFile}
-          />
-
-          {/* Presentation Slides */}
-          <SlidesUpload
-            slides={slides}
-            onSlidesChange={setSlides}
-          />
-
-          {/* Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="featured">Featured Deal</Label>
-                <Switch
-                  id="featured"
-                  checked={formData.featured}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, featured: checked })
-                  }
-                />
-              </div>
 
               <div className="space-y-2">
-                <Label htmlFor="slug">URL Slug</Label>
+                <Label htmlFor="slug" className="text-sm font-semibold">URL Slug</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   placeholder="auto-generated-from-title"
+                  className="bg-muted/10 border-muted/50"
                 />
-                <p className="text-xs text-muted-foreground">
-                  This will be used in the URL: /models/{formData.slug}
+                <p className="text-[10px] text-muted-foreground italic">
+                  URL: /models/{formData.slug || 'slug'}
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="space-y-0.5">
+                <Label htmlFor="featured" className="text-base font-semibold">Featured Deal</Label>
+                <p className="text-xs text-muted-foreground">Highlight this model on the homepage</p>
+              </div>
+              <Switch
+                id="featured"
+                checked={formData.featured}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, featured: checked })
+                }
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Resources & Uploads */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <ExcelUpload
+            onUploadComplete={(fileInfo) => setExcelFile(fileInfo)}
+            existingFile={excelFile}
+          />
+
+          <PdfUpload
+            onUploadComplete={(fileInfo) => setPdfFile(fileInfo)}
+            existingFile={pdfFile}
+          />
+        </div>
+
+        {/* Presentation Slides */}
+        <SlidesUpload
+          slides={slides}
+          onSlidesChange={setSlides}
+        />
+
+        {/* Key Financial Metrics */}
+        <Card className="shadow-sm border-muted/50">
+          <CardHeader>
+            <CardTitle>Key Financial Metrics</CardTitle>
+            <CardDescription>
+              Add key valuation and financial metrics for quick reference
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              {keyMetrics.map((metric, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <Input
+                    placeholder="Metric name (e.g., EV/EBITDA)"
+                    value={metric.key}
+                    onChange={(e) => handleMetricChange(index, 'key', e.target.value)}
+                    className="flex-1 bg-muted/10 border-muted/50"
+                  />
+                  <Input
+                    placeholder="Value (e.g., 12.5x)"
+                    value={metric.value}
+                    onChange={(e) => handleMetricChange(index, 'value', e.target.value)}
+                    className="flex-1 bg-muted/10 border-muted/50"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveMetric(index)}
+                    disabled={keyMetrics.length <= 1}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddMetric}
+              className="w-full border-dashed"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Metric
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Form Footer Actions */}
+        <div className="flex items-center justify-end gap-4 pt-6 border-t">
+          <Button variant="ghost" asChild>
+            <Link href="/admin/models">Cancel</Link>
+          </Button>
+          <Button type="submit" size="lg" disabled={isSubmitting} className="min-w-[150px]">
+            <Save className="mr-2 h-4 w-4" />
+            {isSubmitting ? 'Saving Model...' : (isEdit ? 'Save Changes' : 'Create Model')}
+          </Button>
         </div>
       </form>
     </div>

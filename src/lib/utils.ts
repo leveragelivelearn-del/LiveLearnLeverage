@@ -252,3 +252,16 @@ export function generatePagination(currentPage: number, totalPages: number): (nu
 
   return rangeWithDots
 }
+
+export function getBaseUrl() {
+  if (process.env.NODE_ENV === 'production') {
+    const url = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_APP_URL
+    if (!url) {
+      const errorMsg = "Critical Configuration Error: Both NEXT_PUBLIC_API_URL and NEXT_PUBLIC_APP_URL are missing in a production environment. Falling back to the hardcoded 'https://www.livelearnleverage.com'. Please check your environment variable configuration."
+      console.error(errorMsg)
+      throw new Error(errorMsg)
+    }
+    return url
+  }
+  return 'http://localhost:3000'
+}

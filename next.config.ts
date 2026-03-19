@@ -48,6 +48,10 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  webpack: (config: any) => {
+    config.resolve.alias.canvas = false;
+    return config;
+  },
 
   compiler:
     process.env.NODE_ENV === "production"
