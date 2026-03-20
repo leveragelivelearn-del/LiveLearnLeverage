@@ -3,13 +3,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 
+function escapeRegex(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect()
     
     const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '12')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '12') || 12))
     const category = searchParams.get('category')
     const tag = searchParams.get('tag')
     const search = searchParams.get('search')
@@ -29,11 +33,13 @@ export async function GET(request: NextRequest) {
     }
     
     if (search) {
+      const escapedSearch = escapeRegex(search)
+      const searchRegex = { $regex: escapedSearch, $options: 'i' }
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { excerpt: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
-        { tags: { $regex: search, $options: 'i' } },
+        { title: searchRegex },
+        { excerpt: searchRegex },
+        { content: searchRegex },
+        { tags: searchRegex },
       ]
     }
     

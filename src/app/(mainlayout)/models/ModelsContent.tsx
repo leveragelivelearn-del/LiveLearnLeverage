@@ -4,14 +4,22 @@
 import { useState } from "react";
 import { ModelGrid } from "@/components/models/ModelGrid";
 import { FilterBar } from "@/components/models/FilterBar";
+import { Pagination } from "@/components/models/Pagination";
 
 interface ModelsContentProps {
   initialModels: any[];
   industries: string[];
+  initialPagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
 }
 
-export default function ModelsContent({ initialModels, industries }: ModelsContentProps) {
+export default function ModelsContent({ initialModels, industries, initialPagination }: ModelsContentProps) {
   const [filteredModels, setFilteredModels] = useState(initialModels);
+  const [pagination, setPagination] = useState(initialPagination);
   
   // FIX: Loading must be FALSE initially because we have ISR data
   const [loading, setLoading] = useState(false);
@@ -25,7 +33,7 @@ export default function ModelsContent({ initialModels, industries }: ModelsConte
     sortBy: "newest"
   });
 
-  const handleFilterChange = async (newFilters: any) => {
+  const handleFilterChange = async (newFilters: any, page: number = 1) => {
     // Only set loading to true when fetching NEW data
     setLoading(true);
     
@@ -36,6 +44,8 @@ export default function ModelsContent({ initialModels, industries }: ModelsConte
       setActiveFilters(currentFilters);
 
       const params = new URLSearchParams();
+      params.append("page", page.toString());
+      params.append("limit", "12");
       
       if (currentFilters.industry && !["All", "All Industries", "all"].includes(currentFilters.industry)) {
         params.append("industry", currentFilters.industry);
@@ -63,13 +73,29 @@ export default function ModelsContent({ initialModels, industries }: ModelsConte
       if (!res.ok) throw new Error("Failed to fetch");
       
       const data = await res.json();
+      const models = data.models || [];
+      setFilteredModels(models); 
       
-      setFilteredModels(data.models || []); 
+      // Always update pagination, using safe defaults if missing
+      setPagination(data.pagination || {
+        page: 1,
+        limit: 12,
+        total: models.length,
+        pages: Math.ceil(models.length / 12),
+      });
       
     } catch (error) {
       console.error("Error filtering models:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= pagination.pages) {
+      handleFilterChange(activeFilters, newPage);
+      // Scroll to top of grid
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -86,6 +112,17 @@ export default function ModelsContent({ initialModels, industries }: ModelsConte
       {/* Models Grid */}
       <main className={`flex-1 min-w-0 transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
         <ModelGrid initialModels={filteredModels} />
+        
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="mt-12">
+            <Pagination 
+              currentPage={pagination.page}
+              totalPages={pagination.pages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )}
       </main>
     </div>
   );

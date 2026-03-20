@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from '@/lib/db'
 import Model from '@/models/Model'
 
+function escapeRegex(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // 1. Force Dynamic to prevent caching "All" results
 export const dynamic = 'force-dynamic';
 
@@ -11,8 +15,8 @@ export async function GET(request: NextRequest) {
     await dbConnect()
     
     const searchParams = request.nextUrl.searchParams
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '12')
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '12') || 12))
     
     // Get raw params
     const industry = searchParams.get('industry')
@@ -43,7 +47,8 @@ export async function GET(request: NextRequest) {
     
     // Search Filter (Title OR Description OR Industry)
     if (search && search.trim() !== '') {
-      const searchRegex = { $regex: search.trim(), $options: 'i' };
+      const escapedSearch = escapeRegex(search.trim())
+      const searchRegex = { $regex: escapedSearch, $options: 'i' };
       query.$or = [
         { title: searchRegex },
         { description: searchRegex },

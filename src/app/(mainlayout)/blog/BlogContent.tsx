@@ -1,9 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { BlogGrid } from "@/components/blog/BlogGrid";
 import { BlogSidebar } from "@/components/blog/BlogSidebar";
-import { useMemo } from "react";
+import { Pagination } from "@/components/models/Pagination";
+import { useMemo, useState, useEffect, useRef } from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface BlogContentProps {
@@ -12,6 +13,12 @@ interface BlogContentProps {
     tags: string[];
     popularPosts: any[];
     archiveMonths: any[];
+    initialPagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+    };
 }
 
 export default function BlogContent({
@@ -20,45 +27,76 @@ export default function BlogContent({
     tags,
     popularPosts,
     archiveMonths,
+    initialPagination
 }: BlogContentProps) {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+    const isInitialRenderRef = useRef(true);
+
+    const [blogs, setBlogs] = useState(initialBlogs);
+    const [pagination, setPagination] = useState(initialPagination);
+    const [loading, setLoading] = useState(false);
+
     const categoryParam = searchParams.get("category");
     const tagParam = searchParams.get("tag");
     const searchParam = searchParams.get("search");
     const yearParam = searchParams.get("year");
     const monthParam = searchParams.get("month");
+    const pageParam = searchParams.get("page") || "1";
 
-    // Filtering Logic
-    const filteredBlogs = useMemo(() => {
-        let result = [...initialBlogs];
-
-        if (categoryParam) {
-            result = result.filter((blog) => blog.category === categoryParam);
+    // Fetch blogs whenever search params change
+    useEffect(() => {
+        // Skip first render because we have initialBlogs if no filters/pagination present
+        if (isInitialRenderRef.current && pageParam === "1" && !categoryParam && !tagParam && !searchParam && !yearParam && !monthParam) {
+            isInitialRenderRef.current = false;
+            return;
         }
 
-        if (tagParam) {
-            result = result.filter((blog) => blog.tags?.includes(tagParam));
-        }
+        // Set to false after the first check regardless
+        isInitialRenderRef.current = false;
 
-        if (searchParam) {
-            const lowerSearch = searchParam.toLowerCase();
-            result = result.filter(
-                (blog) =>
-                    blog.title?.toLowerCase().includes(lowerSearch) ||
-                    blog.excerpt?.toLowerCase().includes(lowerSearch)
-            );
-        }
+        const fetchBlogs = async () => {
+            setLoading(true);
+            try {
+                const params = new URLSearchParams(searchParams.toString());
+                if (!params.has("limit")) params.append("limit", "12");
 
-        if (yearParam && monthParam) {
-            result = result.filter((blog) => {
-                const date = new Date(blog.publishedAt);
-                return date.getFullYear() === parseInt(yearParam) && (date.getMonth() + 1) === parseInt(monthParam);
-            });
-        }
+                const res = await fetch(`/api/blog?${params.toString()}`);
+                if (!res.ok) throw new Error("Failed to fetch blogs");
 
+                const data = await res.json();
+                const blogsData = data.blogs || [];
+                setBlogs(blogsData);
 
-        return result;
-    }, [initialBlogs, categoryParam, tagParam, searchParam, yearParam, monthParam]);
+                // Always update pagination, using safe defaults if missing
+                // Warn if pagination is missing - indicates API issue
+                if (!data.pagination) {
+                    console.warn("API response missing pagination data, using fallback");
+                }
+                setPagination(data.pagination || {
+                    page: 1,
+                    limit: 12,
+                    total: blogsData.length,
+                    pages: Math.ceil(blogsData.length / 12),
+                });
+            } catch (error) {
+                console.error("Error fetching blogs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBlogs();
+    }, [searchParams]); // Re-fetch whenever URL parameters change
+
+    const handlePageChange = (newPage: number) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("page", newPage.toString());
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        // Scroll to top of grid
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <div className="flex flex-col lg:flex-row gap-8">
@@ -79,7 +117,20 @@ export default function BlogContent({
 
                     </div>
 
-                    <BlogGrid blogs={filteredBlogs} />
+                    <div className={`transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+                        <BlogGrid blogs={blogs} />
+                    </div>
+
+                    {/* Pagination */}
+                    {pagination.pages > 1 && (
+                        <div className="mt-12">
+                            <Pagination
+                                currentPage={pagination.page}
+                                totalPages={pagination.pages}
+                                onPageChange={handlePageChange}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 

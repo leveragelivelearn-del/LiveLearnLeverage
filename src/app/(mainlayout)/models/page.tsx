@@ -14,28 +14,49 @@ export const metadata: Metadata = {
 };
 
 // DIRECT DATABASE FETCH (Prevents "Fetch Loop" Deadlock)
-async function getModelsAndIndustries() {
+async function getModelsAndIndustries(page: number = 1, limit: number = 12) {
   await dbConnect();
+
+  const skip = (page - 1) * limit;
 
   // 1. Fetch Models (Directly from DB, no API call)
   const models = await Model.find({})
     .sort({ completionDate: -1 })
-    .limit(12) // Initial limit
+    .skip(skip)
+    .limit(limit)
     .select('title slug description dealSize currency industry dealType completionDate views featured slides keyMetrics')
     .lean();
 
-  // 2. Fetch Industries
+  // 2. Fetch total count for pagination
+  const total = await Model.countDocuments({});
+
+  // 3. Fetch Industries
   const industries = await Model.distinct('industry');
 
-  // 3. Serialize data (Crucial: Convert ObjectIds and Dates to strings)
+  // 4. Serialize data (Crucial: Convert ObjectIds and Dates to strings)
   return {
     models: JSON.parse(JSON.stringify(models)),
     industries: JSON.parse(JSON.stringify(industries)),
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
   };
 }
 
-export default async function ModelsPage() {
-  const { models, industries } = await getModelsAndIndustries();
+export default async function ModelsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const pageStr = typeof params.page === 'string' ? params.page : '1';
+  const page = Math.max(1, parseInt(pageStr) || 1);
+  const limit = 12;
+
+  const { models, industries, pagination } = await getModelsAndIndustries(page, limit);
 
   // Calculate stats
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,7 +97,11 @@ export default async function ModelsPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           {/* Pass the server-fetched data to the client component */}
-          <ModelsContent initialModels={models} industries={industries} />
+          <ModelsContent 
+            initialModels={models} 
+            industries={industries} 
+            initialPagination={pagination}
+          />
         </div>
       </section>
 
@@ -112,25 +137,7 @@ export default async function ModelsPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-12">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl font-bold">Looking for Custom M&A Analysis?</h2>
-            <p className="text-muted-foreground">
-              Need help with financial modeling, due diligence, or deal structuring for your specific transaction?
-            </p>
-            <div className="pt-4">
-              <a
-                href="mailto:contact@livelearnleverage.org"
-                className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-              >
-                Contact for Custom Analysis
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+
     </div>
   );
 }

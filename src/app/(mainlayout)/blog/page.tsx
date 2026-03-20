@@ -16,12 +16,19 @@ export const metadata: Metadata = {
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-async function getBlogData() {
+async function getBlogData(page: number = 1, limit: number = 12) {
   await dbConnect()
+
+  const skip = (page - 1) * limit
+
+  // Get total count for pagination
+  const total = await Blog.countDocuments({ published: true })
 
   // Get all published blog posts with author data
   const blogs = await Blog.find({ published: true })
     .sort({ publishedAt: -1 })
+    .skip(skip)
+    .limit(limit)
     .select('title slug excerpt featuredImage tags category publishedAt readTime views')
     .populate('author', 'name image')
     .lean()
@@ -81,11 +88,26 @@ async function getBlogData() {
     tags: JSON.parse(JSON.stringify(allTags)),
     popularPosts: JSON.parse(JSON.stringify(popularPosts)),
     archiveMonths: JSON.parse(JSON.stringify(archiveMonths)),
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
   }
 }
 
-export default async function BlogPage() {
-  const { blogs, categories, tags, popularPosts, archiveMonths } = await getBlogData()
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const pageStr = typeof params.page === 'string' ? params.page : '1';
+  const page = Math.max(1, parseInt(pageStr) || 1);
+  const limit = 12;
+
+  const { blogs, categories, tags, popularPosts, archiveMonths, pagination } = await getBlogData(page, limit)
 
   return (
     <div className="min-h-screen">
@@ -136,6 +158,7 @@ export default async function BlogPage() {
               tags={tags}
               popularPosts={popularPosts}
               archiveMonths={archiveMonths}
+              initialPagination={pagination}
             />
           </Suspense>
         </div>
