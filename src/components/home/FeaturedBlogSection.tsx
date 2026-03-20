@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import dbConnect from "@/lib/db";
 import Blog from '@/models/Blog';
@@ -8,22 +7,28 @@ import FeaturedBlogClient from './FeaturedBlogClient';
 async function getFeaturedContent() {
   await dbConnect();
 
-  const featuredBlogs = await Blog.find({ published: true })
-    .sort({ publishedAt: -1 })
+  const featuredBlogs = await Blog.find({
+    $or: [
+      { published: true },
+      { status: { $regex: /^published$/i } },
+      { status: 'active' }
+    ]
+  }).sort({ publishedAt: -1, createdAt: -1 })
     .limit(4)
-    .select("title excerpt slug featuredImage publishedAt readTime author")
+    .select("_id title excerpt slug featuredImage publishedAt readTime author category tags views")
     .populate("author", "name image")
     .lean();
 
   return {
-    blogs: JSON.parse(JSON.stringify(featuredBlogs)),
+    blogs: featuredBlogs ? JSON.parse(JSON.stringify(featuredBlogs)) : [],
   };
 }
 
 const FeaturedBlogSection = async () => {
   const { blogs } = await getFeaturedContent();
+
   return (
-    <FeaturedBlogClient blogs={blogs} />
+    <FeaturedBlogClient blogs={blogs || []} />
   );
 };
 

@@ -1,66 +1,34 @@
 "use client";
 
-import React, { useRef } from 'react';
-import { Button } from '../ui/button';
-import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { ModelCard } from '@/components/models/ModelCard'; // UPDATED IMPORTS
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-
-gsap.registerPlugin(ScrollTrigger);
+import React from 'react';
+import { ModelCard } from '@/components/models/ModelCard';
 
 interface FeaturedModelClientProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  models: any[];
+  models: Array<{
+    _id: string;
+    title: string;
+    description: string;
+    slug: string;
+    industry: string;
+    dealSize: number;
+    dealType: string;
+    completionDate: string;
+    currency: string;
+    views: number;
+    slides: { imageUrl: string }[];
+    featured: boolean;
+  }>;
 }
 
 const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top 80%',
-        toggleActions: 'play none none reverse',
-      }
-    });
-
-    tl.from('.featured-header h2', {
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power3.out'
-    })
-      .from('.featured-header .divider', {
-        width: 0,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'power3.out'
-      }, '-=0.4')
-      .from('.featured-header p', {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out'
-      }, '-=0.4')
-      .from('.featured-card-wrapper', {
-        y: 50,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: 'back.out(1.7)'
-      }, '-=0.4');
-
-  }, { scope: containerRef });
 
   return (
-    <section ref={containerRef} className="bg-background overflow-hidden">
+    <section className="bg-background overflow-hidden">
       <div className='container mx-auto px-4'>
         {/* Header Section */}
-        <div className="featured-header text-center mb-16">
+        <div
+          className="featured-header text-center mb-16"
+        >
           <h2 className="text-foreground text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
             Featured <span className='text-primary'>Deals</span>
           </h2>
@@ -71,8 +39,11 @@ const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => 
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {models.map((model: any) => (
-            <div key={model._id} className="featured-card-wrapper h-full">
+          {models.map((model, index) => (
+            <div
+              key={model._id}
+              className="featured-card-wrapper h-full"
+            >
               <ModelCard model={model} />
             </div>
           ))}

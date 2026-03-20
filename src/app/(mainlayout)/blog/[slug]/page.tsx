@@ -20,7 +20,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
-import ReadOnlyEditor from '@/components/tiptap-templates/simple/read-only-editor'
+import { generateHtml } from '@/lib/server-html'
 import { CommentSection } from '@/components/blog/CommentSection'
 import { BookmarkButton } from '@/components/blog/BookmarkButton'
 import { getServerSession } from 'next-auth'
@@ -300,7 +300,9 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
               {/* Article Content Column (2/3 width) */}
               <div className="lg:w-3/4">
                 <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
-                  <ReadOnlyEditor content={blog.content} />
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: generateHtml(blog.content) }} 
+                  />
                 </article>
 
                 {/* Bottom Tags */}

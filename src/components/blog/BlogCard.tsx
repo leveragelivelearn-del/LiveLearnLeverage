@@ -16,8 +16,8 @@ interface BlogCardProps {
     slug: string
     excerpt: string
     featuredImage?: string
-    author: {
-      name: string
+    author?: {
+      name?: string
       image?: string
     }
     tags: string[]
@@ -35,7 +35,7 @@ export function BlogCard({ blog, variant = 'default', className }: BlogCardProps
   return (
     <Card className={`group overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full !p-0 !gap-0 rounded-sm ${variant === 'featured' ? 'md:col-span-2' : ''} ${className || ''}`}>
       {blog.featuredImage && (
-        <div className="relative h-56 w-full overflow-hidden">
+        <div className="relative aspect-[1024/572] w-full overflow-hidden">
           <Image
             src={blog.featuredImage}
             alt={blog.title}
@@ -66,10 +66,11 @@ export function BlogCard({ blog, variant = 'default', className }: BlogCardProps
       <CardHeader className="space-y-2 p-6 pb-3">
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8 border border-border">
-            <AvatarImage src={blog.author.image} alt={blog.author.name} />
-            <AvatarFallback>{blog.author.name.substring(0, 2).toUpperCase() || 'AN'}</AvatarFallback>          </Avatar>
+            <AvatarImage src={blog.author?.image} alt={blog.author?.name} />
+            <AvatarFallback>{blog.author?.name?.substring(0, 2).toUpperCase() || 'AN'}</AvatarFallback>
+          </Avatar>
           <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-            {blog.author.name}
+            {blog.author?.name || 'Anonymous'}
           </span>
         </div>
 

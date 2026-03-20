@@ -398,11 +398,9 @@ export default function BlogManagementPage() {
                   }}
                 />
               </TableHead>
-              <TableHead>Title</TableHead>
+              <TableHead className="max-w-[200px]">Title</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Author</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Published</TableHead>
               <TableHead>Views</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -437,7 +435,7 @@ export default function BlogManagementPage() {
                           className="font-medium hover:text-primary transition-colors"
                           target="_blank"
                         >
-                          {post.title}
+                          {post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title}
                         </Link>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                           <span className="flex items-center gap-1">
@@ -458,19 +456,8 @@ export default function BlogManagementPage() {
                       {post.published ? 'Published' : 'Draft'}
                     </Badge>
                   </TableCell>
-                  <TableCell>{post.author?.name || 'Admin'}</TableCell>
                   <TableCell>
                     {post.category || (
-                      <span className="text-muted-foreground">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {post.publishedAt ? (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(post.publishedAt)}
-                      </div>
-                    ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
                   </TableCell>

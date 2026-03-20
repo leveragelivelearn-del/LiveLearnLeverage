@@ -14,18 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import {
-  Save,
-  Eye,
   Upload,
-  X,
-  Plus,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Save
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { SimpleEditor, SimpleEditorRef } from '@/components/tiptap-templates/simple/simple-editor'
+import NovelEditor from '@/components/admin/editor/NovelEditor'
 import Link from 'next/link'
 
 const categories = [
@@ -46,20 +42,20 @@ interface BlogPostFormProps {
 
 export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps) {
   const router = useRouter()
-  const editorRef = useRef<SimpleEditorRef>(null)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || [])
-  const [newTag, setNewTag] = useState('')
 
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     slug: initialData?.slug || '',
-    excerpt: initialData?.excerpt || '',
     content: initialData?.content || '',
     category: initialData?.category || '',
     seoTitle: initialData?.seoTitle || '',
@@ -105,21 +101,46 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
     setIsSubmitting(true)
 
     try {
-      let editorContent = '';
-      if (editorRef.current) {
-        editorContent = editorRef.current.getContent();
+      let isContentEmpty = false;
+      if (!formData.content || formData.content.trim() === '' || formData.content.trim() === '{}') {
+        isContentEmpty = true;
+      } else {
+        try {
+          const parsed = JSON.parse(formData.content);
+          if (!parsed || Object.keys(parsed).length === 0) {
+            isContentEmpty = true;
+          } else if (parsed.type === 'doc') {
+            if (!parsed.content || parsed.content.length === 0) {
+              isContentEmpty = true;
+            } else {
+              // Check if all content nodes are just empty paragraphs
+              const allEmpty = parsed.content.every((node: any) =>
+                node.type === 'paragraph' && (!node.content || node.content.length === 0)
+              );
+              if (allEmpty) isContentEmpty = true;
+            }
+          }
+        } catch (e) {
+          isContentEmpty = formData.content.trim() === '';
+        }
       }
 
-      if (!formData.title.trim() || !editorContent.trim() || !formData.category.trim()) {
+      if (!formData.title.trim() || isContentEmpty || !formData.category.trim()) {
         toast.error('Title, content, and category are required');
         setIsSubmitting(false);
         return;
       }
 
       const payload = {
-        ...formData,
-        content: editorContent,
-        tags: selectedTags,
+        title: formData.title,
+        slug: formData.slug,
+        excerpt: '',
+        content: formData.content, // This is already a JSON string from handleDescriptionChange
+        category: formData.category,
+        seoTitle: formData.seoTitle,
+        seoDescription: formData.seoDescription,
+        featuredImage: formData.featuredImage,
+        tags: [],
         status: 'published',
         published: true
       }
@@ -151,17 +172,6 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
     }
   }
 
-  const handleAddTag = () => {
-    if (newTag.trim() && !selectedTags.includes(newTag.trim())) {
-      setSelectedTags([...selectedTags, newTag.trim()])
-      setNewTag('')
-    }
-  }
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setSelectedTags(selectedTags.filter(tag => tag !== tagToRemove))
-  }
-
   const handleTitleChange = (title: string) => {
     if (!isEdit) {
       setFormData({
@@ -177,6 +187,25 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
       })
     }
   }
+
+  // Helper to handle Novel editor content as JSON object
+  const handleDescriptionChange = (content: any) => {
+    setFormData(prev => ({ ...prev, content: JSON.stringify(content) }));
+  }
+
+  // Parse initial content for Novel
+  const initialDescriptionContent = (() => {
+    if (!initialData?.content) return undefined;
+    try {
+      return JSON.parse(initialData.content);
+    } catch (e) {
+      // If it's old plain text, create a simple doc structure
+      return {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: initialData.content }] }]
+      };
+    }
+  })();
 
   return (
     <div className="space-y-6 pb-12">
@@ -218,22 +247,24 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Content</Label>
-              <SimpleEditor ref={editorRef} initialContent={initialData?.content} />
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Content *</Label>
+              <NovelEditor
+                initialValue={initialDescriptionContent}
+                onChange={handleDescriptionChange}
+              />
             </div>
           </CardContent>
         </Card>
 
-        {/* Metadata Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Settings Section */}
+        <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Category & Tags</CardTitle>
+              <CardTitle>Category</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label>Category</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -250,58 +281,12 @@ export function BlogPostForm({ initialData, isEdit = false }: BlogPostFormProps)
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <Label>Tags</Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add a tag"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                  />
-                  <Button type="button" onClick={handleAddTag} variant="secondary">
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedTags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        className="ml-1 hover:text-destructive"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Short Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label>Excerpt</Label>
-                <Textarea
-                  placeholder="Enter a brief excerpt for the card preview"
-                  value={formData.excerpt}
-                  onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                  rows={6}
-                />
-              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Images & SEO */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Featured Image</CardTitle>

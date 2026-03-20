@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageCarousel } from "@/components/models/ImageCarousel";
-import { ModelCard } from "@/components/models/ModelCard";
 import { formatDate, formatCurrency, getBaseUrl } from "@/lib/utils";
 import { generateHtml } from "@/lib/server-html";
 import {
@@ -27,7 +26,6 @@ import {
   FileSpreadsheet,
   ExternalLink,
 } from "lucide-react";
-import ReadOnlyEditor from "@/components/tiptap-templates/simple/read-only-editor";
 
 // FIXED: Interface matches the new folder name [slug]
 interface ModelDetailPageProps {
@@ -254,13 +252,13 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
 
                 {/* Tabs for Rationale, Metrics, and Description */}
                 <Tabs defaultValue="description" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="description">Description</TabsTrigger>
                     <TabsTrigger value="metrics">Key Metrics</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="description" className="space-y-4 pt-4">
-                    <div 
+                    <div
                       className="prose prose-sm max-w-none dark:prose-invert"
                       dangerouslySetInnerHTML={{ __html: generateHtml(model.description) }}
                     />
@@ -309,7 +307,7 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
                           </p>
                         </div>
                       )}
-                      
+
                       {model.pdfFileUrl && (
                         <div className={model.excelFileUrl ? "pt-2 border-t" : ""}>
                           <Button className="w-full" variant={model.excelFileUrl ? "outline" : "default"} asChild>
