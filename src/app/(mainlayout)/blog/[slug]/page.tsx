@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { ShareButtons } from '@/components/blog/ShareButtons'
 import { BlogCard } from '@/components/blog/BlogCard'
+import { BlogAdminActions } from '@/components/blog/BlogAdminActions'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 import { formatDate } from '@/lib/utils'
@@ -137,6 +138,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 
   // Check if bookmarked
   const session = await getServerSession(authOptions)
+  const isAdmin = session?.user?.role === 'admin'
   let isBookmarked = false
   if (session?.user?.id) {
     await dbConnect()
@@ -229,6 +231,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
           </div>
 
           <div className="container mx-auto px-4 relative z-10 text-white">
+            <BlogAdminActions blogSlug={blog.slug} blogId={blog._id} isAdmin={isAdmin} />
             <Button variant="ghost" size="sm" asChild className="mb-2 pl-0 hover:pl-2 transition-all text-white hover:text-white/80 hover:bg-white/10">
               <Link href="/blog">
                 <ArrowLeft className="mr-2 h-4 w-4" />

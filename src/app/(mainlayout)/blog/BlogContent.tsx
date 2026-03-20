@@ -135,9 +135,8 @@ export default function BlogContent({
             </div>
 
             {/* Sidebar */}
-            <div className="lg:w-1/3">
+            <div className="lg:w-1/3 lg:sticky lg:top-24 self-start">
                 <BlogSidebar
-                    categories={categories}
                     tags={tags}
                     popularPosts={popularPosts}
                     archiveMonths={archiveMonths}

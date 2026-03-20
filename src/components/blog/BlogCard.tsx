@@ -34,59 +34,45 @@ interface BlogCardProps {
 export function BlogCard({ blog, variant = 'default', className }: BlogCardProps) {
   return (
     <Card className={`group overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full !p-0 !gap-0 rounded-sm ${variant === 'featured' ? 'md:col-span-2' : ''} ${className || ''}`}>
-      {blog.featuredImage && (
-        <div className="relative aspect-[1024/572] w-full overflow-hidden">
-          <Image
-            src={blog.featuredImage}
-            alt={blog.title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+      <div className="relative aspect-[1024/572] w-full overflow-hidden">
+        <Image
+          src={blog.featuredImage || '/assets/blogbanner.png'}
+          alt={blog.title}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+
+        <div className="absolute bottom-3 right-3 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+          <BookmarkButton
+            blogId={blog._id}
+            initialIsBookmarked={blog.isBookmarked}
+            showText={false}
+            className="bg-background/80 hover:bg-background backdrop-blur-sm text-foreground rounded-full h-9 w-9 p-0 flex items-center justify-center shadow-lg"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {blog.category && (
-            <div className="absolute top-3 left-3">
-              <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
-                {blog.category}
-              </Badge>
-            </div>
-          )}
-
-          <div className="absolute bottom-3 right-3 transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-            <BookmarkButton
-              blogId={blog._id}
-              initialIsBookmarked={blog.isBookmarked}
-              showText={false}
-              className="bg-background/80 hover:bg-background backdrop-blur-sm text-foreground rounded-full h-9 w-9 p-0 flex items-center justify-center shadow-lg"
-            />
-          </div>
         </div>
-      )}
+      </div>
 
-      <CardHeader className="space-y-2 p-6 pb-3">
+      <CardHeader className="space-y-2 p-2 pb-3">
+        <CardTitle className="line-clamp-2 text-sm font-semibold leading-tight group-hover:text-primary transition-colors">          <Link href={`/blog/${blog.slug}`} title={blog.title}>
+          {blog.title}
+        </Link>
+        </CardTitle>
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8 border border-border">
+          <Avatar className="h-6 w-6 border border-border">
             <AvatarImage src={blog.author?.image} alt={blog.author?.name} />
             <AvatarFallback>{blog.author?.name?.substring(0, 2).toUpperCase() || 'AN'}</AvatarFallback>
           </Avatar>
-          <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+          <span className="text-[12px] text-muted-foreground group-hover:text-foreground transition-colors">
             {blog.author?.name || 'Anonymous'}
           </span>
         </div>
-
-
-        <CardTitle className={`line-clamp-2 leading-tight group-hover:text-primary transition-colors ${variant === 'featured' ? 'text-2xl' : 'text-xl'}`}>
-          <Link href={`/blog/${blog.slug}`} title={blog.title}>
-            {blog.title}
-          </Link>
-        </CardTitle>
-
-
       </CardHeader>
 
 
 
-      <CardFooter className="border-t p-6 bg-muted/5">
+      <CardFooter className="border-t p-2 bg-muted/5">
         <div className="flex justify-between items-center w-full">
           <div className="flex items-center gap-3 text-xs text-muted-foreground mb-1">
 

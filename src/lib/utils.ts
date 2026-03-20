@@ -8,16 +8,20 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDate(date: Date | string) {
   if (!date) return "N/A"
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return "N/A"
   
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(date))
+  }).format(d)
 }
 
 export function formatDateTime(date: Date | string) {
   if (!date) return "N/A"
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return "N/A"
   
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -25,7 +29,7 @@ export function formatDateTime(date: Date | string) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(date))
+  }).format(d)
 }
 
 export function formatCurrency(amount: number, currency: string = 'USD') {

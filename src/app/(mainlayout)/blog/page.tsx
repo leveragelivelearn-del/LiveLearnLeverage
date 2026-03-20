@@ -54,17 +54,13 @@ async function getBlogData(page: number = 1, limit: number = 12) {
   const categories = await Blog.distinct('category', { published: true })
   const allTags = await Blog.distinct('tags', { published: true })
 
-  // Get popular posts (most viewed in last 30 days)
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
+  // Get popular posts (most viewed)
   const popularPosts = await Blog.find({
     published: true,
-    publishedAt: { $gte: thirtyDaysAgo }
   })
     .sort({ views: -1 })
-    .limit(5)
-    .select('title slug views featuredImage')
+    .limit(4)
+    .select('title slug views featuredImage publishedAt')
     .lean()
 
   // Get archive dates
