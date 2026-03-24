@@ -9,18 +9,18 @@ async function getHeroData() {
     fetch(`${baseUrl}/api/about`, { cache: 'force-cache', next: { tags: ['about'] } }),
     fetch(`${baseUrl}/api/settings`, { cache: 'force-cache', next: { tags: ['settings'] } })
   ]);
-  
+
   const [aboutData, settingsData] = await Promise.all([
     aboutRes.json(),
     settingsRes.json()
   ]);
-  
+
   return { aboutData, settingsData };
 }
 
 export default async function HomePage() {
   const { aboutData, settingsData } = await getHeroData();
-  
+
   return (
     <div className="space-y-16 lg:space-y-24">
       {/* Hero Section */}

@@ -49,8 +49,8 @@ export default async function AboutPage() {
   const data = await getAboutData();
 
   return (
-    <AboutContent 
-      initialAboutData={data.aboutData} 
+    <AboutContent
+      initialAboutData={data.aboutData}
       initialSettings={data.settings}
       initialModels={data.models}
       initialBlogs={data.blogs}

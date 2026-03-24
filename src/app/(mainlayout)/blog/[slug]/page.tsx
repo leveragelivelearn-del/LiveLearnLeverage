@@ -102,7 +102,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
   const session = await getServerSession(authOptions)
   const isAdmin = session?.user?.role === 'admin'
   let isBookmarked = false
-  
+
   try {
     if (session?.user?.id) {
       await dbConnect()
