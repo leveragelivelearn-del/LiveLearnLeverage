@@ -114,10 +114,10 @@ export function ModelCard({ model }: ModelCardProps) {
         )}
       </div>
 
-      <CardHeader className="pb-3 pt-5">
+      <CardHeader className="pb-3 pt-5 px-2">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
-            <CardTitle className="line-clamp-1 text-lg leading-tight">
+            <CardTitle className="line-clamp-1 text-sm leading-tight">
               <Link
                 href={`/models/${model.slug}`}
                 className="hover:text-primary transition-colors block"
@@ -125,25 +125,12 @@ export function ModelCard({ model }: ModelCardProps) {
                 {model.title}
               </Link>
             </CardTitle>
-            <CardDescription className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="text-[10px] px-2 h-5 font-normal">
-                {model.industry}
-              </Badge>
-              <span className="text-xs text-muted-foreground">•</span>
-              <span className="text-xs font-medium text-muted-foreground">{model.dealType}</span>
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground whitespace-nowrap bg-secondary/50 px-2 py-1 rounded-full">
-            <Eye className="h-3 w-3" />
-            <span>{model.views}</span>
+
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pb-4 flex-grow">
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-5 leading-relaxed">
-          {extractTextFromJson(model.description)}
-        </p>
+      <CardContent className="pb-4 px-2 flex-grow">
 
         <div className="grid grid-cols-2 gap-3 p-3 bg-secondary/10 rounded-lg border border-border/50">
           <div className="space-y-0.5">
@@ -161,11 +148,11 @@ export function ModelCard({ model }: ModelCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="pt-0 pb-5 px-6">
+      <CardFooter className="pt-0 pb-5 px-2">
         <Button className="w-full group/btn" asChild>
           <Link href={`/models/${model.slug}`}>
-            <BarChart3 className="mr-2 h-4 w-4 transition-transform group-hover/btn:scale-110" />
-            View Analysis
+
+            View Model
           </Link>
         </Button>
       </CardFooter>

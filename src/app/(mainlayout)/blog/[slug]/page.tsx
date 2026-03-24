@@ -154,7 +154,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         {/* Breadcrumb Area */}
         <div className="border-b bg-secondary/10">
           <div className="container mx-auto px-4 py-4">
@@ -272,7 +272,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 
               {/* Article Content Column (2/3 width) */}
               <div className="lg:w-3/4">
-                <article className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
+                <article className="prose bg-card p-6 rounded-xl dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
                   <div
                     dangerouslySetInnerHTML={{ __html: generateHtml(blog.content) }}
                   />
@@ -312,7 +312,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 
 
                   {/* Desktop Share Buttons */}
-                  <div className="hidden lg:block">
+                  <Card className="hidden lg:block px-6">
                     <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
                       Share this article
                     </h3>
@@ -321,12 +321,12 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                       title={blog.title}
                       description={blog.excerpt}
                     />
-                  </div>
+                  </Card>
 
                   {/* Simple CTA/Ad placeholder */}
                   <Card className="bg-primary/5 border-primary/20">
-                    <CardContent className="p-6">
-                      <h4 className="font-bold mb-2">Need Financial Models?</h4>
+                    <CardContent className="px-6">
+                      <h4 className="font-bold text-white mb-2">Visit Financial Models?</h4>
                       <p className="text-sm text-muted-foreground mb-4">
                         Download professional M&A and valuation templates.
                       </p>

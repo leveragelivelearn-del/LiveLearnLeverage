@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { AdminSearch } from '@/components/admin/AdminSearch'
 import { BulkActions } from '@/components/admin/BulkActions'
 import { Checkbox } from '@/components/ui/checkbox'
-import { 
+import {
   Table,
   TableBody,
   TableCell,
@@ -25,14 +25,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
+import {
+  MoreHorizontal,
+  Eye,
+  Edit,
   Trash2,
   Plus,
   Calendar,
-  Clock, 
+  Clock,
   Filter,
   Loader2
 } from 'lucide-react'
@@ -45,11 +45,11 @@ async function getBlogPosts() {
     const response = await fetch('/api/admin/blog', {
       cache: 'no-store'
     })
-    
+
     if (!response.ok) {
       throw new Error('Failed to fetch blog posts')
     }
-    
+
     const data = await response.json()
     return data.blogs || []
   } catch (error) {
@@ -91,22 +91,22 @@ export default function BlogManagementPage() {
   // Client-Side Filtering Logic
   const filteredPosts = posts.filter(post => {
     // Search Filter
-    const matchesSearch = 
+    const matchesSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.author?.name?.toLowerCase().includes(searchQuery.toLowerCase())
 
     // Status Filter
-    const matchesStatus = statusFilter === 'all' 
-      ? true 
-      : statusFilter === 'published' 
-        ? post.published === true 
-        : statusFilter === 'draft' 
-          ? post.published === false 
-          : post.status === statusFilter 
+    const matchesStatus = statusFilter === 'all'
+      ? true
+      : statusFilter === 'published'
+        ? post.published === true
+        : statusFilter === 'draft'
+          ? post.published === false
+          : post.status === statusFilter
 
     // Category Filter
-    const matchesCategory = categoryFilter === 'all' 
-      ? true 
+    const matchesCategory = categoryFilter === 'all'
+      ? true
       : post.category === categoryFilter
 
     // Date Filter
@@ -128,7 +128,7 @@ export default function BlogManagementPage() {
   // Bulk delete function
   const handleBulkDelete = async () => {
     if (selectedPosts.length === 0) return
-    
+
     const result = await Swal.fire({
       title: 'Are you sure?',
       text: `You are about to delete ${selectedPosts.length} posts. This cannot be undone!`,
@@ -158,7 +158,7 @@ export default function BlogManagementPage() {
       if (response.ok) {
         Swal.fire('Deleted!', 'Your posts have been deleted.', 'success')
         setSelectedPosts([])
-        fetchPosts() 
+        fetchPosts()
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to delete posts')
@@ -173,7 +173,7 @@ export default function BlogManagementPage() {
   // Bulk publish function
   const handleBulkPublish = async () => {
     if (selectedPosts.length === 0) return
-    
+
     setIsProcessing(true)
     try {
       const response = await fetch('/api/admin/bulk', {
@@ -191,7 +191,7 @@ export default function BlogManagementPage() {
       if (response.ok) {
         toast.success(`Published ${selectedPosts.length} post(s)`)
         setSelectedPosts([])
-        fetchPosts() 
+        fetchPosts()
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to publish posts')
@@ -206,7 +206,7 @@ export default function BlogManagementPage() {
   // Bulk archive function
   const handleBulkArchive = async () => {
     if (selectedPosts.length === 0) return
-    
+
     setIsProcessing(true)
     try {
       const response = await fetch('/api/admin/bulk', {
@@ -224,7 +224,7 @@ export default function BlogManagementPage() {
       if (response.ok) {
         toast.success(`Archived ${selectedPosts.length} post(s)`)
         setSelectedPosts([])
-        fetchPosts() 
+        fetchPosts()
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Failed to archive posts')
@@ -311,14 +311,14 @@ export default function BlogManagementPage() {
       {/* Filters and Search */}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
-          <AdminSearch 
+          <AdminSearch
             placeholder="Search posts..."
             onSearch={(query) => setSearchQuery(query)}
             onFilterClick={() => setShowFilters(!showFilters)}
             // FIXED: Hide the internal filter button to avoid duplicates
-            showFilters={false} 
+            showFilters={false}
           />
-          <Button 
+          <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             className={showFilters ? "bg-accent" : ""}
@@ -327,14 +327,14 @@ export default function BlogManagementPage() {
             Filters
           </Button>
         </div>
-        
+
         {showFilters && (
           <Card>
             <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Status</label>
-                  <select 
+                  <select
                     className="w-full px-3 py-2 border rounded-md"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -347,7 +347,7 @@ export default function BlogManagementPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Category</label>
-                  <select 
+                  <select
                     className="w-full px-3 py-2 border rounded-md"
                     value={categoryFilter}
                     onChange={(e) => setCategoryFilter(e.target.value)}
@@ -364,7 +364,7 @@ export default function BlogManagementPage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Date Range</label>
-                  <select 
+                  <select
                     className="w-full px-3 py-2 border rounded-md"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
@@ -430,7 +430,7 @@ export default function BlogManagementPage() {
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                       <div>
-                        <Link 
+                        <Link
                           href={`/blog/${post.slug}`}
                           className="font-medium hover:text-primary transition-colors"
                           target="_blank"
@@ -489,7 +489,7 @@ export default function BlogManagementPage() {
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           className="text-red-600"
                           onClick={() => handleDelete(post._id)}
                         >
