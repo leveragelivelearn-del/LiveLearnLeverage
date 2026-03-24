@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Eye, BarChart3, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react'
-import { formatDate, formatCurrency } from '@/lib/utils'
+import { formatDate, formatCurrency, extractTextFromJson } from '@/lib/utils'
 
 interface ModelCardProps {
   model: {
@@ -97,10 +97,13 @@ export function ModelCard({ model }: ModelCardProps) {
           </>
         ) : (
           /* Fallback Placeholder */
-          <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/20 text-muted-foreground">
-            <ImageIcon className="h-10 w-10 opacity-20 mb-2" />
-            <span className="text-xs font-medium opacity-40">No Preview Available</span>
-          </div>
+          <Image
+            src="/assets/modelbanner.png"
+            alt={model.title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
         )}
 
         {/* Featured Badge (Top Right) */}
@@ -139,7 +142,7 @@ export function ModelCard({ model }: ModelCardProps) {
 
       <CardContent className="pb-4 flex-grow">
         <p className="text-sm text-muted-foreground line-clamp-2 mb-5 leading-relaxed">
-          {model.description}
+          {extractTextFromJson(model.description)}
         </p>
 
         <div className="grid grid-cols-2 gap-3 p-3 bg-secondary/10 rounded-lg border border-border/50">

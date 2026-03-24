@@ -10,7 +10,7 @@ export function formatDate(date: Date | string) {
   if (!date) return "N/A"
   const d = new Date(date)
   if (isNaN(d.getTime())) return "N/A"
-  
+
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
@@ -22,7 +22,7 @@ export function formatDateTime(date: Date | string) {
   if (!date) return "N/A"
   const d = new Date(date)
   if (isNaN(d.getTime())) return "N/A"
-  
+
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
@@ -34,7 +34,7 @@ export function formatDateTime(date: Date | string) {
 
 export function formatCurrency(amount: number, currency: string = 'USD') {
   if (amount === null || amount === undefined) return '$0'
-  
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
@@ -45,7 +45,7 @@ export function formatCurrency(amount: number, currency: string = 'USD') {
 
 export function formatNumber(number: number) {
   if (number === null || number === undefined) return '0'
-  
+
   return new Intl.NumberFormat('en-US').format(number)
 }
 
@@ -75,14 +75,14 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null
-  
+
   const debounced = (...args: Parameters<T>) => {
     if (timeout) {
       clearTimeout(timeout)
     }
     timeout = setTimeout(() => func(...args), wait)
   }
-  
+
   // Add cancel method
   debounced.cancel = () => {
     if (timeout) {
@@ -90,7 +90,7 @@ export function debounce<T extends (...args: any[]) => any>(
       timeout = null
     }
   }
-  
+
   return debounced as typeof debounced & { cancel: () => void }
 }
 
@@ -110,21 +110,21 @@ export function getInitials(name: string) {
 
 export function formatFileSize(bytes: number) {
   if (bytes === 0) return '0 Bytes'
-  
+
   const k = 1024
   const sizes = ['Bytes', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 export function getTimeAgo(date: Date | string) {
   if (!date) return 'Just now'
-  
+
   const now = new Date()
   const past = new Date(date)
   const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000)
-  
+
   const intervals = {
     year: 31536000,
     month: 2592000,
@@ -134,14 +134,14 @@ export function getTimeAgo(date: Date | string) {
     minute: 60,
     second: 1
   }
-  
+
   for (const [unit, seconds] of Object.entries(intervals)) {
     const interval = Math.floor(diffInSeconds / seconds)
     if (interval >= 1) {
       return interval === 1 ? `1 ${unit} ago` : `${interval} ${unit}s ago`
     }
   }
-  
+
   return 'Just now'
 }
 
@@ -162,15 +162,39 @@ export function safeParseJSON<T>(jsonString: string, fallback: T): T {
   }
 }
 
+export function extractTextFromJson(json: any): string {
+  if (!json) return ''
+
+  if (typeof json === 'string') {
+    try {
+      const parsed = JSON.parse(json)
+      return extractTextFromJson(parsed)
+    } catch {
+      return json
+    }
+  }
+
+  if (json.type === 'text') {
+    return json.text || ''
+  }
+
+  let text = ''
+  if (json.content && Array.isArray(json.content)) {
+    text = json.content.map(extractTextFromJson).join(' ')
+  }
+
+  return text.replace(/\s+/g, ' ').trim()
+}
+
 export function createQueryString(params: Record<string, string | number | boolean | undefined>) {
   const searchParams = new URLSearchParams()
-  
+
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       searchParams.append(key, String(value))
     }
   })
-  
+
   return searchParams.toString()
 }
 
@@ -178,11 +202,11 @@ export function extractFirstParagraph(html: string) {
   // Remove HTML tags and get first paragraph
   const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
   const sentences = text.match(/[^.!?]+[.!?]+/g)
-  
+
   if (sentences && sentences.length > 0) {
     return sentences[0].trim()
   }
-  
+
   return truncate(text, 150)
 }
 
@@ -215,16 +239,16 @@ export function hexToRgb(hex: string) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   return result
     ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16),
+    }
     : null
 }
 
 export function isMobileDevice() {
   if (typeof window === 'undefined') return false
-  
+
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
     navigator.userAgent
   )
@@ -259,9 +283,9 @@ export function generatePagination(currentPage: number, totalPages: number): (nu
 
 export function getBaseUrl() {
   if (process.env.NODE_ENV === 'production') {
-    return process.env.NEXT_PUBLIC_API_URL || 
-           process.env.NEXT_PUBLIC_APP_URL || 
-           'https://www.livelearnleverage.org'
+    return process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      'https://www.livelearnleverage.org'
   }
   return 'http://localhost:3000'
 }
