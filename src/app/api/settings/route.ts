@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import dbConnect from '@/lib/db'
 import Settings from '@/models/settings'
-import { revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 // GET: Fetch settings (Public or Protected depending on needs)
 export async function GET() {
@@ -50,9 +50,12 @@ export async function POST(request: NextRequest) {
       { new: true, upsert: true, setDefaultsOnInsert: true }
     )
     
+    revalidatePath('/')
     revalidateTag('settings', 'default')
     revalidateTag('about', 'default')
     revalidateTag('hero', 'default')
+    revalidateTag('blogs', 'default')
+    revalidateTag('models', 'default')
 
     return NextResponse.json({
       message: 'Settings saved successfully',

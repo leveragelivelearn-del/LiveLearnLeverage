@@ -20,7 +20,7 @@ interface AuthenticatedSession {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions) as AuthenticatedSession | null
-    
+
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -29,16 +29,16 @@ export async function GET(request: NextRequest) {
     }
 
     await dbConnect()
-    
+
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
     const status = searchParams.get('status')
-    
+
     const query: any = {}
     if (status === 'published') query.published = true
     if (status === 'draft') query.published = false
-    
+
     const total = await Blog.countDocuments(query)
     const blogs = await Blog.find(query)
       .sort({ publishedAt: -1 })
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .populate('author', 'name')
       .lean()
-    
+
     return NextResponse.json({
       blogs,
       pagination: {
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions) as AuthenticatedSession | null
-    
+
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -77,44 +77,45 @@ export async function POST(request: NextRequest) {
     }
 
     await dbConnect()
-    
+
     const data = await request.json()
-    
+
     // Generate slug if not provided
     if (!data.slug && data.title) {
       data.slug = slugify(data.title)
     }
-    
+
     // Get author ID from session
     const author = await User.findOne({ email: session.user.email })
     if (author) {
       data.author = author._id
     }
-    
+
     // Set publishedAt if publishing
     if (data.published && !data.publishedAt) {
       data.publishedAt = new Date()
     }
-    
+
     const blog = await Blog.create(data) as any
-    
+
     if (blog && blog.published) {
+      revalidatePath('/')
       revalidatePath('/blog')
       revalidatePath(`/blog/${blog.slug}`)
       revalidateTag('blogs', 'default')
     }
-    
+
     return NextResponse.json({ blog })
   } catch (error: any) {
     console.error('Error creating blog:', error)
-    
+
     if (error.code === 11000) {
       return NextResponse.json(
         { error: 'Slug already exists' },
         { status: 400 }
       )
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to create blog post' },
       { status: 500 }

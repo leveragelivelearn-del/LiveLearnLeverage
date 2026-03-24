@@ -17,7 +17,7 @@ interface Params {
 export async function DELETE(request: NextRequest, props: Params) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     // Check Auth
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -30,6 +30,7 @@ export async function DELETE(request: NextRequest, props: Params) {
     const deletedBlog = await Blog.findByIdAndDelete(params.slug)
 
     if (deletedBlog) {
+      revalidatePath('/')
       revalidatePath('/blog')
       revalidatePath(`/blog/${deletedBlog.slug}`)
       revalidateTag('blogs', 'default')
@@ -77,9 +78,9 @@ export async function PUT(request: NextRequest, props: Params) {
 
     const params = await props.params
     await dbConnect()
-    
+
     const data = await request.json()
-    
+
     // Prevent modifying system fields
     delete data._id
     delete data.createdAt
@@ -92,6 +93,7 @@ export async function PUT(request: NextRequest, props: Params) {
     )
 
     if (updatedBlog) {
+      revalidatePath('/')
       revalidatePath('/blog')
       // Revalidate both old and potentially new slug
       if (params.slug !== updatedBlog.slug) {

@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       about = await About.create(body);
     }
     
+    revalidatePath('/')
     revalidatePath('/about');
     revalidateTag('about', 'default');
     

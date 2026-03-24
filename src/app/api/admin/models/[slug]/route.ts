@@ -32,6 +32,7 @@ export async function DELETE(request: NextRequest, props: Params) {
     }
 
     if (deletedModel.slug) {
+      revalidatePath('/')
       revalidatePath('/models')
       revalidatePath(`/models/${deletedModel.slug}`)
       revalidateTag('models', 'default')
@@ -102,6 +103,7 @@ export async function PUT(request: NextRequest, props: Params) {
       revalidateTag(`model-${params.slug}`, 'default')
     }
     if (updatedModel.slug) {
+      revalidatePath('/')
       revalidatePath(`/models/${updatedModel.slug}`)
       revalidateTag('models', 'default')
       revalidateTag(`model-${updatedModel.slug}`, 'default')

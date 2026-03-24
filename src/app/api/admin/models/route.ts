@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
     const model = await Model.create(data) as any
 
     if (model && model.slug) {
+      revalidatePath('/')
       revalidatePath('/models')
       revalidatePath(`/models/${model.slug}`)
       revalidateTag('models', 'default')
