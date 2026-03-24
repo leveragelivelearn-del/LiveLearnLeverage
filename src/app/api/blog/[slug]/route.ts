@@ -28,38 +28,52 @@ export async function GET(
     // Increment view count
     await Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } })
 
-    // Fetch Prev/Next and Related
-    const [prevPost, nextPost] = await Promise.all([
-      Blog.findOne({
+    // Fetch Prev/Next only if publishedAt exists
+    let prevPost: any = null
+    let nextPost: any = null
+    
+    if (blog.publishedAt) {
+      [prevPost, nextPost] = await Promise.all([
+        Blog.findOne({
+          published: true,
+          publishedAt: { $lt: blog.publishedAt }
+        })
+          .sort({ publishedAt: -1 })
+          .select('title slug')
+          .lean(),
+    
+        Blog.findOne({
+          published: true,
+          publishedAt: { $gt: blog.publishedAt }
+        })
+          .sort({ publishedAt: 1 })
+          .select('title slug')
+          .lean(),
+      ])
+    }
+  
+    // Build related posts query carefully
+    const orConditions: any[] = []
+    if (blog.category) {
+      orConditions.push({ category: blog.category })
+    }
+    if (blog.tags && Array.isArray(blog.tags) && blog.tags.length > 0) {
+      orConditions.push({ tags: { $in: blog.tags } })
+    }
+
+    let relatedPosts: any[] = []
+    if (orConditions.length > 0) {
+      relatedPosts = await Blog.find({
+        _id: { $ne: blog._id },
         published: true,
-        publishedAt: { $lt: blog.publishedAt }
+        $or: orConditions
       })
         .sort({ publishedAt: -1 })
-        .select('title slug')
-        .lean(),
-  
-      Blog.findOne({
-        published: true,
-        publishedAt: { $gt: blog.publishedAt }
-      })
-        .sort({ publishedAt: 1 })
-        .select('title slug')
-        .lean(),
-    ])
-  
-    const relatedPosts = await Blog.find({
-      _id: { $ne: blog._id },
-      published: true,
-      $or: [
-        { category: blog.category },
-        { tags: { $in: blog.tags } }
-      ]
-    })
-      .sort({ publishedAt: -1 })
-      .limit(3)
-      .populate('author', 'name image')
-      .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
-      .lean()
+        .limit(3)
+        .populate('author', 'name image')
+        .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
+        .lean()
+    }
 
     return NextResponse.json({ 
       blog,
