@@ -3,7 +3,6 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import BlogContent from './BlogContent'
-import { BlogSearch } from '@/components/blog/BlogSearch'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 import User from '@/models/User'
@@ -133,11 +132,7 @@ export default async function BlogPage({
               financial modeling, and investment strategies.
             </p>
 
-            <div className="pt-4">
-              <Suspense fallback={<div className="h-12 bg-white/20 rounded-lg animate-pulse" />}>
-                <BlogSearch />
-              </Suspense>
-            </div>
+
           </div>
         </div>
       </section>

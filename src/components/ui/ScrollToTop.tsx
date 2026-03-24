@@ -57,7 +57,7 @@ export default function ScrollToTop() {
     <button
       onClick={scrollToTop}
       className={cn(
-        'fixed bottom-2 right-0.5 md:bottom-6 md:right-6 z-50', // Adjusted right-0.5 to align center with ChatBot (which is right-2 w-8)
+        'fixed bottom-6 right-6 z-50', 
         'scale-75 md:scale-100', // Smallest comfortable size on mobile
         'flex items-center justify-center',
         'rounded-full bg-primary text-primary-foreground', // Solid background

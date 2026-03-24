@@ -35,6 +35,8 @@ export default function AboutPage() {
   const [blogs, setBlogs] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [settings, setSettings] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [aboutData, setAboutData] = useState<any>(null);
 
   // Contact form state
   const form = useRef<HTMLFormElement>(null);
@@ -95,6 +97,19 @@ export default function AboutPage() {
   }, []);
 
   useEffect(() => {
+    const fetchAboutData = async () => {
+      try {
+        const res = await fetch('/api/about');
+        const data = await res.json();
+        setAboutData(data);
+      } catch (error) {
+        console.error("Failed to fetch about data", error);
+      }
+    };
+    fetchAboutData();
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'portfolio' && models.length === 0) {
       const fetchModels = async () => {
         try {
@@ -133,15 +148,15 @@ export default function AboutPage() {
   }, [activeTab, blogs.length]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans pt-16 lg:pt-0">
+    <div className="min-h-screen text-foreground font-sans pt-16 lg:pt-0">
 
       {/* Top Banner Section */}
       <div className="relative h-[250px] lg:h-[400px] w-full bg-gradient-to-b from-primary/20 to-background overflow-hidden">
         {/* Background Effects */}
         <div className="absolute inset-0">
           <Image
-            src="/assets/charles-banner.png"
-            alt="Gamaelle Charles Banner"
+            src={aboutData?.bannerImage || "/assets/charles-banner.png"}
+            alt={`${aboutData?.name || "Gamaelle Charles"} Banner`}
             fill
             className="object-cover object-center bg-gray-100" // Added light bg as fallback
             priority
@@ -164,8 +179,8 @@ export default function AboutPage() {
                 {/* Image */}
                 <div className="relative w-full aspect-[4/5] mb-6 rounded-lg overflow-hidden bg-gradient-to-b from-muted to-card ring-1 ring-border group">
                   <Image
-                    src="/assets/gamaelle-charles.png"
-                    alt="Gamaelle Charles"
+                    src={aboutData?.profileImage || "/assets/gamaelle-charles.png"}
+                    alt={aboutData?.name || "Gamaelle Charles"}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     priority
@@ -175,10 +190,10 @@ export default function AboutPage() {
                 {/* Info */}
                 <div className="text-center space-y-2 mb-8">
                   <h2 className="text-xl font-bold text-foreground">
-                    Gamaelle Charles
+                    {aboutData?.name || "Gamaelle Charles"}
                   </h2>
                   <p className="text-primary font-medium text-xs pt-1 leading-relaxed">
-                    Junior at Babson College | Fidelity Scholar | MLT Fellow | GWI SIP ’25
+                    {aboutData?.tagline || "Junior at Babson College | Fidelity Scholar | MLT Fellow | GWI SIP ’25"}
                   </p>
                 </div>
 
@@ -186,8 +201,8 @@ export default function AboutPage() {
                 <div className="space-y-3 mb-6">
                   <div className="p-3 rounded-lg bg-accent border border-border text-center group hover:border-primary/30 transition-colors">
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-1">Email</p>
-                    <a href="mailto:gamaellechar123@gmail.com" className="text-xs font-medium text-foreground/80 group-hover:text-primary transition-colors truncate block">
-                      gamaellechar123@gmail.com
+                    <a href={`mailto:${aboutData?.email || "gamaellechar123@gmail.com"}`} className="text-xs font-medium text-foreground/80 group-hover:text-primary transition-colors truncate block">
+                      {aboutData?.email || "gamaellechar123@gmail.com"}
                     </a>
                   </div>
                 </div>
@@ -225,7 +240,7 @@ export default function AboutPage() {
 
                 {/* Resume Button */}
                 <Button asChild className="w-full rounded-lg py-5 bg-transparent border border-border hover:bg-foreground hover:text-background transition-all text-foreground font-medium text-sm group">
-                  <a href="/assets/gamaelle-charles-resume.pdf" download="Gamaelle_Charles_Resume.pdf">
+                  <a href={aboutData?.resumeUrl || "/assets/gamaelle-charles-resume.pdf"} download={`${(aboutData?.name || "Gamaelle_Charles").replace(/\s+/g, '_')}_Resume.pdf`}>
                     Download My CV
                     <Download className="ml-2 h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
                   </a>
@@ -246,61 +261,21 @@ export default function AboutPage() {
                 </div>
 
                 <div className="relative z-10">
-                  <div className="inline-block px-3 py-1 rounded bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold tracking-wider uppercase mb-4">
-                    About Me
-                  </div>
+
                   <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight text-foreground">
-                    Finance Student & Aspiring Investment Banker
+                    {aboutData?.bioTitle || "About Me"}
                   </h2>
                   <p className="text-muted-foreground leading-relaxed text-sm md:text-base mb-4">
-                    Finance student passionate about fair and free markets, civil duty, and investment banking/private equity with hands-on internship experience in private credit analysis and equity research.
+                    {aboutData?.bioParagraph1 || "Finance student passionate about fair and free markets, civil duty, and investment banking/private equity with hands-on internship experience in private credit analysis and equity research."}
                   </p>
                   <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                    Developing expertise in financial modeling (DCF, LBO, pro forma), due diligence, and transaction analysis through professional experience and coursework. Fellow at Management Leadership for Tomorrow (MLT) and Girls Who Invest (GWI).
+                    {aboutData?.bioParagraph2 || "Developing expertise in financial modeling (DCF, LBO, pro forma), due diligence, and transaction analysis through professional experience and coursework. Fellow at Management Leadership for Tomorrow (MLT) and Girls Who Invest (GWI)."}
                   </p>
                 </div>
               </div>
 
-              {/* What I Do Section */}
-              <div className="mt-8">
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-foreground">
-                  What I Do?
-                  <span className="h-px bg-border flex-1 ml-4"></span>
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {[
-                    { icon: LineChart, title: 'Financial Modeling', color: 'text-chart-1', bg: 'bg-chart-1/10', desc: 'Developing complex models including DCF, LBO, and Pro Forma analysis.' },
-                    { icon: Briefcase, title: 'M&A Advisory', color: 'text-chart-2', bg: 'bg-chart-2/10', desc: 'Expert advice on sell-side and buy-side transactions and structuring.' },
-                    { icon: Target, title: 'Due Diligence', color: 'text-chart-3', bg: 'bg-chart-3/10', desc: 'Rigorous financial and operational due diligence to validate theses.' },
-                    { icon: PieChart, title: 'Valuation Partners', color: 'text-chart-4', bg: 'bg-chart-4/10', desc: 'Driving long-term business success through accurate valuation.' }
-                  ].map((item, i) => (
-                    <div key={i} className="group bg-card p-6 rounded-lg border border-border hover:border-primary/20 transition-all hover:bg-accent relative overflow-hidden">
-                      <div className={`w-12 h-12 rounded-lg ${item.bg} flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110`}>
-                        <item.icon className={`w-6 h-6 ${item.color}`} />
-                      </div>
-                      <h4 className="text-lg font-bold mb-2 text-foreground group-hover:text-primary transition-colors">{item.title}</h4>
-                      <p className="text-muted-foreground text-xs leading-relaxed">
-                        {item.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Stats Section */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-                {[
-                  { val: '15B+', label: 'Transaction Value' },
-                  { val: '40+', label: 'M&A Deals' },
-                  { val: '8', label: 'Sectors' },
-                  { val: '2+', label: 'Years Exp.' }
-                ].map((stat, i) => (
-                  <div key={i} className="bg-card p-5 rounded-lg border border-border text-center hover:border-primary/20 transition-all group">
-                    <h3 className="text-3xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{stat.val}</h3>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
+
             </div>
 
             {/* RESUME TAB */}
@@ -310,19 +285,30 @@ export default function AboutPage() {
                   <Briefcase className="text-primary" /> Experience
                 </h3>
                 <div className="space-y-8 border-l-2 border-border pl-8 ml-4">
-                  {[
-                    { role: 'Private Credit Analyst', company: 'TPG Twin Brook Capital Partners', period: 'Jul 2025 - Aug 2025', desc: 'Incoming Summer Intern. Focusing on private credit analysis.' },
-                    { role: 'Fall Analyst', company: 'Thresher Fixed', period: 'Sep 2024 - May 2025', desc: 'Remote internship. Conducting fixed income research and analysis.' },
-                    { role: 'Finance Analyst', company: 'Charles River Development', period: 'Jul 2022 - Aug 2022', desc: 'Gained experience in financial operations and creative problem solving.' },
-                    { role: 'Client Solutions', company: 'State Street Global Advisors', period: 'Jul 2021 - Aug 2021', desc: 'Learned about client services and learning management systems.' }
-                  ].map((item, i) => (
-                    <div key={i} className="relative">
-                      <span className="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-background border-2 border-primary"></span>
-                      <h4 className="text-xl font-bold text-foreground mb-1">{item.role}</h4>
-                      <p className="text-sm text-primary mb-2">{item.company} <span className="text-muted-foreground mx-2">|</span> {item.period}</p>
-                      <p className="text-muted-foreground text-sm">{item.desc}</p>
-                    </div>
-                  ))}
+                  {(aboutData?.experience && aboutData.experience.length > 0) ? (
+                    aboutData.experience.map((item: any, i: number) => (
+                      <div key={i} className="relative">
+                        <span className="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-background border-2 border-primary"></span>
+                        <h4 className="text-xl font-bold text-foreground mb-1">{item.role}</h4>
+                        <p className="text-sm text-primary mb-2">{item.company} <span className="text-muted-foreground mx-2">|</span> {item.period}</p>
+                        <p className="text-muted-foreground text-sm">{item.desc}</p>
+                      </div>
+                    ))
+                  ) : (
+                    [
+                      { role: 'Private Credit Analyst', company: 'TPG Twin Brook Capital Partners', period: 'Jul 2025 - Aug 2025', desc: 'Incoming Summer Intern. Focusing on private credit analysis.' },
+                      { role: 'Fall Analyst', company: 'Thresher Fixed', period: 'Sep 2024 - May 2025', desc: 'Remote internship. Conducting fixed income research and analysis.' },
+                      { role: 'Finance Analyst', company: 'Charles River Development', period: 'Jul 2022 - Aug 2022', desc: 'Gained experience in financial operations and creative problem solving.' },
+                      { role: 'Client Solutions', company: 'State Street Global Advisors', period: 'Jul 2021 - Aug 2021', desc: 'Learned about client services and learning management systems.' }
+                    ].map((item, i) => (
+                      <div key={i} className="relative">
+                        <span className="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-background border-2 border-primary"></span>
+                        <h4 className="text-xl font-bold text-foreground mb-1">{item.role}</h4>
+                        <p className="text-sm text-primary mb-2">{item.company} <span className="text-muted-foreground mx-2">|</span> {item.period}</p>
+                        <p className="text-muted-foreground text-sm">{item.desc}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -331,18 +317,28 @@ export default function AboutPage() {
                   <GraduationCap className="text-chart-2" /> Education
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { degree: 'Finance, General', school: 'The London School of Economics (LSE)', year: '2025 - 2026' },
-                    { degree: 'BS Accounting & Finance', school: 'Babson College', year: '2023 - 2027' },
-                    { degree: 'Career Prep Fellow', school: 'Management Leadership for Tomorrow', year: '2024 - 2025' },
-                    { degree: 'High School Diploma', school: 'Boston Latin Academy', year: '2019 - 2023' }
-                  ].map((item, i) => (
-                    <div key={i} className="bg-accent p-6 rounded-lg border border-border">
-                      <span className="text-xs text-chart-2 font-bold tracking-wider">{item.year}</span>
-                      <h4 className="text-lg font-bold text-foreground mt-1 mb-2">{item.degree}</h4>
-                      <p className="text-muted-foreground text-sm">{item.school}</p>
-                    </div>
-                  ))}
+                  {(aboutData?.education && aboutData.education.length > 0) ? (
+                    aboutData.education.map((item: any, i: number) => (
+                      <div key={i} className="bg-accent p-6 rounded-lg border border-border">
+                        <span className="text-xs text-chart-2 font-bold tracking-wider">{item.year}</span>
+                        <h4 className="text-lg font-bold text-foreground mt-1 mb-2">{item.degree}</h4>
+                        <p className="text-muted-foreground text-sm">{item.school}</p>
+                      </div>
+                    ))
+                  ) : (
+                    [
+                      { degree: 'Finance, General', school: 'The London School of Economics (LSE)', year: '2025 - 2026' },
+                      { degree: 'BS Accounting & Finance', school: 'Babson College', year: '2023 - 2027' },
+                      { degree: 'Career Prep Fellow', school: 'Management Leadership for Tomorrow', year: '2024 - 2025' },
+                      { degree: 'High School Diploma', school: 'Boston Latin Academy', year: '2019 - 2023' }
+                    ].map((item, i) => (
+                      <div key={i} className="bg-accent p-6 rounded-lg border border-border">
+                        <span className="text-xs text-chart-2 font-bold tracking-wider">{item.year}</span>
+                        <h4 className="text-lg font-bold text-foreground mt-1 mb-2">{item.degree}</h4>
+                        <p className="text-muted-foreground text-sm">{item.school}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -398,7 +394,7 @@ export default function AboutPage() {
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 block">Get in Touch</span>
                   <h2 className="text-3xl font-bold mb-2 text-foreground">Contact With Me</h2>
                   <p className="text-muted-foreground text-sm">
-                    Have a project in mind, a question, or just want to say hello? Feel free to reach out! I'm always open to discussing new ideas, collaborations, or freelance opportunities.
+                    {aboutData?.contactDescription || "Have a question or feedback on my model, or just want to say hello? Feel free to reach out! I'm always open to discussing new ideas and collaborations."}
                   </p>
                 </div>
 

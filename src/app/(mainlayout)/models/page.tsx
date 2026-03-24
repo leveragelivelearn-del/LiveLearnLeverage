@@ -97,45 +97,15 @@ export default async function ModelsPage({
       <section className="py-12">
         <div className="container mx-auto px-4">
           {/* Pass the server-fetched data to the client component */}
-          <ModelsContent 
-            initialModels={models} 
-            industries={industries} 
+          <ModelsContent
+            initialModels={models}
+            industries={industries}
             initialPagination={pagination}
           />
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 bg-secondary/30">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">
-                {models.length}
-              </div>
-              <div className="text-sm text-muted-foreground">Deals Analyzed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">
-                {industries.length}
-              </div>
-              <div className="text-sm text-muted-foreground">Industries Covered</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">
-                ${formattedValue}B+
-              </div>
-              <div className="text-sm text-muted-foreground">Total Value</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">
-                2014-{new Date().getFullYear()}
-              </div>
-              <div className="text-sm text-muted-foreground">Years of Coverage</div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
 
     </div>

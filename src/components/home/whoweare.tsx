@@ -6,7 +6,7 @@ import Image from 'next/image';
 const WhoWeAre: React.FC = () => {
 
   return (
-    <section className="bg-background overflow-hidden">
+    <section className="bg-transparent overflow-hidden">
       <div className="px-4 container mx-auto">
         {/* Section Header */}
         <div
@@ -32,7 +32,7 @@ const WhoWeAre: React.FC = () => {
           <div
             className="w-full lg:w-3/5 z-10 lg:-mr-32"
           >
-            <div className="bg-background p-8 md:p-12 lg:p-16 shadow-[0_20px_50px_rgba(0,0,0,0.08)] border border-gray-50 rounded-sm">
+            <div className="bg-white/5 backdrop-blur-md p-8 md:p-12 lg:p-16 shadow-2xl border border-white/10 rounded-xl">
               <h3 className="text-xl md:text-2xl font-bold text-foreground leading-tight mb-6 uppercase">
                 Looking for a premier partner for <br className="hidden md:block" />
                 strategic business planning?
@@ -90,7 +90,7 @@ const WhoWeAre: React.FC = () => {
           <div
             className="w-full lg:w-2/3 mt-12 lg:mt-0"
           >
-            <div className="relative aspect-4/3 lg:aspect-square overflow-hidden rounded-sm shadow-2xl">
+            <div className="relative aspect-4/3 lg:aspect-square overflow-hidden rounded-xl shadow-2xl border border-white/10">
               <Image
                 src="/assets/whowerree.png"
                 alt="Business Consultant Professional"

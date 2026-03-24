@@ -15,6 +15,8 @@ interface FileUploadProps {
   maxSize?: number
   maxFiles?: number
   label?: string
+  apiEndpoint?: string
+  folder?: string
 }
 
 export function FileUpload({
@@ -27,6 +29,8 @@ export function FileUpload({
   maxSize = 10 * 1024 * 1024, // 10MB
   maxFiles = 10,
   label = 'Drag & drop files here, or click to select',
+  apiEndpoint = '/api/admin/upload',
+  folder = 'uploads',
 }: FileUploadProps) {
   const [files, setFiles] = useState<File[]>([])
   const [isUploading, setIsUploading] = useState(false)
@@ -60,15 +64,16 @@ export function FileUpload({
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         const formData = new FormData()
-        formData.append('image', file)
+        formData.append('file', file)
+        formData.append('folder', folder)
         
         // Simulate upload progress
         const interval = setInterval(() => {
           setUploadProgress(prev => Math.min(prev + 10, 90))
         }, 100)
         
-        // Upload to ImgBB
-        const response = await fetch('/api/admin/upload', {
+        // Upload to API
+        const response = await fetch(apiEndpoint, {
           method: 'POST',
           body: formData,
         })
@@ -76,7 +81,8 @@ export function FileUpload({
         clearInterval(interval)
         
         if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}`)
+          const errorData = await response.json()
+          throw new Error(errorData.error || `Failed to upload ${file.name}`)
         }
         
         const data = await response.json()

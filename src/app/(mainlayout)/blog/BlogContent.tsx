@@ -105,7 +105,7 @@ export default function BlogContent({
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h2 className="text-2xl font-bold">
+                            <h2 className="text-2xl font-bold text-white">
                                 {searchParam ? `Search Results for "${searchParam}"` :
                                     categoryParam ? `${categoryParam} Articles` :
                                         tagParam ? `Articles tagged "${tagParam}"` :

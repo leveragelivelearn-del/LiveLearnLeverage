@@ -23,18 +23,18 @@ interface FeaturedModelClientProps {
 const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => {
 
   return (
-    <section className="bg-background overflow-hidden">
+    <section className="bg-transparent overflow-hidden">
       <div className='container mx-auto px-4'>
         {/* Header Section */}
         <div
           className="featured-header text-center mb-16"
         >
-          <h2 className="text-foreground text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
-            Featured <span className='text-primary'>Deals</span>
+          <h2 className="text-white text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
+            Case <span className='text-primary'>Studies</span>
           </h2>
           <div className="divider w-12 h-[3px] bg-primary mx-auto mb-8"></div>
           <p className="max-w-4xl mx-auto text-muted-foreground text-base md:text-lg leading-relaxed font-light">
-            Discover our library of financial models and investment analysis. We offer comprehensive tools and templates designed to streamline your financial planning and decision-making processes.
+            Here are the case studies and analyses that I have done in the past.
           </p>
         </div>
 

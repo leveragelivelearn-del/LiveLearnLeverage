@@ -237,47 +237,7 @@ export default async function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Common tasks and shortcuts</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-auto py-4 justify-start" asChild>
-              <Link href="/admin/blog/new">
-                <FileText className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">New Blog Post</div>
-                  <div className="text-xs text-muted-foreground">Write a new article</div>
-                </div>
-              </Link>
-            </Button>
 
-            <Button variant="outline" className="h-auto py-4 justify-start" asChild>
-              <Link href="/admin/models/new">
-                <BarChart3 className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">New Model</div>
-                  <div className="text-xs text-muted-foreground">Add M&A analysis</div>
-                </div>
-              </Link>
-            </Button>
-
-
-            <Button variant="outline" className="h-auto py-4 justify-start" asChild>
-              <Link href="/admin/analytics">
-                <TrendingUp className="mr-3 h-5 w-5" />
-                <div className="text-left">
-                  <div className="font-medium">Analytics</div>
-                  <div className="text-xs text-muted-foreground">View insights</div>
-                </div>
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

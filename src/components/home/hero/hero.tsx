@@ -1,205 +1,208 @@
 "use client";
 
 import React from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, EffectFade } from "swiper/modules"; // Removed Navigation
-
-// Import Swiper styles
-import "swiper/css";
-import "swiper/css/effect-fade";
-import "swiper/css/pagination";
+import { motion, Variants } from "framer-motion";
 import Link from "next/link";
-// Removed navigation css import
-
-interface SlideData {
-  id: number;
-  image: string;
-  label: string;
-  title: string;
-  description: string;
-  primaryBtn: string;
-  secondaryBtn: string;
-}
-
-const slides: SlideData[] = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1920",
-    label: "TOWARDS A BRIGHT FUTURE",
-    title: "Perfect Insurance When it Matters",
-    description:
-      "Beniam quis nostrud exercitation sed lamco laboris nis aliquip repraderit luptate velit excepteur ocaan ipsum.",
-    primaryBtn: "HOW WE HELP",
-    secondaryBtn: "FIND AN AGENT",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80&w=1920",
-    label: "EXPERT STRATEGY",
-    title: "Maximize Your Market Leverage",
-    description:
-      "Specialized financial insights and M&A advisory for investment professionals worldwide.",
-    primaryBtn: "OUR PORTFOLIO",
-    secondaryBtn: "GET IN TOUCH",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1920",
-    label: "GLOBAL NETWORK",
-    title: "Strategic Partnerships for Growth",
-    description:
-      "Connecting institutional investors with high-yield opportunities across emerging markets.",
-    primaryBtn: "EXPLORE MODELS",
-    secondaryBtn: "READ INSIGHTS",
-  },
-];
+import Image from "next/image";
 
 const Hero: React.FC = () => {
-  const fadeUpVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (custom: number) => ({
+  const [aboutData, setAboutData] = React.useState<any>(null);
+  const [settingsData, setSettingsData] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [aboutRes, settingsRes] = await Promise.all([
+          fetch('/api/about'),
+          fetch('/api/settings')
+        ]);
+        
+        const [aboutData, settingsData] = await Promise.all([
+          aboutRes.json(),
+          settingsRes.json()
+        ]);
+        
+        setAboutData(aboutData);
+        setSettingsData(settingsData);
+      } catch (error) {
+        console.error("Failed to fetch hero data", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Variants for staggered text animation
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
       opacity: 1,
       y: 0,
       transition: {
-        delay: 0.3 + custom * 0.2,
         duration: 0.8,
-        ease: [0.215, 0.61, 0.355, 1] as [number, number, number, number],
+        ease: [0.215, 0.61, 0.355, 1],
       },
-    }),
+    },
+  };
+
+  // Bubble bounce animation for the image
+  const bubbleBounce: Variants = {
+    animate: {
+      y: [0, -20, 0],
+      scale: [1, 1.05, 1],
+      rotate: [0, 2, -2, 0],
+      transition: {
+        duration: 6,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
   };
 
   return (
-    <section className="relative w-full h-[90vh] md:h-screen overflow-hidden bg-black">
-      {/* Updated Styles: Removed button styles, kept pagination */}
-      <style jsx global>{`
-        .swiper-pagination-bullet {
-          background: white !important;
-          opacity: 0.5;
-          width: 10px;
-          height: 10px;
-          transition: all 0.3s ease;
-        }
-        .swiper-pagination-bullet-active {
-          background: #e23645 !important;
-          opacity: 1;
-          transform: scale(1.2);
-        }
-      `}</style>
+    <section className="relative w-full min-h-[90vh] flex items-center overflow-hidden bg-transparent">
+      <div className="container mx-auto px-6 md:px-12 relative z-10 pt-32 pb-20">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
 
-      <Swiper
-        modules={[Autoplay, Pagination, EffectFade]} // Removed Navigation
-        effect="fade"
-        speed={1500} // Slower transition for smoother auto-slide feel
-        autoplay={{
-          delay: 5000,
-          disableOnInteraction: false,
-        }}
-        pagination={{
-          clickable: true,
-          dynamicBullets: true,
-        }}
-        loop={true}
-        allowTouchMove={false} // Optional: prevents user from swiping manually if you strictly want auto only
-        className="w-full h-full"
-      >
-        {slides.map((slide) => (
-          <SwiperSlide key={slide.id}>
-            {({ isActive }) => (
-              <div className="relative w-full h-full flex items-center">
-                {/* Background Image with Zoom Effect */}
-                <div className="absolute inset-0 z-0">
-                  <motion.div
-                    initial={{ scale: 1 }}
-                    animate={isActive ? { scale: 1.15 } : { scale: 1 }}
-                    transition={{ duration: 10, ease: "linear" }}
-                    className="w-full h-full"
-                  >
-                    <img
-                      src={slide.image}
-                      alt={slide.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </motion.div>
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/50" />
-                </div>
-
-                {/* Content Container */}
-                <div className="container mx-auto px-6 md:px-12 relative z-10">
-                  <div className="max-w-4xl">
-                    <AnimatePresence mode="wait">
-                      {isActive && (
-                        <div className="space-y-6">
-                          {/* Label with Line */}
-                          <motion.div
-                            custom={0}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="flex items-center gap-3 md:gap-4"
-                          >
-                            <div className="h-[2px] w-8 md:w-12 bg-white" />
-                            <span className="text-white font-bold tracking-[0.15em] md:tracking-[0.2em] text-[10px] md:text-base">
-                              {slide.label}
-                            </span>
-                          </motion.div>
-
-                          {/* Heading */}
-                          <motion.h1
-                            custom={1}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="text-2xl md:text-4xl lg:text-6xl font-bold leading-tight text-white max-w-3xl"
-                          >
-                            {slide.title}
-                          </motion.h1>
-
-                          {/* Description */}
-                          <motion.p
-                            custom={2}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="text-sm md:text-xl text-white/80 max-w-xl font-light leading-relaxed"
-                          >
-                            {slide.description}
-                          </motion.p>
-
-                          {/* Buttons */}
-                          <motion.div
-                            custom={3}
-                            variants={fadeUpVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="flex flex-row items-center gap-3 md:gap-4 pt-4 md:pt-6"
-                          >
-                            <Link href="/models">
-                              <button className="bg-[#e23645] hover:bg-[#c92d3a] cursor-pointer text-white px-5 py-2.5 md:px-8 md:py-4 rounded-md font-bold text-[10px] md:text-sm tracking-widest transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg whitespace-nowrap">
-                                EXPLORE MODELS
-                              </button>
-                            </Link>
-                            <Link href="/blog">
-                              <button className="bg-transparent border md:border-2 border-white hover:bg-white hover:text-black cursor-pointer text-white px-5 py-2.5 md:px-8 md:py-4 rounded-md font-bold text-[10px] md:text-sm tracking-widest transition-all duration-300 transform hover:scale-105 active:scale-95 whitespace-nowrap">
-                                READ INSIGHTS
-                              </button>
-                            </Link>
-                          </motion.div>
-                        </div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
+          {/* Left Side: Content */}
+          <motion.div
+            className="flex-1 text-left order-2 lg:order-1"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* Decorative Icon from Screenshot */}
+            <motion.div variants={itemVariants} className="mb-8">
+              <div className="w-10 h-10 bg-white/10 rotate-45 flex items-center justify-center backdrop-blur-sm border border-white/20">
+                <div className="w-6 h-6 bg-white/20 rotate-12" />
               </div>
-            )}
-          </SwiperSlide>
-        ))}
-        {/* Navigation buttons div removed */}
-      </Swiper>
+            </motion.div>
+
+            <motion.h1
+              variants={itemVariants}
+              className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-4 uppercase"
+            >
+              {aboutData?.name?.split(' ').map((part: string, i: number) => (
+                <React.Fragment key={i}>
+                  {part} {i === 0 && <br />}
+                </React.Fragment>
+              )) || <>GAMAELLE <br /> CHARLES</>}
+            </motion.h1>
+
+            {/* Continuous Typewriter Animation for Subtitle */}
+            <motion.div variants={itemVariants} className="mb-10 min-h-[1.5em] flex items-center">
+              <motion.p className="text-sm md:text-lg text-white/60 font-medium tracking-[0.2em] uppercase">
+                {(aboutData?.tagline || "Portfolio of a Finance Student").split("").map((char: string, i: number) => (
+                  <motion.span
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 1, 0] }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      times: [0, 0.1, 0.8, 1],
+                      delay: i * 0.05,
+                      repeatDelay: 2
+                    }}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+                <motion.span
+                  animate={{ opacity: [0, 1, 0] }}
+                  transition={{
+                    duration: 0.8,
+                    repeat: Infinity,
+                  }}
+                  className="inline-block w-[2px] h-[1em] bg-white/60 ml-1 align-middle"
+                />
+              </motion.p>
+            </motion.div>
+
+            {/* Buttons */}
+            <motion.div
+              variants={itemVariants}
+              className="flex flex-wrap items-center gap-6"
+            >
+
+              <Link
+                href={aboutData?.resumeUrl || "/assets/gamaelle-charles-resume.pdf"}
+                target="_blank"
+                className="bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-full border border-white/10 backdrop-blur-md transition-all duration-300 transform hover:scale-105 active:scale-95 font-bold tracking-widest text-xs"
+              >
+                DOWNLOAD CV
+              </Link>
+              <Link
+                href={settingsData?.socialLinks?.linkedin || "https://linkedin.com/in/gamaelle-charles-liv3theg00dlif3"}
+                target="_blank"
+                className="group relative"
+              >
+                <span className="text-white font-bold tracking-widest text-sm border-b-2 border-white/30 group-hover:border-white transition-all duration-300 pb-1">
+                  LINKEDIN
+                </span>
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Right Side: Image with Bubble Bounce */}
+          <motion.div
+            className="flex-1 flex justify-center lg:justify-end order-1 lg:order-2"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <motion.div
+              className="relative w-56 h-56 md:w-72 md:h-72 lg:w-[380px] lg:h-[380px]"
+              variants={bubbleBounce}
+              animate="animate"
+            >
+              {/* Outer Glow/Orbit Ring */}
+              <div className="absolute inset-[-15px] border border-white/5 rounded-full animate-pulse" />
+
+              {/* Image Frame */}
+              <div className="w-full h-full rounded-full overflow-hidden border-[8px] border-white/10 shadow-2xl relative">
+                <Image
+                  src={aboutData?.profileImage || "/assets/gamaelle-charles.png"}
+                  alt={aboutData?.name || "Gamaelle Charles"}
+                  fill
+                  priority
+                  className="object-cover scale-110"
+                />
+              </div>
+
+              {/* Floating Decorative Elements */}
+              <motion.div
+                className="absolute top-0 right-0 w-12 h-12 bg-blue-500/20 backdrop-blur-xl rounded-full border border-white/10"
+                animate={{ y: [0, -15, 0] }}
+                transition={{ duration: 4, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute bottom-10 left-[-20px] w-8 h-8 bg-teal-500/20 backdrop-blur-xl rounded-full border border-white/10"
+                animate={{ y: [0, 20, 0] }}
+                transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+              />
+            </motion.div>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* Side Label (Optional, seen in some premium portfolios) */}
+      <div className="absolute left-6 bottom-12 hidden md:block vertical-text">
+        <span className="text-[10px] text-white/20 tracking-[1em] font-bold uppercase rotate-180" style={{ writingMode: 'vertical-rl' }}>
+          SCROLL TO EXPLORE
+        </span>
+      </div>
     </section>
   );
 };

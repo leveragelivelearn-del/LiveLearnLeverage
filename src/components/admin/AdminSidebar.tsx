@@ -21,6 +21,7 @@ import {
   BookOpen,
   Upload,
   Database,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "../logo";
@@ -60,6 +61,11 @@ const navigation = [
     title: "Users",
     href: "/admin/users",
     icon: Users,
+  },
+  {
+    title: "About Page",
+    href: "/admin/about",
+    icon: User,
   },
   {
     title: "Settings",
@@ -131,7 +137,7 @@ export function AdminSidebar({ user }: AdminSidebarProps) {
                     item.href === "/admin"
                       ? pathname === "/admin"
                       : pathname === item.href ||
-                        pathname.startsWith(item.href + "/");
+                      pathname.startsWith(item.href + "/");
 
                   return (
                     <li key={item.href}>
