@@ -344,7 +344,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 
         {/* Related Posts Section */}
         {relatedPosts.length > 0 && (
-          <section className="py-16 bg-secondary/20 border-t">
+          <section className="py-16 bg-background border-t">
             <div className="container mx-auto px-4 max-w-7xl">
               <div className="flex items-center justify-between mb-8">
                 <div>
