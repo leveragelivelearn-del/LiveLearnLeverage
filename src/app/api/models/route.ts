@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     const minSize = parseFloat(searchParams.get('minSize') || '0')
     const maxSize = parseFloat(searchParams.get('maxSize') || '1000000000')
     const sortBy = searchParams.get('sortBy') || 'newest'
+    const includeMeta = searchParams.get('includeMeta') === 'true'
     
     console.log("API Filter Params Received:", { industry, dealType, search });
 

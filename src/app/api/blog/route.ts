@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     const year = searchParams.get('year')
     const month = searchParams.get('month')
     const sortBy = searchParams.get('sortBy') || 'newest'
+    const includeMeta = searchParams.get('includeMeta') === 'true'
     
     // Build query
     const query: any = { published: true }
@@ -89,8 +90,41 @@ export async function GET(request: NextRequest) {
       .populate('author', 'name image')
       .lean()
     
+    let categories = []
+    let tags = []
+    let popularPosts = []
+    let archiveMonths = []
+
+    if (includeMeta) {
+      categories = await Blog.distinct('category', { published: true })
+      tags = await Blog.distinct('tags', { published: true })
+      popularPosts = await Blog.find({ published: true })
+        .sort({ views: -1 })
+        .limit(4)
+        .select('title slug views featuredImage publishedAt')
+        .lean()
+      
+      archiveMonths = await Blog.aggregate([
+        { $match: { published: true } },
+        {
+          $group: {
+            _id: {
+              year: { $year: '$publishedAt' },
+              month: { $month: '$publishedAt' }
+            },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { '_id.year': -1, '_id.month': -1 } }
+      ])
+    }
+
     return NextResponse.json({
       blogs,
+      categories: categories.filter(Boolean),
+      tags,
+      popularPosts,
+      archiveMonths,
       pagination: {
         page,
         limit,

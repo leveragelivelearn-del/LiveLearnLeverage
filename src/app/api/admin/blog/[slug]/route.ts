@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 // Interface for Next.js 15+ Params
 interface Params {
@@ -28,8 +29,11 @@ export async function DELETE(request: NextRequest, props: Params) {
     // We assume the 'slug' param in the URL is actually an ID when deleting
     const deletedBlog = await Blog.findByIdAndDelete(params.slug)
 
-    if (!deletedBlog) {
-      return NextResponse.json({ error: 'Blog post not found' }, { status: 404 })
+    if (deletedBlog) {
+      revalidatePath('/blog')
+      revalidatePath(`/blog/${deletedBlog.slug}`)
+      revalidateTag('blogs')
+      revalidateTag(`blog-${deletedBlog.slug}`)
     }
 
     return NextResponse.json({ message: 'Blog post deleted successfully' })
@@ -87,8 +91,16 @@ export async function PUT(request: NextRequest, props: Params) {
       { new: true, runValidators: true }
     )
 
-    if (!updatedBlog) {
-      return NextResponse.json({ error: 'Blog post not found' }, { status: 404 })
+    if (updatedBlog) {
+      revalidatePath('/blog')
+      // Revalidate both old and potentially new slug
+      if (params.slug !== updatedBlog.slug) {
+        revalidatePath(`/blog/${params.slug}`)
+        revalidateTag(`blog-${params.slug}`)
+      }
+      revalidatePath(`/blog/${updatedBlog.slug}`)
+      revalidateTag('blogs')
+      revalidateTag(`blog-${updatedBlog.slug}`)
     }
 
     return NextResponse.json({ blog: updatedBlog })

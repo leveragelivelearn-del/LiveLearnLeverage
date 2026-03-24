@@ -3,92 +3,42 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import { Suspense } from 'react'
 import BlogContent from './BlogContent'
-import dbConnect from '@/lib/db'
-import Blog from '@/models/Blog'
-import User from '@/models/User'
+import { getBaseUrl } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Finance & M&A Insights | Blog | LiveLearnLeverage',
   description: 'Read expert articles on finance, M&A trends, deal analysis, and investment strategies from industry professionals.',
 }
 
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-
 async function getBlogData(page: number = 1, limit: number = 12) {
-  await dbConnect()
+  try {
+    const baseUrl = getBaseUrl()
+    const response = await fetch(`${baseUrl}/api/blog?page=${page}&limit=${limit}&includeMeta=true`, {
+      cache: 'force-cache',
+      next: { tags: ['blogs'] }
+    })
 
-  const skip = (page - 1) * limit
+    if (!response.ok) throw new Error('Failed to fetch blog data')
 
-  // Get total count for pagination
-  const total = await Blog.countDocuments({ published: true })
-
-  // Get all published blog posts with author data
-  const blogs = await Blog.find({ published: true })
-    .sort({ publishedAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .select('title slug excerpt featuredImage tags category publishedAt readTime views')
-    .populate('author', 'name image')
-    .lean()
-
-  // Get user bookmarks if logged in
-  const session = await getServerSession(authOptions)
-  let userBookmarks: string[] = []
-
-  if (session?.user?.id) {
-    const user = await User.findById(session.user.id).select('bookmarks').lean()
-    if (user && user.bookmarks) {
-      userBookmarks = user.bookmarks.map((id: any) => id.toString())
+    const data = await response.json()
+    return {
+      blogs: data.blogs || [],
+      categories: data.categories || [],
+      tags: data.tags || [],
+      popularPosts: data.popularPosts || [],
+      archiveMonths: data.archiveMonths || [],
+      pagination: data.pagination || { page, limit, total: 0, pages: 1 }
     }
-  }
-
-  // Add isBookmarked status to blogs
-  const blogsWithBookmarkStatus = blogs.map((blog: any) => ({
-    ...blog,
-    isBookmarked: userBookmarks.includes(blog._id.toString())
-  }))
-
-  // Get unique categories and tags
-  const categories = await Blog.distinct('category', { published: true })
-  const allTags = await Blog.distinct('tags', { published: true })
-
-  // Get popular posts (most viewed)
-  const popularPosts = await Blog.find({
-    published: true,
-  })
-    .sort({ views: -1 })
-    .limit(4)
-    .select('title slug views featuredImage publishedAt')
-    .lean()
-
-  // Get archive dates
-  const archiveMonths = await Blog.aggregate([
-    { $match: { published: true } },
-    {
-      $group: {
-        _id: {
-          year: { $year: '$publishedAt' },
-          month: { $month: '$publishedAt' }
-        },
-        count: { $sum: 1 }
-      }
-    },
-    { $sort: { '_id.year': -1, '_id.month': -1 } }
-  ])
-
-  return {
-    blogs: JSON.parse(JSON.stringify(blogsWithBookmarkStatus)),
-    categories: JSON.parse(JSON.stringify(categories.filter(Boolean))),
-    tags: JSON.parse(JSON.stringify(allTags)),
-    popularPosts: JSON.parse(JSON.stringify(popularPosts)),
-    archiveMonths: JSON.parse(JSON.stringify(archiveMonths)),
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
+  } catch (error) {
+    console.error('Error in getBlogData:', error)
+    return {
+      blogs: [],
+      categories: [],
+      tags: [],
+      popularPosts: [],
+      archiveMonths: [],
+      pagination: { page, limit, total: 0, pages: 1 }
+    }
   }
 }
 
@@ -137,8 +87,6 @@ export default async function BlogPage({
         </div>
       </section>
 
-
-
       {/* Main Content */}
       <section className="py-12">
         <div className="container mx-auto px-4">
@@ -154,7 +102,6 @@ export default async function BlogPage({
           </Suspense>
         </div>
       </section>
-
 
     </div>
   )

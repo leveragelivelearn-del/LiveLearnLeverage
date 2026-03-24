@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import dbConnect from '@/lib/db'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
@@ -9,9 +10,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ShareButtons } from '@/components/blog/ShareButtons'
 import { BlogCard } from '@/components/blog/BlogCard'
 import { BlogAdminActions } from '@/components/blog/BlogAdminActions'
-import dbConnect from '@/lib/db'
-import Blog from '@/models/Blog'
-import { formatDate } from '@/lib/utils'
 import {
   ArrowLeft,
   CalendarDays,
@@ -27,6 +25,7 @@ import { BookmarkButton } from '@/components/blog/BookmarkButton'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import User from '@/models/User'
+import Blog from '@/models/Blog'
 
 // Correct type for Next.js 15+ dynamic params
 interface BlogDetailPageProps {
@@ -35,14 +34,30 @@ interface BlogDetailPageProps {
   }>
 }
 
+import { getBaseUrl, formatDate } from '@/lib/utils'
+
+async function getBlogPostAndRelated(slug: string) {
+  try {
+    const baseUrl = getBaseUrl()
+    const response = await fetch(`${baseUrl}/api/blog/${slug}`, {
+      cache: 'force-cache',
+      next: { tags: [`blog-${slug}`, 'blogs'] }
+    })
+
+    if (!response.ok) return null
+
+    const data = await response.json()
+    return data
+  } catch (error) {
+    console.error('Error fetching blog post:', error)
+    return null
+  }
+}
+
 export async function generateMetadata(props: BlogDetailPageProps): Promise<Metadata> {
   const params = await props.params;
-  await dbConnect()
-
-  // FIX: Added <any> to lean() to tell TypeScript the author field is populated
-  const blog = await Blog.findOne({ slug: params.slug })
-    .populate('author', 'name')
-    .lean<any>()
+  const data = await getBlogPostAndRelated(params.slug)
+  const blog = data?.blog
 
   if (!blog) {
     return {
@@ -58,7 +73,7 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
       description: blog.seoDescription || blog.excerpt,
       type: 'article',
       publishedTime: blog.publishedAt ? new Date(blog.publishedAt).toISOString() : undefined,
-      authors: [blog.author.name], // This line caused the error, now fixed by <any>
+      authors: [blog.author?.name || 'Admin'],
       tags: blog.tags,
     },
     twitter: {
@@ -70,59 +85,7 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
   }
 }
 
-async function getBlogPostAndRelated(slug: string) {
-  await dbConnect()
-
-  // FIX: Added <any> to lean() here as well for consistency
-  const blog = await Blog.findOne({ slug })
-    .populate('author', 'name image bio')
-    .lean<any>()
-
-  if (!blog || !blog.published) {
-    return null
-  }
-
-  await Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } })
-
-  const [prevPost, nextPost] = await Promise.all([
-    Blog.findOne({
-      published: true,
-      publishedAt: { $lt: blog.publishedAt }
-    })
-      .sort({ publishedAt: -1 })
-      .select('title slug')
-      .lean(),
-
-    Blog.findOne({
-      published: true,
-      publishedAt: { $gt: blog.publishedAt }
-    })
-      .sort({ publishedAt: 1 })
-      .select('title slug')
-      .lean(),
-  ])
-
-  const relatedPosts = await Blog.find({
-    _id: { $ne: blog._id },
-    published: true,
-    $or: [
-      { category: blog.category },
-      { tags: { $in: blog.tags } }
-    ]
-  })
-    .sort({ publishedAt: -1 })
-    .limit(3)
-    .populate('author', 'name image')
-    .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
-    .lean<any>() // Also treating related posts as any to handle populated author safely
-
-  return {
-    blog: JSON.parse(JSON.stringify(blog)),
-    prevPost: JSON.parse(JSON.stringify(prevPost)),
-    nextPost: JSON.parse(JSON.stringify(nextPost)),
-    relatedPosts: JSON.parse(JSON.stringify(relatedPosts)),
-  }
-}
+// Handled in getBlogPostAndRelated above
 
 export default async function BlogDetailPage(props: BlogDetailPageProps) {
   const params = await props.params;
@@ -303,8 +266,8 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
               {/* Article Content Column (2/3 width) */}
               <div className="lg:w-3/4">
                 <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: generateHtml(blog.content) }} 
+                  <div
+                    dangerouslySetInnerHTML={{ __html: generateHtml(blog.content) }}
                   />
                 </article>
 

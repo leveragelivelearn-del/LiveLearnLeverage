@@ -6,6 +6,7 @@ import dbConnect from '@/lib/db'
 import Blog from '@/models/Blog'
 import User from '@/models/User'
 import { slugify } from '@/lib/utils'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 interface AuthenticatedSession {
   user: {
@@ -95,7 +96,13 @@ export async function POST(request: NextRequest) {
       data.publishedAt = new Date()
     }
     
-    const blog = await Blog.create(data)
+    const blog = await Blog.create(data) as any
+    
+    if (blog && blog.published) {
+      revalidatePath('/blog')
+      revalidatePath(`/blog/${blog.slug}`)
+      revalidateTag('blogs')
+    }
     
     return NextResponse.json({ blog })
   } catch (error: any) {

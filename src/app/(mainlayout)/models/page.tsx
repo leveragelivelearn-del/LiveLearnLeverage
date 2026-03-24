@@ -1,49 +1,37 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import ModelsContent from './ModelsContent';
-import dbConnect from '@/lib/db';
-import Model from '@/models/Model';
-
-// --- ISR CONFIGURATION ---
-// Revalidate this page every 5 minutes (300 seconds)
-export const revalidate = 300;
+import { getBaseUrl } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'M&A Models & Deal Analysis | LiveLearnLeverage',
   description: 'Explore detailed M&A financial models, deal analyses, and transaction insights across various industries.',
 };
 
-// DIRECT DATABASE FETCH (Prevents "Fetch Loop" Deadlock)
 async function getModelsAndIndustries(page: number = 1, limit: number = 12) {
-  await dbConnect();
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/models?page=${page}&limit=${limit}&includeMeta=true`, {
+      cache: 'force-cache',
+      next: { tags: ['models'] }
+    });
 
-  const skip = (page - 1) * limit;
+    if (!response.ok) throw new Error('Failed to fetch model data');
 
-  // 1. Fetch Models (Directly from DB, no API call)
-  const models = await Model.find({})
-    .sort({ completionDate: -1 })
-    .skip(skip)
-    .limit(limit)
-    .select('title slug description dealSize currency industry dealType completionDate views featured slides keyMetrics')
-    .lean();
-
-  // 2. Fetch total count for pagination
-  const total = await Model.countDocuments({});
-
-  // 3. Fetch Industries
-  const industries = await Model.distinct('industry');
-
-  // 4. Serialize data (Crucial: Convert ObjectIds and Dates to strings)
-  return {
-    models: JSON.parse(JSON.stringify(models)),
-    industries: JSON.parse(JSON.stringify(industries)),
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  };
+    const data = await response.json();
+    return {
+      models: data.models || [],
+      industries: data.industries || [],
+      pagination: data.pagination || { page, limit, total: 0, pages: 1 },
+    };
+  } catch (error) {
+    console.error('Error in getModelsAndIndustries:', error);
+    return {
+      models: [],
+      industries: [],
+      pagination: { page, limit, total: 0, pages: 1 },
+    };
+  }
 }
 
 export default async function ModelsPage({

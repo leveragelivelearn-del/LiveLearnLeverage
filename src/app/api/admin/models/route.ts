@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
     if (model && model.slug) {
       revalidatePath('/models')
       revalidatePath(`/models/${model.slug}`)
+      revalidateTag('models')
       revalidateTag(`model-${model.slug}`, 'default')
     }
 

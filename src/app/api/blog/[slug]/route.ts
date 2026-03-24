@@ -27,8 +27,46 @@ export async function GET(
     
     // Increment view count
     await Blog.updateOne({ _id: blog._id }, { $inc: { views: 1 } })
-    
-    return NextResponse.json({ blog })
+
+    // Fetch Prev/Next and Related
+    const [prevPost, nextPost] = await Promise.all([
+      Blog.findOne({
+        published: true,
+        publishedAt: { $lt: blog.publishedAt }
+      })
+        .sort({ publishedAt: -1 })
+        .select('title slug')
+        .lean(),
+  
+      Blog.findOne({
+        published: true,
+        publishedAt: { $gt: blog.publishedAt }
+      })
+        .sort({ publishedAt: 1 })
+        .select('title slug')
+        .lean(),
+    ])
+  
+    const relatedPosts = await Blog.find({
+      _id: { $ne: blog._id },
+      published: true,
+      $or: [
+        { category: blog.category },
+        { tags: { $in: blog.tags } }
+      ]
+    })
+      .sort({ publishedAt: -1 })
+      .limit(3)
+      .populate('author', 'name image')
+      .select('title slug excerpt featuredImage tags category publishedAt readTime views author')
+      .lean()
+
+    return NextResponse.json({ 
+      blog,
+      prevPost,
+      nextPost,
+      relatedPosts
+    })
   } catch (error) {
     console.error('Error fetching blog post:', error)
     return NextResponse.json(

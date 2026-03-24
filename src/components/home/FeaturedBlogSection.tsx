@@ -1,34 +1,30 @@
 import React from 'react';
-import dbConnect from "@/lib/db";
-import Blog from '@/models/Blog';
-import "@/models/User";
 import FeaturedBlogClient from './FeaturedBlogClient';
 
-async function getFeaturedContent() {
-  await dbConnect();
+import { getBaseUrl } from '@/lib/utils';
 
-  const featuredBlogs = await Blog.find({
-    $or: [
-      { published: true },
-      { status: { $regex: /^published$/i } },
-      { status: 'active' }
-    ]
-  }).sort({ publishedAt: -1, createdAt: -1 })
-    .limit(4)
-    .select("_id title excerpt slug featuredImage publishedAt readTime author category tags views")
-    .populate("author", "name image")
-    .lean();
+async function getFeaturedBlogs() {
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/blog?limit=4`, {
+      cache: 'force-cache',
+      next: { tags: ['blogs'] }
+    });
 
-  return {
-    blogs: featuredBlogs ? JSON.parse(JSON.stringify(featuredBlogs)) : [],
-  };
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.blogs || [];
+  } catch (error) {
+    console.error("Error fetching featured blogs:", error);
+    return [];
+  }
 }
 
 const FeaturedBlogSection = async () => {
-  const { blogs } = await getFeaturedContent();
+  const blogs = await getFeaturedBlogs();
 
   return (
-    <FeaturedBlogClient blogs={blogs || []} />
+    <FeaturedBlogClient blogs={blogs} />
   );
 };
 

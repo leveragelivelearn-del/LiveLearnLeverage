@@ -1,26 +1,29 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import Model from '@/models/Model';
-import dbConnect from "@/lib/db";
 import FeaturedModelClient from './FeaturedModelClient';
 
-async function getFeaturedContent() {
-  await dbConnect();
+import { getBaseUrl } from '@/lib/utils';
 
-  const featuredModels = await Model.find({ featured: true })
-    .sort({ createdAt: -1 })
-    .limit(4)
-    .select("title description slug industry dealSize dealType completionDate currency views slides featured")
-    .lean();
+async function getFeaturedModels() {
+  try {
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}/api/models?limit=4&featured=true`, {
+      cache: 'force-cache',
+      next: { tags: ['models'] }
+    });
 
-  return {
-    models: JSON.parse(JSON.stringify(featuredModels)),
-  };
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.models || [];
+  } catch (error) {
+    console.error("Error fetching featured models:", error);
+    return [];
+  }
 }
 
 const FeaturedModelSection = async () => {
-  const { models } = await getFeaturedContent();
+  const models = await getFeaturedModels();
   return (
     <div>
       <FeaturedModelClient models={models} />

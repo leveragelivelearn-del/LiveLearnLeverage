@@ -4,6 +4,7 @@ import React from "react";
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { Linkedin } from "lucide-react";
 
 const Hero: React.FC = () => {
   const [aboutData, setAboutData] = React.useState<any>(null);
@@ -16,12 +17,12 @@ const Hero: React.FC = () => {
           fetch('/api/about'),
           fetch('/api/settings')
         ]);
-        
+
         const [aboutData, settingsData] = await Promise.all([
           aboutRes.json(),
           settingsRes.json()
         ]);
-        
+
         setAboutData(aboutData);
         setSettingsData(settingsData);
       } catch (error) {
@@ -101,8 +102,8 @@ const Hero: React.FC = () => {
 
             {/* Continuous Typewriter Animation for Subtitle */}
             <motion.div variants={itemVariants} className="mb-10 min-h-[1.5em] flex items-center">
-              <motion.p className="text-sm md:text-lg text-white/60 font-medium tracking-[0.2em] uppercase">
-                {(aboutData?.tagline || "Portfolio of a Finance Student").split("").map((char: string, i: number) => (
+              <motion.p className="text-[10px] md:text-lg text-white/60 font-medium tracking-[0.2em] uppercase">
+                {("Portfolio of a Finance Student").split("").map((char: string, i: number) => (
                   <motion.span
                     key={i}
                     initial={{ opacity: 0 }}
@@ -132,24 +133,22 @@ const Hero: React.FC = () => {
             {/* Buttons */}
             <motion.div
               variants={itemVariants}
-              className="flex flex-wrap items-center gap-6"
+              className="flex flex-row items-center gap-4 md:gap-6"
             >
-
               <Link
                 href={aboutData?.resumeUrl || "/assets/gamaelle-charles-resume.pdf"}
                 target="_blank"
-                className="bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-full border border-white/10 backdrop-blur-md transition-all duration-300 transform hover:scale-105 active:scale-95 font-bold tracking-widest text-xs"
+                className="bg-white/5 hover:bg-white/10 text-white px-4 py-3 md:px-8 md:py-4 rounded-full border border-white/10 backdrop-blur-md transition-all duration-300 transform hover:scale-105 active:scale-95 font-bold tracking-widest text-[10px] md:text-xs"
               >
                 DOWNLOAD CV
               </Link>
               <Link
                 href={settingsData?.socialLinks?.linkedin || "https://linkedin.com/in/gamaelle-charles-liv3theg00dlif3"}
                 target="_blank"
-                className="group relative"
+                className="bg-white/5 hover:bg-white/10 text-white p-3 md:p-4 rounded-full border border-white/10 backdrop-blur-md transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center group"
+                aria-label="LinkedIn Profile"
               >
-                <span className="text-white font-bold tracking-widest text-sm border-b-2 border-white/30 group-hover:border-white transition-all duration-300 pb-1">
-                  LINKEDIN
-                </span>
+                <Linkedin className="w-4 h-4 md:w-5 md:h-5 text-white transition-colors" />
               </Link>
             </motion.div>
           </motion.div>
