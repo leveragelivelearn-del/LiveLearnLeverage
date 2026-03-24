@@ -42,7 +42,6 @@ const SettingsSchema = new mongoose.Schema({
   smtpPass: { type: String, default: '' },
   fromEmail: { type: String, default: '' },
   notifyNewUser: { type: Boolean, default: true },
-  notifyNewComment: { type: Boolean, default: true },
 
   // Security
   sessionTimeout: { type: Number, default: 30 },

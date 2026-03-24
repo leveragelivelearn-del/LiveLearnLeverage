@@ -359,7 +359,6 @@ export const handleImageUpload = async (
   abortSignal?: AbortSignal
 ): Promise<string> => {
   try {
-    // Validate file
     if (!file) {
       throw new Error("No file provided");
     }
@@ -374,78 +373,36 @@ export const handleImageUpload = async (
       throw new Error("Only image files are allowed");
     }
 
-    // Create FormData for ImgBB API
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', file); // Use 'image' to match my backend update
+    formData.append('folder', 'editor');
 
-    // Get API key from environment or use the provided one
-    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY || 'd08120f6a6e1af75c0d2755245d6dee1';
-
-    if (!apiKey) {
-      throw new Error("ImgBB API key is not configured");
-    }
-
-    // Simulate initial progress
     onProgress?.({ progress: 10 });
 
-    const controller = new AbortController();
-    const signal = abortSignal || controller.signal;
-
-    // Upload to ImgBB
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+    const response = await fetch('/api/admin/upload', {
       method: 'POST',
       body: formData,
-      signal,
+      signal: abortSignal,
     });
-
-    onProgress?.({ progress: 60 });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      let errorMessage = `Upload failed with status: ${response.status}`;
-
-      try {
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.error?.message || errorMessage;
-      } catch {
-        errorMessage = errorText || errorMessage;
-      }
-
-      throw new Error(errorMessage);
-    }
 
     onProgress?.({ progress: 80 });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Upload failed');
+    }
+
     const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error?.message || 'Upload failed');
-    }
-
-    // Get the image URL from ImgBB response
-    const imageUrl = data.data.url;
-
-    if (!imageUrl) {
-      throw new Error('No image URL returned from ImgBB');
-    }
-
     onProgress?.({ progress: 100 });
 
-    console.log('Image uploaded successfully to ImgBB:', imageUrl);
-    return imageUrl;
+    return data.url;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Image upload error:', error);
-
-    if (error instanceof Error) {
-      // Handle specific error cases
-      if (error.name === 'AbortError') {
-        throw new Error('Upload cancelled');
-      }
-      throw error;
+    if (error.name === 'AbortError') {
+      throw new Error('Upload cancelled');
     }
-
-    throw new Error('Upload failed due to an unknown error');
+    throw error;
   }
 };
 

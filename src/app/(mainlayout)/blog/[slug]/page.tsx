@@ -20,7 +20,6 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { generateHtml } from '@/lib/server-html'
-import { CommentSection } from '@/components/blog/CommentSection'
 import { BookmarkButton } from '@/components/blog/BookmarkButton'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -297,10 +296,6 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                 </div>
 
 
-                {/* Comment Section */}
-                <div className="mt-12 pt-8 border-t">
-                  <CommentSection postId={blog._id.toString()} postType="blog" />
-                </div>
 
                 {/* Post Navigation */}
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -400,33 +395,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
           </section>
         )}
 
-        {/* Newsletter Section */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto text-center space-y-6">
-              <div className="inline-flex items-center justify-center p-3 rounded-full bg-primary/10 text-primary mb-2">
-                <CalendarDays className="h-6 w-6" />
-              </div>
-              <h2 className="text-3xl font-bold">Subscribe to our newsletter</h2>
-              <p className="text-muted-foreground text-lg">
-                Get the latest financial insights, M&A trends, and modeling tips delivered directly to your inbox.
-              </p>
 
-              <form className="max-w-md mx-auto flex gap-2 pt-4">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
-                  required
-                />
-                <Button type="submit">Subscribe</Button>
-              </form>
-              <p className="text-xs text-muted-foreground pt-2">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
-            </div>
-          </div>
-        </section>
       </div>
     </>
   )
