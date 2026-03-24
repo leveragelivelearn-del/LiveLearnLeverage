@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageCarousel } from "@/components/models/ImageCarousel";
-import { formatDate, formatCurrency, getBaseUrl } from "@/lib/utils";
+import { formatDate, formatCurrency, getBaseUrl, extractTextFromJson } from "@/lib/utils";
 import { generateHtml } from "@/lib/server-html";
 import {
   Download,
@@ -80,13 +80,13 @@ export async function generateMetadata(
 
   return {
     title: `${model.title}`,
-    description: model.description,
+    description: extractTextFromJson(model.description),
     alternates: {
       canonical: `/models/${model.slug}`,
     },
     openGraph: {
       title: model.title,
-      description: model.description,
+      description: extractTextFromJson(model.description),
       type: "article",
       publishedTime: model.completionDate
         ? new Date(model.completionDate).toISOString()
