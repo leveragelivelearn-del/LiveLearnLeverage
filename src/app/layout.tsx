@@ -16,7 +16,7 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL('https://www.livelearnleverage.org'),
   title: {
     default: "LiveLearnLeverage - M&A Insights & Financial Models",
     template: "%s | LiveLearnLeverage",
@@ -80,9 +80,9 @@ export const metadata: Metadata = {
       "msvalidate.01": "your-bing-verification-code",
     },
   },
-  alternates: {
-    canonical: "https://www.livelearnleverage.org",
-  },
+  // alternates: {
+  //   canonical: "https://www.livelearnleverage.org",
+  // },
   category: "finance",
 };
 

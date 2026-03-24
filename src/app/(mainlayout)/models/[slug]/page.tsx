@@ -79,8 +79,11 @@ export async function generateMetadata(
   }
 
   return {
-    title: `${model.title} | M&A Analysis`,
+    title: `${model.title}`,
     description: model.description,
+    alternates: {
+      canonical: `/models/${model.slug}`,
+    },
     openGraph: {
       title: model.title,
       description: model.description,

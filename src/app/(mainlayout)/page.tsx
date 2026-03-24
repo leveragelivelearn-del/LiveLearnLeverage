@@ -18,6 +18,14 @@ async function getHeroData() {
   return { aboutData, settingsData };
 }
 
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: '/',
+  },
+};
+
 export default async function HomePage() {
   const { aboutData, settingsData } = await getHeroData();
 

@@ -389,12 +389,12 @@ export function ModelForm({ initialData, isEdit = false }: ModelFormProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="dealSize" className="text-sm font-semibold">Deal Size *</Label>
+                <Label htmlFor="dealSize" className="text-sm font-semibold">Deal Size (Millions) *</Label>
                 <div className="relative">
                   <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="dealSize"
-                    placeholder="100,000,000"
+                    placeholder="e.g., 100"
                     value={formData.dealSize}
                     onChange={(e) => {
                       const formatted = formatCurrency(e.target.value)

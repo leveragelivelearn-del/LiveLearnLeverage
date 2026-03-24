@@ -33,14 +33,14 @@ export function formatDateTime(date: Date | string) {
 }
 
 export function formatCurrency(amount: number, currency: string = 'USD') {
-  if (amount === null || amount === undefined) return '$0'
+  if (amount === null || amount === undefined) return '$0M'
 
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: amount < 1 ? 2 : 0,
-  }).format(amount)
+  }).format(amount) + 'M'
 }
 
 export function formatNumber(number: number) {

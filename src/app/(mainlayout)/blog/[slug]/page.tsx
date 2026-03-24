@@ -67,6 +67,9 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
   return {
     title: `${blog.seoTitle || blog.title}`,
     description: blog.seoDescription || blog.excerpt,
+    alternates: {
+      canonical: `/blog/${blog.slug}`,
+    },
     openGraph: {
       title: blog.seoTitle || blog.title,
       description: blog.seoDescription || blog.excerpt,
@@ -299,44 +302,6 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                     description={blog.excerpt}
                   />
                 </div>
-
-
-
-                {/* Post Navigation */}
-                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {prevPost ? (
-                    <Link href={`/blog/${prevPost.slug}`} className="group block">
-                      <Card className="h-full hover:border-primary/50 transition-colors">
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3 group-hover:text-primary">
-                            <ChevronLeft className="h-4 w-4" />
-                            Previous Article
-                          </div>
-                          <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                            {prevPost.title}
-                          </h4>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ) : <div />}
-
-                  {nextPost && (
-                    <Link href={`/blog/${nextPost.slug}`} className="group block">
-                      <Card className="h-full hover:border-primary/50 transition-colors">
-                        <CardContent className="p-6 text-right">
-                          <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground mb-3 group-hover:text-primary">
-                            Next Article
-                            <ChevronRight className="h-4 w-4" />
-                          </div>
-                          <h4 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
-                            {nextPost.title}
-                          </h4>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  )}
-                </div>
-
               </div>
 
               {/* Sidebar Column (1/3 width) - Sticky */}
