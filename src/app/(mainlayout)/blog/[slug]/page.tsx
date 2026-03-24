@@ -65,7 +65,7 @@ export async function generateMetadata(props: BlogDetailPageProps): Promise<Meta
   }
 
   return {
-    title: `${blog.seoTitle || blog.title} | LiveLearnLeverage`,
+    title: `${blog.seoTitle || blog.title}`,
     description: blog.seoDescription || blog.excerpt,
     openGraph: {
       title: blog.seoTitle || blog.title,
@@ -102,13 +102,18 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
   const session = await getServerSession(authOptions)
   const isAdmin = session?.user?.role === 'admin'
   let isBookmarked = false
-  if (session?.user?.id) {
-    await dbConnect()
-    const user = await User.findById(session.user.id).select('bookmarks').lean()
-    if (user && user.bookmarks) {
-      // user.bookmarks is an array of ObjectIds, we need to convert to string for comparison
-      isBookmarked = user.bookmarks.some((id: any) => id.toString() === blog._id.toString())
+  
+  try {
+    if (session?.user?.id) {
+      await dbConnect()
+      const user = await User.findById(session.user.id).select('bookmarks').lean()
+      if (user && user.bookmarks && blog?._id) {
+        // user.bookmarks is an array of ObjectIds, we need to convert to string for comparison
+        isBookmarked = user.bookmarks.some((id: any) => id.toString() === blog._id.toString())
+      }
     }
+  } catch (error) {
+    console.error('Error checking bookmark status:', error)
   }
 
   const structuredData = {
@@ -121,7 +126,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
     dateModified: blog.updatedAt,
     author: {
       '@type': 'Person',
-      name: blog.author.name,
+      name: blog.author?.name || 'Admin',
     },
     publisher: {
       '@type': 'Organization',
@@ -211,10 +216,10 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
               {/* Meta Info Grid */}
               <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-200 py-4">
                 <div className="flex items-center gap-2">
-                  {blog.author.image ? (
+                  {blog.author?.image ? (
                     <Image
                       src={blog.author.image}
-                      alt={blog.author.name}
+                      alt={blog.author.name || 'Author'}
                       width={40}
                       height={40}
                       className="rounded-full border border-white/20"
@@ -226,7 +231,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
                   )}
                   <div className="flex flex-col text-left">
                     <span className="text-xs font-medium text-gray-300">Written by</span>
-                    <span className="font-medium text-white">{blog.author.name}</span>
+                    <span className="font-medium text-white">{blog.author?.name || 'Admin'}</span>
                   </div>
                 </div>
 
@@ -264,7 +269,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 
               {/* Article Content Column (2/3 width) */}
               <div className="lg:w-3/4">
-                <article className="prose prose-lg dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
+                <article className="prose dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
                   <div
                     dangerouslySetInnerHTML={{ __html: generateHtml(blog.content) }}
                   />
