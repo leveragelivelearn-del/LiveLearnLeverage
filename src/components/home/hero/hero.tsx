@@ -6,31 +6,39 @@ import Link from "next/link";
 import Image from "next/image";
 import { Linkedin } from "lucide-react";
 
-const Hero: React.FC = () => {
-  const [aboutData, setAboutData] = React.useState<any>(null);
-  const [settingsData, setSettingsData] = React.useState<any>(null);
+interface HeroProps {
+  initialAboutData?: any;
+  initialSettingsData?: any;
+}
+
+const Hero: React.FC<HeroProps> = ({ initialAboutData, initialSettingsData }) => {
+  const [aboutData, setAboutData] = React.useState<any>(initialAboutData);
+  const [settingsData, setSettingsData] = React.useState<any>(initialSettingsData);
 
   React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [aboutRes, settingsRes] = await Promise.all([
-          fetch('/api/about'),
-          fetch('/api/settings')
-        ]);
+    // If not provided from server, fetch on client
+    if (!initialAboutData || !initialSettingsData) {
+      const fetchData = async () => {
+        try {
+          const [aboutRes, settingsRes] = await Promise.all([
+            fetch('/api/about'),
+            fetch('/api/settings')
+          ]);
 
-        const [aboutData, settingsData] = await Promise.all([
-          aboutRes.json(),
-          settingsRes.json()
-        ]);
+          const [about, settings] = await Promise.all([
+            aboutRes.json(),
+            settingsRes.json()
+          ]);
 
-        setAboutData(aboutData);
-        setSettingsData(settingsData);
-      } catch (error) {
-        console.error("Failed to fetch hero data", error);
-      }
-    };
-    fetchData();
-  }, []);
+          setAboutData(about);
+          setSettingsData(settings);
+        } catch (error) {
+          console.error("Failed to fetch hero data", error);
+        }
+      };
+      fetchData();
+    }
+  }, [initialAboutData, initialSettingsData]);
 
   // Variants for staggered text animation
   const containerVariants = {

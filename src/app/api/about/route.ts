@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import dbConnect from '@/lib/db';
 import About from '@/models/About';
 
@@ -59,6 +60,9 @@ export async function POST(request: Request) {
     } else {
       about = await About.create(body);
     }
+    
+    revalidatePath('/about');
+    revalidateTag('about', 'default');
     
     return NextResponse.json(about);
   } catch (error: any) {
