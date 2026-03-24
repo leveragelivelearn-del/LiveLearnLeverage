@@ -208,21 +208,6 @@ export function ImageCarousel({ images, className = '' }: ImageCarouselProps) {
       </div>
 
 
-      {/* Slide Indicators - Hidden on mobile */}
-      <div className="hidden md:flex absolute bottom-4 left-1/2 transform -translate-x-1/2 gap-2 z-20">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex 
-                ? 'bg-primary w-6' 
-                : 'bg-primary/50 hover:bg-primary/90 w-2'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
 
       {/* Thumbnails */}
       {images.length > 1 && (
