@@ -154,7 +154,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         {/* Breadcrumb Area */}
         <div className="border-b bg-secondary/10">
           <div className="container mx-auto px-4 py-4">
