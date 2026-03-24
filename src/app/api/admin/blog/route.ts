@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
     if (blog && blog.published) {
       revalidatePath('/blog')
       revalidatePath(`/blog/${blog.slug}`)
-      revalidateTag('blogs')
+      revalidateTag('blogs', 'default')
     }
     
     return NextResponse.json({ blog })

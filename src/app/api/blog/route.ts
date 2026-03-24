@@ -90,10 +90,10 @@ export async function GET(request: NextRequest) {
       .populate('author', 'name image')
       .lean()
     
-    let categories = []
-    let tags = []
-    let popularPosts = []
-    let archiveMonths = []
+    let categories: string[] = []
+    let tags: string[] = []
+    let popularPosts: any[] = []
+    let archiveMonths: any[] = []
 
     if (includeMeta) {
       categories = await Blog.distinct('category', { published: true })

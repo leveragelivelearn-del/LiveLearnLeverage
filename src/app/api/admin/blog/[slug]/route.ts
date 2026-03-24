@@ -32,8 +32,8 @@ export async function DELETE(request: NextRequest, props: Params) {
     if (deletedBlog) {
       revalidatePath('/blog')
       revalidatePath(`/blog/${deletedBlog.slug}`)
-      revalidateTag('blogs')
-      revalidateTag(`blog-${deletedBlog.slug}`)
+      revalidateTag('blogs', 'default')
+      revalidateTag(`blog-${deletedBlog.slug}`, 'default')
     }
 
     return NextResponse.json({ message: 'Blog post deleted successfully' })
@@ -96,11 +96,11 @@ export async function PUT(request: NextRequest, props: Params) {
       // Revalidate both old and potentially new slug
       if (params.slug !== updatedBlog.slug) {
         revalidatePath(`/blog/${params.slug}`)
-        revalidateTag(`blog-${params.slug}`)
+        revalidateTag(`blog-${params.slug}`, 'default')
       }
       revalidatePath(`/blog/${updatedBlog.slug}`)
-      revalidateTag('blogs')
-      revalidateTag(`blog-${updatedBlog.slug}`)
+      revalidateTag('blogs', 'default')
+      revalidateTag(`blog-${updatedBlog.slug}`, 'default')
     }
 
     return NextResponse.json({ blog: updatedBlog })
