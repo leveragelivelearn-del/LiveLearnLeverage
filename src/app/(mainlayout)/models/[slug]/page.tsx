@@ -187,7 +187,7 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
               </div>
 
               {/* Title - Reduced size on mobile */}
-              <h1 className="text-2xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
                 {model.title}
               </h1>
 

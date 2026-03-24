@@ -212,7 +212,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
             <div className="max-w-4xl mx-auto text-center space-y-2">
 
               {/* Title */}
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
                 {blog.title}
               </h1>
 
