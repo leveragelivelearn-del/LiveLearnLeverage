@@ -32,7 +32,7 @@ const FeaturedBlogClient: React.FC<FeaturedBlogClientProps> = ({ blogs }) => {
         <div
           className="blog-header text-center mb-16"
         >
-          <h2 className="text-foreground text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
+          <h2 className="text-white text-3xl md:text-4xl font-extrabold uppercase tracking-widest mb-4">
             Blog <span className='text-primary'>Posts</span>
           </h2>
           <div className="divider w-12 h-[3px] bg-primary mx-auto mb-8"></div>
