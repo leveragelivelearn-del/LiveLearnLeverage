@@ -43,7 +43,7 @@ export default async function ProfilePage() {
                 <div className="flex flex-col md:flex-row gap-8 items-start">
 
                     {/* Left Sidebar - Persistent */}
-                    <div className="w-full md:w-1/3 lg:w-1/4 sticky top-24">
+                    <div className="w-full md:w-1/3 lg:w-1/4 lg:sticky top-24">
                         <ProfileSidebar user={user} />
                     </div>
 
