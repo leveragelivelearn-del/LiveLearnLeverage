@@ -12,7 +12,7 @@ interface BlogGridProps {
 export function BlogGrid({ blogs }: BlogGridProps) {
   const [currentPage, setCurrentPage] = useState(1)
 
-  const itemsPerPage = 9
+  const itemsPerPage = 12
 
   // Memoize current page blogs
   const currentBlogs = useMemo(() => {
@@ -41,7 +41,7 @@ export function BlogGrid({ blogs }: BlogGridProps) {
       {/* Blog Grid */}
       {currentBlogs.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {currentBlogs.map((blog, index) => (
               <BlogCard
                 key={blog._id}

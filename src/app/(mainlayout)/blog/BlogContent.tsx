@@ -2,7 +2,6 @@
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { BlogGrid } from "@/components/blog/BlogGrid";
-import { BlogSidebar } from "@/components/blog/BlogSidebar";
 import { Pagination } from "@/components/models/Pagination";
 import { useMemo, useState, useEffect, useRef } from "react";
 
@@ -99,48 +98,37 @@ export default function BlogContent({
     };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="w-full">
             {/* Blog Posts */}
-            <div className="lg:w-2/3">
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-2xl font-bold text-white">
-                                {searchParam ? `Search Results for "${searchParam}"` :
-                                    categoryParam ? `${categoryParam} Articles` :
-                                        tagParam ? `Articles tagged "${tagParam}"` :
-                                            "Latest Articles"}
-                            </h2>
-
-                        </div>
-
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h2 className="text-2xl font-bold text-white">
+                            {searchParam ? `Search Results for "${searchParam}"` :
+                                categoryParam ? `${categoryParam} Articles` :
+                                    tagParam ? `Articles tagged "${tagParam}"` :
+                                        "Latest Articles"}
+                        </h2>
 
                     </div>
 
-                    <div className={`transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
-                        <BlogGrid blogs={blogs} />
-                    </div>
 
-                    {/* Pagination */}
-                    {pagination.pages > 1 && (
-                        <div className="mt-12">
-                            <Pagination
-                                currentPage={pagination.page}
-                                totalPages={pagination.pages}
-                                onPageChange={handlePageChange}
-                            />
-                        </div>
-                    )}
                 </div>
-            </div>
 
-            {/* Sidebar */}
-            <div className="lg:w-1/3 lg:sticky lg:top-24 self-start">
-                <BlogSidebar
-                    tags={tags}
-                    popularPosts={popularPosts}
-                    archiveMonths={archiveMonths}
-                />
+                <div className={`transition-opacity duration-200 ${loading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+                    <BlogGrid blogs={blogs} />
+                </div>
+
+                {/* Pagination */}
+                {pagination.pages > 1 && (
+                    <div className="mt-12">
+                        <Pagination
+                            currentPage={pagination.page}
+                            totalPages={pagination.pages}
+                            onPageChange={handlePageChange}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
