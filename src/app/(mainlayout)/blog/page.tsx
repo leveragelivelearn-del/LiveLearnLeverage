@@ -7,7 +7,7 @@ import { getBaseUrl } from '@/lib/utils'
 import { BackgroundLines } from '@/components/ui/background-lines'
 
 export const metadata: Metadata = {
-  title: 'Finance & M&A Insights | Blog | LiveLearnLeverage',
+  title: 'Finance & M&A Insights',
   description: 'Read expert articles on finance, M&A trends, deal analysis, and investment strategies from industry professionals.',
 }
 

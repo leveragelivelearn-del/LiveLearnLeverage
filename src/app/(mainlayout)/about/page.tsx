@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
     });
     const about = await res.json();
     return {
-      title: `${about?.name || 'About Me'} | LiveLearnLeverage`,
+      title: `${about?.name || 'About Me'}`,
       description: about?.bioParagraph1 || 'Finance student passionate about free markets and investment banking.',
     };
   } catch (error) {

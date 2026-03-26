@@ -5,7 +5,7 @@ import { getBaseUrl } from '@/lib/utils';
 import { BackgroundLines } from '@/components/ui/background-lines';
 
 export const metadata: Metadata = {
-  title: 'M&A Models & Deal Analysis | LiveLearnLeverage',
+  title: 'M&A Models & Deal Analysis',
   description: 'Explore detailed M&A financial models, deal analyses, and transaction insights across various industries.',
 };
 
