@@ -26,6 +26,7 @@ import { ModelCard } from '@/components/models/ModelCard';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { WhatsAppIcon } from '@/components/icons/WhatsappIcon';
 import emailjs from '@emailjs/browser';
+import { SparklesCore } from "@/components/ui/sparkles";
 
 interface AboutContentProps {
   initialAboutData: any;
@@ -34,8 +35,8 @@ interface AboutContentProps {
   initialBlogs: any[];
 }
 
-export default function AboutContent({ 
-  initialAboutData, 
+export default function AboutContent({
+  initialAboutData,
   initialSettings,
   initialModels,
   initialBlogs
@@ -129,18 +130,19 @@ export default function AboutContent({
     <div className="min-h-screen text-foreground font-sans pt-16 lg:pt-0">
 
       {/* Top Banner Section */}
-      <div className="relative h-[250px] lg:h-[400px] w-full bg-gradient-to-b from-primary/20 to-background overflow-hidden">
+      <div className="relative h-[250px] lg:h-[400px] w-full bg-transparent overflow-hidden flex items-center justify-end px-6 md:px-12 lg:px-24">
         {/* Background Effects */}
-        <div className="absolute inset-0">
-          <Image
-            src={aboutData?.bannerImage || "/assets/charles-banner.png"}
-            alt={`${aboutData?.name || "Gamaelle Charles"} Banner`}
-            fill
-            className="object-cover object-center bg-gray-100"
-            priority
+        <div className="w-full absolute inset-0 h-full">
+          <SparklesCore
+            id="tsparticlesfullpage"
+            background="transparent"
+            minSize={0.6}
+            maxSize={1.4}
+            particleDensity={100}
+            className="w-full h-full"
+            particleColor="#FFFFFF"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80"></div>
       </div>
 
       <div className="container mx-auto px-4 -mt-24 lg:-mt-48 relative z-10 pb-20">
@@ -370,7 +372,7 @@ export default function AboutContent({
                       />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-xs font-bold text-muted-foreground uppercase">Your Subject</label>
+                      <label className="text-xs font-bold text-muted-foreground uppercase">Your Subject</label>
                       <Input
                         name="subject"
                         value={formData.subject}

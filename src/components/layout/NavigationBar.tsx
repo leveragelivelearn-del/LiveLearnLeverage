@@ -94,41 +94,48 @@ export function NavigationBar() {
         <div className="flex items-center gap-4 z-20">
 
           {/* Mobile Hamburger (Now on Left) */}
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className={!isTransparent ? "-ml-2" : "text-white hover:bg-white/10 -ml-2"}>
-                {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between mb-6">
-                  <span className="font-bold text-lg">Menu</span>
-                  <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-                <nav className="flex-1 space-y-1">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={cn(
-                        "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
-                        pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent"
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                  <div className="border-t my-3 pt-3">
-                    <ThemeToggle />
+          {/* Mobile Hamburger (Now on Left) - Guarded by mounted to fix hydration ID mismatch */}
+          {mounted ? (
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon" className={!isTransparent ? "-ml-2" : "text-white hover:bg-white/10 -ml-2"}>
+                  {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between mb-6">
+                    <span className="font-bold text-lg">Menu</span>
+                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                      <X className="h-5 w-5" />
+                    </Button>
                   </div>
-                </nav>
-              </div>
-            </SheetContent>
-          </Sheet>
+                  <nav className="flex-1 space-y-1">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setIsOpen(false)}
+                        className={cn(
+                          "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors",
+                          pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent"
+                        )}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                    <div className="border-t my-3 pt-3">
+                      <ThemeToggle />
+                    </div>
+                  </nav>
+                </div>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <Button variant="ghost" size="icon" className={cn("md:hidden -ml-2", isTransparent && "text-white")}>
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
 
           {/* Desktop Logo */}
           <div className={cn("hidden md:block transition-all duration-300", !isTransparent ? "" : "brightness-0 invert")}>
@@ -186,111 +193,118 @@ export function NavigationBar() {
             <>
               {/* Desktop User Menu (Name + Avatar) */}
               <div className="hidden md:block">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "flex items-center rounded-full transition-all focus-visible:ring-0 focus-visible:ring-offset-0 px-2",
-                        !isTransparent ? "hover:bg-accent/50" : "hover:bg-white/10 text-white"
+                {mounted ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "flex items-center rounded-full transition-all focus-visible:ring-0 focus-visible:ring-offset-0 px-2",
+                          !isTransparent ? "hover:bg-accent/50" : "hover:bg-white/10 text-white"
+                        )}
+                      >
+                        <div className="relative">
+                          <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+                            <AvatarImage
+                              src={session.user?.image || ""}
+                              alt={session.user?.name || "User"}
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                              {getInitials(session.user?.name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-64 mt-2">
+                      <DropdownMenuLabel className="flex flex-col">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">{getInitials(session?.user?.name)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 overflow-hidden">
+                            <p className="font-semibold truncate">{session?.user?.name || "User"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+                          </div>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {(session?.user?.role === "admin" || session?.user?.role === "editor") && (
+                        <>
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin" className="cursor-pointer">
+                              <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/admin/models" className="cursor-pointer">
+                              <Settings className="mr-2 h-4 w-4" /> Manage Content
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                        </>
                       )}
-                    >
-                      <div className="relative">
-                        <Avatar className="h-9 w-9 ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer">
+                          <User className="mr-2 h-4 w-4" /> Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
+                        <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <div className="h-9 w-9 rounded-full bg-muted/20 animate-pulse" />
+                )}
+              </div>
+
+              {/* Mobile User Menu (Avatar Only) */}
+              {mounted ? (
+                <div className="md:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn("rounded-full h-8 w-8", !isTransparent ? "" : "text-white hover:bg-white/10")}
+                      >
+                        <Avatar className="h-7 w-7">
                           <AvatarImage
                             src={session.user?.image || ""}
                             alt={session.user?.name || "User"}
                           />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-[10px]">
                             {getInitials(session.user?.name)}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  {/* ... Dropdown Content (Same as before) ... */}
-                  <DropdownMenuContent align="end" className="w-64 mt-2">
-                    <DropdownMenuLabel className="flex flex-col">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} />
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white">{getInitials(session?.user?.name)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 overflow-hidden">
-                          <p className="font-semibold truncate">{session?.user?.name || "User"}</p>
-                          <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>
+                        <div className="flex flex-col">
+                          <span className="font-semibold">{session?.user?.name}</span>
+                          <span className="text-xs text-muted-foreground">{session?.user?.email}</span>
                         </div>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {(session?.user?.role === "admin" || session?.user?.role === "editor") && (
-                      <>
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin" className="cursor-pointer">
-                            <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/admin/models" className="cursor-pointer">
-                            <Settings className="mr-2 h-4 w-4" /> Manage Content
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                      </>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" /> Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {/* Mobile User Menu (Avatar Only) */}
-              <div className="md:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={cn("rounded-full h-8 w-8", !isTransparent ? "" : "text-white hover:bg-white/10")}
-                    >
-                      <Avatar className="h-7 w-7">
-                        <AvatarImage
-                          src={session.user?.image || ""}
-                          alt={session.user?.name || "User"}
-                        />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white text-[10px]">
-                          {getInitials(session.user?.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col">
-                        <span className="font-semibold">{session?.user?.name}</span>
-                        <span className="text-xs text-muted-foreground">{session?.user?.email}</span>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile" className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" /> Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer">
+                          <User className="mr-2 h-4 w-4" /> Profile
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                        <LogOut className="mr-2 h-4 w-4" /> Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="md:hidden h-8 w-8 rounded-full bg-muted/20 animate-pulse" />
+              )}
             </>
           ) : (
             <>

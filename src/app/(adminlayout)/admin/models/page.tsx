@@ -392,9 +392,9 @@ export default function ModelsManagementPage() {
             $
             {(
               models.reduce(
-                (sum: number, model: any) => sum + model.dealSize,
+                (sum: number, model: any) => sum + (model.dealSize || 0),
                 0
-              ) / 1000000000
+              ) / 1000
             ).toFixed(1)}
             B
           </div>
@@ -488,8 +488,7 @@ export default function ModelsManagementPage() {
                   </TableCell>
                   <TableCell>{model.dealType}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />
+                    <div className="flex items-center gap-1 font-medium">
                       {formatCurrency(model.dealSize, model.currency)}
                     </div>
                   </TableCell>

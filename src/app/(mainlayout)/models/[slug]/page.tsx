@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImageCarousel } from "@/components/models/ImageCarousel";
 import { formatDate, formatCurrency, getBaseUrl, extractTextFromJson } from "@/lib/utils";
 import { generateHtml } from "@/lib/server-html";
+import { Spotlight } from "@/components/ui/spotlight-new";
 import {
   Download,
   Eye,
@@ -149,17 +150,9 @@ export default async function ModelDetailPage(props: ModelDetailPageProps) {
 
         {/* Hero Banner Section - Reduced padding on mobile */}
         <section className="relative min-h-[40vh] md:min-h-[60vh] flex items-center overflow-hidden py-8 md:py-16">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/assets/modelbanner.png"
-              alt="Model Banner"
-              fill
-              className="object-cover"
-              priority
-            />
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/60" />
+          {/* Spotlight Background */}
+          <div className="absolute inset-0 z-0 bg-slate-950">
+            <Spotlight />
           </div>
 
           <div className="container mx-auto px-4 relative z-10 text-white">

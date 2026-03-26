@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import ModelsContent from './ModelsContent';
 import { getBaseUrl } from '@/lib/utils';
+import { BackgroundLines } from '@/components/ui/background-lines';
 
 export const metadata: Metadata = {
   title: 'M&A Models & Deal Analysis | LiveLearnLeverage',
@@ -54,32 +55,18 @@ export default async function ModelsPage({
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/assets/modelbanner.png"
-            alt="M&A Models Banner"
-            fill
-            className="object-cover"
-            priority
-          />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/60" />
-        </div>
-
+      <BackgroundLines className="relative pb-12 pt-20 md:pb-20 md:pt-40 overflow-hidden flex flex-col items-center justify-center">
         <div className="container mx-auto px-4 relative z-10 text-white">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+          <div className="max-5-3xl mx-auto text-center space-y-6">
+            <h1 className="text-2xl md:text-6xl font-bold tracking-tight text-white">
               M&A Models & Deal Analysis
             </h1>
-            <p className="text-xl text-gray-200">
+            <p className="text-sm md:text-lg text-gray-200">
               Explore detailed financial models and comprehensive analysis of M&A transactions across various industries.
             </p>
           </div>
         </div>
-      </section>
+      </BackgroundLines>
 
       {/* Main Content */}
       <section className="py-12">

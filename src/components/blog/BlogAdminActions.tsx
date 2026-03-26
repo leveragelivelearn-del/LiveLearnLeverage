@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { MoreVertical, Edit, Trash, Settings, Plus } from "lucide-react"
+import { MoreVertical, Edit, Trash, Settings, Plus, Link as LinkIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -24,8 +24,23 @@ interface BlogAdminActionsProps {
 export function BlogAdminActions({ blogSlug, blogId, isAdmin }: BlogAdminActionsProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   if (!isAdmin) return null
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center">
+        <Button disabled variant="ghost" size="icon" className="h-9 w-9 bg-transparent border-0 text-white/50">
+          <MoreVertical className="h-5 w-5" />
+        </Button>
+      </div>
+    )
+  }
 
   const handleDelete = async () => {
     const result = await Swal.fire({
@@ -69,10 +84,10 @@ export function BlogAdminActions({ blogSlug, blogId, isAdmin }: BlogAdminActions
   }
 
   return (
-    <div className="absolute top-0 right-4 z-50">
+    <div className="flex items-center">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button aria-label="Open blog actions" variant="ghost" size="icon" className="bg-transparent border-0 outline-none focus-visible:ring-0 text-white hover:bg-white/20">
+          <Button aria-label="Open blog actions" variant="ghost" size="icon" className="h-9 w-9 bg-transparent border-0 outline-none focus-visible:ring-0 text-white hover:bg-white/20 transition-colors">
             <MoreVertical className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>

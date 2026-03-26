@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BlogCard } from '@/components/blog/BlogCard';
+import { cn } from '@/lib/utils';
 
 interface FeaturedBlogClientProps {
   blogs: Array<{
@@ -24,6 +25,7 @@ interface FeaturedBlogClientProps {
 }
 
 const FeaturedBlogClient: React.FC<FeaturedBlogClientProps> = ({ blogs }) => {
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <section className="bg-transparent overflow-hidden pb-16 ">
@@ -45,7 +47,12 @@ const FeaturedBlogClient: React.FC<FeaturedBlogClientProps> = ({ blogs }) => {
             blogs.map((blog, index) => (
               <div
                 key={blog._id}
-                className="blog-card-wrapper h-full"
+                className={cn(
+                  "blog-card-wrapper h-full transition-all duration-300 ease-out",
+                  hovered !== null && hovered !== index && "blur-[2px] scale-[0.98] opacity-50"
+                )}
+                onMouseEnter={() => setHovered(index)}
+                onMouseLeave={() => setHovered(null)}
               >
                 <BlogCard
                   blog={blog}

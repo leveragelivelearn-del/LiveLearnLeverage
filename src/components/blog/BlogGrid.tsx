@@ -4,6 +4,7 @@
 import { useState, useMemo } from 'react'
 import { BlogCard } from './BlogCard'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface BlogGridProps {
   blogs: any[]
@@ -11,6 +12,7 @@ interface BlogGridProps {
 
 export function BlogGrid({ blogs }: BlogGridProps) {
   const [currentPage, setCurrentPage] = useState(1)
+  const [hovered, setHovered] = useState<number | null>(null);
 
   const itemsPerPage = 12
 
@@ -43,11 +45,20 @@ export function BlogGrid({ blogs }: BlogGridProps) {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {currentBlogs.map((blog, index) => (
-              <BlogCard
+              <div
                 key={blog._id}
-                blog={blog}
-                variant='default'
-              />
+                className={cn(
+                  "transition-all duration-300 ease-out",
+                  hovered !== null && hovered !== index && "blur-[2px] scale-[0.98] opacity-50"
+                )}
+                onMouseEnter={() => setHovered(index)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                <BlogCard
+                  blog={blog}
+                  variant='default'
+                />
+              </div>
             ))}
           </div>
 

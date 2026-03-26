@@ -1,7 +1,8 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ModelCard } from '@/components/models/ModelCard';
+import { cn } from '@/lib/utils';
 
 interface FeaturedModelClientProps {
   models: Array<{
@@ -21,6 +22,7 @@ interface FeaturedModelClientProps {
 }
 
 const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => {
+  const [hovered, setHovered] = useState<number | null>(null);
 
   return (
     <section className="bg-transparent overflow-hidden">
@@ -42,7 +44,12 @@ const FeaturedModelClient: React.FC<FeaturedModelClientProps> = ({ models }) => 
           {models.map((model, index) => (
             <div
               key={model._id}
-              className="featured-card-wrapper h-full"
+              className={cn(
+                "featured-card-wrapper h-full transition-all duration-300 ease-out",
+                hovered !== null && hovered !== index && "blur-[2px] scale-[0.98] opacity-50"
+              )}
+              onMouseEnter={() => setHovered(index)}
+              onMouseLeave={() => setHovered(null)}
             >
               <ModelCard model={model} />
             </div>

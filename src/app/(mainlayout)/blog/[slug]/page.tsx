@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { ShareButtons } from '@/components/blog/ShareButtons'
+import { InlineShare } from '@/components/blog/InlineShare'
 import { BlogCard } from '@/components/blog/BlogCard'
 import { BlogAdminActions } from '@/components/blog/BlogAdminActions'
 import {
@@ -15,9 +16,11 @@ import {
   CalendarDays,
   Clock,
   User as UserIcon,
-  Eye,
-  ChevronLeft,
-  ChevronRight
+  Linkedin,
+  Facebook,
+  Twitter,
+  Mail,
+  Check
 } from 'lucide-react'
 import { generateHtml } from '@/lib/server-html'
 import { BookmarkButton } from '@/components/blog/BookmarkButton'
@@ -103,7 +106,7 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
 
   // Check if bookmarked
   const session = await getServerSession(authOptions)
-  const isAdmin = session?.user?.role === 'admin'
+  const isAdmin = session?.user?.role === 'admin' || session?.user?.role === 'editor'
   let isBookmarked = false
 
   try {
@@ -181,163 +184,103 @@ export default async function BlogDetailPage(props: BlogDetailPageProps) {
           </div>
         </div>
 
-        {/* Hero Banner Section */}
-        <section className="relative min-h-[50vh] md:min-h-[60vh] flex items-center overflow-hidden py-16">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
-            {blog.featuredImage ? (
-              <Image
-                src="/assets/blogbanner.png"
-                alt={blog.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-muted" />
-            )}
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/60" />
-          </div>
-
-          <div className="container mx-auto px-4 relative z-10 text-white">
-            <BlogAdminActions blogSlug={blog.slug} blogId={blog._id} isAdmin={isAdmin} />
-            <Button variant="ghost" size="sm" asChild className="mb-2 pl-0 hover:pl-2 transition-all text-white hover:text-white/80 hover:bg-white/10">
-              <Link href="/blog">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Articles
-              </Link>
-            </Button>
-
-            <div className="max-w-4xl mx-auto text-center space-y-2">
-
-              {/* Title */}
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white leading-tight">
-                {blog.title}
-              </h1>
-
-              {/* Meta Info Grid */}
-              <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-200 py-4">
-                <div className="flex items-center gap-2">
-                  {blog.author?.image ? (
-                    <Image
-                      src={blog.author.image}
-                      alt={blog.author.name || 'Author'}
-                      width={40}
-                      height={40}
-                      className="rounded-full border border-white/20"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-                      <UserIcon className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                  <div className="flex flex-col text-left">
-                    <span className="text-xs font-medium text-gray-300">Written by</span>
-                    <span className="font-medium text-white">{blog.author?.name || 'Admin'}</span>
-                  </div>
-                </div>
-
-                <div className="w-px h-8 bg-white/20 hidden sm:block" />
-
-                <div className="flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  <span>{formatDate(blog.publishedAt)}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{blog.readTime} min read</span>
-                </div>
-
-                <div className="w-px h-8 bg-white/20 hidden sm:block" />
-
-                <div className="text-white">
-                  <BookmarkButton
-                    blogId={blog._id.toString()}
-                    initialIsBookmarked={isBookmarked}
-                    className="bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Main Content Layout */}
         <section className="pb-20 pt-12">
           {/* FIX: Increased max-w to 7xl to allow sidebar room */}
           <div className="container mx-auto px-4 max-w-7xl">
-            <div className="flex flex-col lg:flex-row gap-12">
+            <div className="flex flex-col gap-12">
 
-              {/* Article Content Column (2/3 width) */}
-              <div className="lg:w-3/4">
-                <article className="prose bg-card p-6 rounded-xl dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl">
+              {/* Article Content Column (Full width) */}
+              <div className="w-full space-y-8">
+                {/* Relocated Header and Meta Info */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <Button variant="ghost" size="sm" asChild className="pl-0 hover:pl-2 transition-all text-white hover:text-white/80 hover:bg-white/10">
+                      <Link href="/blog">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Articles
+                      </Link>
+                    </Button>
+                    <BlogAdminActions blogSlug={blog.slug} blogId={blog._id} isAdmin={isAdmin} />
+                  </div>
+
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                    {blog.title}
+                  </h1>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-wrap items-center gap-y-6 gap-x-8 text-sm text-gray-400 border-y border-white/10 py-6">
+                    {/* Author - Always important */}
+                    <div className="flex items-center gap-3">
+                      {blog.author?.image ? (
+                        <Image
+                          src={blog.author.image}
+                          alt={blog.author.name || 'Author'}
+                          width={48}
+                          height={48}
+                          className="rounded-full border-2 border-primary/20"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                          <UserIcon className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-gray-500">Written by</span>
+                        <span className="font-semibold text-white text-base">
+                          {blog.author?.name || 'Admin'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="hidden md:block w-px h-10 bg-white/10" />
+
+                    {/* Desktop/Tablet side-by-side, Mobile might stack slightly or stay grid */}
+                    <div className="flex gap-8 sm:gap-6">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-gray-500 mb-1">Published</span>
+                        <div className="flex items-center gap-2 text-white font-medium">
+                          <CalendarDays className="h-4 w-4 text-primary" />
+                          <span>{formatDate(blog.publishedAt)}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-gray-500 mb-1">Read Time</span>
+                        <div className="flex items-center gap-2 text-white font-medium">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <span>{blog.readTime} min read</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Bar (Share + Bookmark) */}
+                    <div className="flex flex-wrap items-center gap-4 mt-2 sm:mt-0 md:ml-auto">
+                      <InlineShare
+                        url={shareUrl}
+                        title={blog.title}
+                      />
+
+                      <div className="h-4 w-px bg-white/10 hidden sm:block" />
+
+                      <BookmarkButton
+                        blogId={blog._id.toString()}
+                        initialIsBookmarked={isBookmarked}
+                        className="rounded-full bg-white/5 border-white/10 text-white hover:bg-white/10 py-1.5 h-auto"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <article className="max-w-4xl mx-auto prose prose-invert lg:prose-lg bg-card p-8 rounded-2xl border border-white/10 shadow-sm prose-headings:scroll-mt-20 prose-img:rounded-2xl prose-headings:font-bold prose-a:text-primary text-foreground prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground">
                   <div
                     dangerouslySetInnerHTML={{ __html: generateHtml(blog.content) }}
                   />
                 </article>
 
-                {/* Bottom Tags */}
-                {blog.tags.length > 0 && (
-                  <div className="mt-12 pt-8 border-t">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                      Related Tags
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {blog.tags.map((tag: string) => (
-                        <Badge key={tag} variant="secondary" className="px-3 py-1">
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
-                {/* Mobile Share Buttons (Visible only on small screens) */}
-                <div className="lg:hidden mt-8">
-                  <ShareButtons
-                    url={shareUrl}
-                    title={blog.title}
-                    description={blog.excerpt}
-                  />
-                </div>
+
               </div>
-
-              {/* Sidebar Column (1/3 width) - Sticky */}
-              <aside className="lg:w-1/4 space-y-8">
-                {/* Sticky Wrapper */}
-                <div className="sticky top-24 space-y-8">
-                  {/* Table of Contents */}
-
-
-                  {/* Desktop Share Buttons */}
-                  <Card className="hidden lg:block px-6">
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">
-                      Share this article
-                    </h3>
-                    <ShareButtons
-                      url={shareUrl}
-                      title={blog.title}
-                      description={blog.excerpt}
-                    />
-                  </Card>
-
-                  {/* Simple CTA/Ad placeholder */}
-                  <Card className="bg-primary/5 border-primary/20">
-                    <CardContent className="px-6">
-                      <h4 className="font-bold text-white mb-2">Visit Financial Models?</h4>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Download professional M&A and valuation templates.
-                      </p>
-                      <Button className="w-full" size="sm" asChild>
-                        <Link href="/models">Browse Models</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </aside>
-
             </div>
           </div>
         </section>
